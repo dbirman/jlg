@@ -26,35 +26,6 @@ var canvas;
  * @type Mouse
  */
 var mouse;
-// The main off-screen canvas/context. 
-//var backCtx;
-//var backCanvas;
-// The off-screen canvas/context that is used to combine the stencil and backCanvas
-/**
- * The canvas for the stencil to be drawn on
- * @type Object
- * @private
- */
-var stencilCanvas;
-/**
- * The context of the stencilCanvas.
- * @type Object
- * @private
- */
-var stencilCtx;
-
-/**
- * The canvas to draw textures on.
- * @type Object
- * @private
- */
-var texCanvas;
-/**
- * The context of the texCanvas.
- * @type Object
- * @private
- */
-var texCtx;
 
 
 /**
@@ -62,8 +33,6 @@ var texCtx;
  * @constructor
  * @property {Object} canvas the front canvas.
  * @property {Ojbect} context the context for the front canvas.
- * @property {Object} backCanvas the back canvas.
- * @property {Ojbect} backCtx the context for the back canvas.
  * @property {Number} height the height of the canvas.
  * @property {Number} width the width of the canvas.
  * @property {Array} stencils an array of all of the saved stencils.
@@ -84,8 +53,6 @@ var texCtx;
 function Canvas() {	
 	this.canvas = document.getElementById("canvas");
 	this.context = this.canvas.getContext("2d"); // main on-screen context
-	this.backCanvas = document.getElementById("backCanvas");
-	this.backCtx = backCanvas.getContext("2d");
 	this.height = $("#canvas").height(); // height of screen
 	this.width = $("#canvas").width(); // width of screen
 	this.stencils = []; // array of all stencil canvases
@@ -152,8 +119,7 @@ function jglOpen(resolution) {
 		stencils = canvas.stencils;
 	}
 	$(".jgl").append("<div id=\"jglDiv\" style=\"position: relative;\"><canvas style=\" position: absolute; top: 0px; left: 0px;\" id=\"canvas\" width=\"800\" height=\"800\"></canvas>"
-			+ "<canvas style=\" position: absolute; top: 0px; left: 0px;\" id=\"backCanvas\" width=\"800\" height=\"800\"></canvas> </div>");
-	$("#backCanvas").hide();
+			+ "</div>");
 	canvas = new Canvas();
 	window.resizeTo(canvas.width + 50, canvas.height + 80);
 	canvas.stencils = stencils;
