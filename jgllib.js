@@ -130,19 +130,6 @@ function jglOpen(resolution) {
 	canvas.pixPerDeg = resolution * inPerDeg;
 	canvas.degPerPix = 1 / canvas.pixPerDeg;
 	
-	stencilCanvas = document.createElement("canvas");
-//	stencilCanvas = document.getElementById("stencilcanvas");
-	stencilCtx = stencilCanvas.getContext("2d");
-	
-	stencilCanvas.width = canvas.width;
-	stencilCanvas.height = canvas.height;
-	stencilCtx = stencilCanvas.getContext("2d");
-	
-	texCanvas = document.createElement('canvas');
-	texCanvas.width = canvas.width;
-	texCanvas.height = canvas.height;
-	texCtx = texCanvas.getContext("2d");
-	
 	jglVisualAngleCoordinates();
 	
 	canvas.isOpen = true;
@@ -166,118 +153,6 @@ function jglIsOpen() {
 function jglClose() {
 	$("#jglDiv").remove();
 	canvas.isOpen = false;
-}
-
-/**
- * Flips the visiblity of the two buffers, and draws the background.
- * Operates in discrete frames, meaning that each draw
- * draws all the elements to the screen at once. If a stencil
- * is selected works with the backCanvas and stencilCanvas to maintain
- * discrete frames, read Stencil Comment for more information.
- */
-function jglFlush() {
-	if (! canvas.useStencil) {
-		canvas.backCtx.save();
-		canvas.backCtx.globalCompositeOperation = "destination-over"; // enables background painting
-		// 2*screen.width is used so either coordinate system will work
-		jglFillRect([0],[0], [2*canvas.width, 2*canvas.height], canvas.backgroundColor); // colors background
-		canvas.backCtx.restore();
-		screenSwapPrivate(); // swap buffers (read function comments)
-	} else {
-		// Need to combine stencil and image, use stencilCtx, and offscreen canvas for the combination
-		// First draw the stencil on the canvas
-		stencilCtx.drawImage(canvas.stencils[canvas.stencilSelected], 0, 0);
-		stencilCtx.save();
-		// Turn on stenciling
-		stencilCtx.globalCompositeOperation = "source-in";
-		// Draw the image, which will be stenciled
-		stencilCtx.drawImage(canvas.backCanvas, 0, 0);
-		stencilCtx.restore();
-		// Clear the back buffer
-		privateClearContext(canvas.backCtx);
-		// Draw the stenciled image to the back buffer then clear the stencilCanvas for later use
-		if (canvas.usingVisualAngles) {
-			
-			jglScreenCoordinates(); // Change back to screen coordinates for ease of image drawing
-			canvas.backCtx.drawImage(stencilCanvas, 0, 0);
-			jglVisualAngleCoordinates();
-			stencilCtx.clearRect(0, 0, stencilCanvas.width, stencilCanvas.height);
-		} else {
-			canvas.backCtx.drawImage(stencilCanvas, 0, 0);
-			stencilCtx.clearRect(0,0, stencilCanvas.width, stencilCanvas.height);
-		}
-		// Draw background and swap buffers
-		canvas.backCtx.save();
-		canvas.backCtx.globalCompositeOperation = "destination-over";
-		jglFillRect([0],[0], [2*canvas.width, 2*canvas.height], canvas.backgroundColor);
-		canvas.backCtx.restore();
-		screenSwapPrivate();
-	}
-	
-	canvas.lastFlushTime = jglGetSecs();
-
-}
-
-/**
- * Flushes and then waits for a frame to pass.
- */
-function jglFlushAndWait() {
-	var lastFlushTime = canvas.lastFlushTime;
-	
-	var frameRate = canvas.frameRate;
-	
-	if (isEmpty(frameRate)) {
-		console.error("jglFushAndWait: No frameRate set");
-		return;
-	}
-	
-	var frameTime = 1 / frameRate;
-	
-	jglFlush();
-	
-	console.log('should not get here');
-	jglWaitSecs(frameTime - jglGetSecs(lastFlushTime));
-	
-	canvas.lastFlushTime =  jglGetSecs();
-}
-
-/**
- * Waits for a frame but does not flush
- */
-function jglNoFlushWait() {
-	var lastFlushTime = canvas.lastFlushTime;
-	
-	var frameRate = canvas.frameRate;
-	
-	if (isEmpty(frameRate)) {
-		console.error("jglFlushAndWait: no framerate set");
-		return;
-	}
-	
-	var frameTime = 1 / frameRate;
-	
-	console.log('should not get here');
-	jglWaitSecs(frameTime - jglGetSecs(lastFlushTime));
-	
-	canvas.lastFlushTime = jglGetSecs();
-}
-
-/**
- * Private function to swap the two buffers. 
- * This is done by toggling both canvases (if hidden, shows, if shown, hides),
- * then the values of canvas and backCanvas are swapped, as well as the values
- * of context and backCtx.
- * @private
- */
-function screenSwapPrivate() {
-	$("#canvas").toggle();
-	$("#backCanvas").toggle();
-	var temp = canvas.context;
-	canvas.context = canvas.backCtx;
-	canvas.backCtx = temp;
-	temp = canvas.canvas;
-	canvas.canvas = canvas.backCanvas;
-	canvas.backCanvas = temp;
 }
 
 /**
