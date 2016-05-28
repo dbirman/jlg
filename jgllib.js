@@ -192,21 +192,6 @@ function jglClearScreen(background) {
 	privateClearContext(canvas.context);
 }
 
-/**
- * Function to convert a number between 0-255 to hex.
- * Includes zero padding so result.length always == 2
- * @param {Number} number the number to convert
- * @returns {String} the hex value of the number given
- */
-function numToHex(number) {
-	var hex = number.toString(16); // returns the base 16 string version of the number
-	if (hex.length == 1) {
-		hex = "0" + hex;
-	}
-	return hex;
-}
-
-
 //-------------------Drawing Different Shapes-------------------
 
 /**
@@ -222,11 +207,11 @@ function jglPoints2(x, y, size, color) {
 		throw "Points2: Lengths dont match";
 	}
 	for (var i=0;i<x.length;i++) {
-		canvas.backCtx.fillStyle=color;
-		canvas.backCtx.beginPath();
-		canvas.backCtx.arc(x[i], y[i], size/2, 0, 2*Math.PI);
-		canvas.backCtx.fill();
-		canvas.backCtx.closePath();
+		canvas.context.fillStyle=color;
+		canvas.context.beginPath();
+		canvas.context.arc(x[i], y[i], size/2, 0, 2*Math.PI);
+		canvas.context.fill();
+		canvas.context.closePath();
 	}
 	//screen.context.save();
 }
@@ -246,12 +231,12 @@ function jglLines2(x0, y0, x1, y1, size, color) {
 		throw "Lines2: Lengths dont match";
 	}
 	for (var i=0;i<x0.length;i++) {
-		canvas.backCtx.lineWidth = size;
-		canvas.backCtx.strokeStyle=color;
-		canvas.backCtx.beginPath();
-		canvas.backCtx.moveTo(x0[i], y0[i]);
-		canvas.backCtx.lineTo(x1[i], y1[i]);
-		canvas.backCtx.stroke();
+		canvas.context.lineWidth = size;
+		canvas.context.strokeStyle=color;
+		canvas.context.beginPath();
+		canvas.context.moveTo(x0[i], y0[i]);
+		canvas.context.lineTo(x1[i], y1[i]);
+		canvas.context.stroke();
 	}
 }
 
@@ -261,10 +246,10 @@ function jglFillOval(x, y, size, color) {
 		throw "Fill Oval: Lengths dont match";
 	}
 	var radius = Math.min(size[0], size[1]);
-	canvas.backCtx.save();
-	canvas.backCtx.transform(0, size[0], size[1],0,0,0);
+	canvas.context.save();
+	canvas.context.transform(0, size[0], size[1],0,0,0);
 	jglPoints2(x, y, radius, color);
-	canvas.backCtx.restore();
+	canvas.context.restore();
 }
 
 function jglFillArc(x, y, size, color, sAng, wAng) {
@@ -272,12 +257,12 @@ function jglFillArc(x, y, size, color, sAng, wAng) {
 		//Error
 		throw "Fill Oval: Lengths dont match";
 	}
-	canvas.backCtx.fillStyle=color;
-	canvas.backCtx.beginPath();
-	canvas.backCtx.moveTo(0,0);
-	canvas.backCtx.arc(x,y,size,sAng,wAng);
-	canvas.backCtx.fill();
-	canvas.backCtx.closePath();
+	canvas.context.fillStyle=color;
+	canvas.context.beginPath();
+	canvas.context.moveTo(0,0);
+	canvas.context.arc(x,y,size,sAng,wAng);
+	canvas.context.fill();
+	canvas.context.closePath();
 }
 
 /**
@@ -297,10 +282,10 @@ function jglFillRect(x, y, size, color) {
 			y:0
 	};
 	for (var i=0;i<x.length;i++) {
-		canvas.backCtx.fillStyle = color;
+		canvas.context.fillStyle = color;
 		upperLeft.x = x[i] - (size[0] / 2);
 		upperLeft.y = y[i] - (size[1] / 2);
-		canvas.backCtx.fillRect(upperLeft.x, upperLeft.y, size[0], size[1]);
+		canvas.context.fillRect(upperLeft.x, upperLeft.y, size[0], size[1]);
 	}
 }
 
@@ -329,16 +314,16 @@ function jglFixationCross(width, lineWidth, color, origin) {
 		}
 		
 	}
-	canvas.backCtx.lineWidth = lineWidth;
-	canvas.backCtx.strokeStyle = color;
-	canvas.backCtx.beginPath();
-	canvas.backCtx.moveTo(origin[0] - width / 2, origin[1]);
-	canvas.backCtx.lineTo(origin[0] + width / 2, origin[1]);
-	canvas.backCtx.stroke();
-	canvas.backCtx.beginPath();
-	canvas.backCtx.moveTo(origin[0], origin[1] - width / 2);
-	canvas.backCtx.lineTo(origin[0], origin[1] + width / 2);
-	canvas.backCtx.stroke();
+	canvas.context.lineWidth = lineWidth;
+	canvas.context.strokeStyle = color;
+	canvas.context.beginPath();
+	canvas.context.moveTo(origin[0] - width / 2, origin[1]);
+	canvas.context.lineTo(origin[0] + width / 2, origin[1]);
+	canvas.context.stroke();
+	canvas.context.beginPath();
+	canvas.context.moveTo(origin[0], origin[1] - width / 2);
+	canvas.context.lineTo(origin[0], origin[1] + width / 2);
+	canvas.context.stroke();
 }
 
 /**
@@ -354,15 +339,15 @@ function jglPolygon(x, y, color) {
 		// make a polygon.
 		throw "Polygon arrays not same length";
 	}
-	canvas.backCtx.fillStyle = color;
-	canvas.backCtx.strokeStyle = color;
-	canvas.backCtx.beginPath();
-	canvas.backCtx.moveTo(x[0], y[0]);
+	canvas.context.fillStyle = color;
+	canvas.context.strokeStyle = color;
+	canvas.context.beginPath();
+	canvas.context.moveTo(x[0], y[0]);
 	for (var i=1;i<x.length;i++) {
-		canvas.backCtx.lineTo(x[i], y[i]);
+		canvas.context.lineTo(x[i], y[i]);
 	}
-	canvas.backCtx.closePath();
-	canvas.backCtx.fill();
+	canvas.context.closePath();
+	canvas.context.fill();
 //	backCtx.stroke();
 }
 
@@ -388,6 +373,8 @@ function jglGetSecs(t0) {
  * @param {Number} secs the number of seconds to wait.
  */
 function jglWaitSecs(secs) {
+	console.log('NOT FUNCTIONAL');
+	return;
 	var first, second;
 	first = new Date();
 	var current = first.getTime();
@@ -420,8 +407,8 @@ function jglTextSet(fontName, fontSize, fontColor, fontBold, fontItalic) {
 	}
 	
 	fontString = fontString.concat(fontSize, "px ", fontName);
-	canvas.backCtx.font = fontString;
-	canvas.backCtx.fillStyle = fontColor;
+	canvas.context.font = fontString;
+	canvas.context.fillStyle = fontColor;
 }
 
 /**
@@ -431,7 +418,7 @@ function jglTextSet(fontName, fontSize, fontColor, fontBold, fontItalic) {
  * @param {Number} y the y coordinate of the beginning of the text
  */
 function jglTextDraw(text, x, y) {
-	canvas.backCtx.fillText(text, x, y);
+	canvas.context.fillText(text, x, y);
 }
 
 
@@ -479,93 +466,6 @@ var jglGetKeys = function jglGetKeys() {
 	return KeyboardJS.activeKeys();
 }
 
-
-//-----------------------Stencil Functions----------------------------
-/*
- * A Note on how stencils work:
- * Stencils must be used in the following flow:
- * createBegin(i)
- * Drawing functions...
- * createEnd
- * select(i)
- * drawing functions...
- * flush
- * 
- * Stencils work by creating a new off-screen canvas on which to draw.
- * The drawing functions called between createBegin and createEnd draw
- * to that off-screen canvas, not the main off-screen canvas. When 
- * createEnd is called, all following draw functions draw to the normal
- * off-screen canvas. When select is called screen.useStencil is set to 
- * true and the stencilNumber is remembered. The big change happens in
- * flush. If a stencil is being used, flush behaves quite differently. 
- * flush first draws the stencil to a third off-screen canvas, stencilCanvas,
- * then draws the backCanvas to stencilCanvas with stencil mode enabled, 
- * and then finally draws stencilCanvas to the on-screen canvas. This is 
- * done so that only the final image is ever drawn to the screen, and it
- * is drawn all at once. This makes sure that flush ensures discrete frames.
- *  
- */
-
-/**
- * Starts the creation of a stencil with the given number.
- * @param {Number} stencilNumber the number of the stencil about to be created.
- */
-function jglStencilCreateBegin(stencilNumber) {
-	var newCanvas = document.createElement('canvas');
-	newCanvas.width = canvas.width;
-	newCanvas.height = canvas.height;
-	canvas.stencils[stencilNumber] = newCanvas;
-	canvas.backCtx = newCanvas.getContext("2d");
-	if (canvas.usingVisualAngles) {
-		canvas.backCtx.save();
-		canvas.backCtx.translate(canvas.width / 2, canvas.height / 2);
-		canvas.backCtx.transform(canvas.pixPerDeg,0,0,canvas.pixPerDeg, 0,0);
-		canvas.usingVisualAnglesStencil = true;
-
-	}
-	canvas.drawingStencil = true;
-}
-
-/**
- * Ends the creation of a stencil.
- */
-function jglStencilCreateEnd() {
-	canvas.backCtx = canvas.backCanvas.getContext("2d");
-	canvas.drawingStencil = false;
-}
-
-/**
- * Selects the stencil with the given number.
- * @param {Number} stencilNumber the number of the stencil to select.
- * @throw Number too large if the number given is greater than the number of stencils.
- * @throw No stencil if the number does not correspond to a stencil.
- */
-function jglStencilSelect(stencilNumber) {
-	if (stencilNumber == 0) {
-		jglStencilDeselect();
-		return;
-	}
-	
-	if (stencilNumber >= canvas.stencils.length) {
-		//Error
-		throw "StencilSelect: Number too large";
-	}
-	if (canvas.stencils[stencilNumber] == null) {
-		// TODO: Not sure if javaScript works like that, need to check
-		throw "StencilSelect: No Stencil with that number";
-	}
-	
-	canvas.useStencil = true;
-	canvas.stencilSelected = stencilNumber;
-}
-
-/**
- * Deselects the selected stencil, this will cause flush to act as normal.
- */
-function jglStencilDeselect() {
-	canvas.useStencil = false;
-}
-
 //----------------------Coordinate Functions---------------------------
 
 /**
@@ -579,9 +479,9 @@ function jglVisualAngleCoordinates() {
 		//Error
 		throw "VisualCoordinates: Already using visual coordinates";
 	}
-	canvas.backCtx.save();
-	canvas.backCtx.translate(canvas.width / 2, canvas.height / 2);
-	canvas.backCtx.transform(canvas.pixPerDeg,0,0,canvas.pixPerDeg, 0,0);
+	canvas.context.save();
+	canvas.context.translate(canvas.width / 2, canvas.height / 2);
+	canvas.context.transform(canvas.pixPerDeg,0,0,canvas.pixPerDeg, 0,0);
 	
 	canvas.context.save();
 	canvas.context.translate(canvas.width / 2, canvas.height / 2);
@@ -605,7 +505,7 @@ function jglScreenCoordinates() {
 		// Error
 		throw "ScreenCoordinates: Already using screen coordinates";
 	}
-	canvas.backCtx.restore();
+	canvas.context.restore();
 	
 	canvas.context.restore();
 	if (! canvas.drawingStencil) {
@@ -685,7 +585,7 @@ function jglCreateTexture(array) {
 	var image;
 	if ( ! $.isArray(array[0])) {
 		// 1D array passed in
-		image = canvas.backCtx.createImageData(array.length, array.length);
+		image = canvas.context.createImageData(array.length, array.length);
 		var counter = 0;
 		for (var i=0;i<image.data.length;i += 4) {
 			image.data[i + 0] = array[counter];
@@ -701,7 +601,7 @@ function jglCreateTexture(array) {
 		
 	} else if (! $.isArray(array[0][0])) {
 		// 2D array passed in
-		image = canvas.backCtx.createImageData(array.length, array.length);
+		image = canvas.context.createImageData(array.length, array.length);
 		var row = 0;
 		var col = 0;
 		for (var i=0;i<image.data.length;i += 4) {
@@ -721,7 +621,7 @@ function jglCreateTexture(array) {
 		// 3D array passed in
 		if (array[0][0].length == 3) {
 			// RGB
-			image = canvas.backCtx.createImageData(array.length, array.length);
+			image = canvas.context.createImageData(array.length, array.length);
 			var row = 0;
 			var col = 0;
 			for (var i=0;i<image.data.length;i += 4) {
@@ -738,7 +638,7 @@ function jglCreateTexture(array) {
 			return image;
 		} else if(array[0][0].length == 4) {
 			//RGB and Alpha
-			image = canvas.backCtx.createImageData(array.length, array.length);
+			image = canvas.context.createImageData(array.length, array.length);
 			var row = 0;
 			var col = 0;
 			for (var i=0;i<image.data.length;i += 4) {
@@ -835,21 +735,21 @@ function jglBltTexture(texture, xpos, ypos, rotation) {
 		
 		texCtx.putImageData(texture, xtopLeft, ytopLeft); // draws texture to texCtx
 		jglScreenCoordinates(); // switch to screenCoordinates to make image placement easier
-		canvas.backCtx.save();
-		canvas.backCtx.translate(xcenter, ycenter); // translate to rotate about the center of the texture
-		canvas.backCtx.rotate(rotation * 0.0174532925); // rotate uses radians, must convert
-		canvas.backCtx.drawImage(texCanvas, -xcenter, -ycenter); // draw image, 
+		canvas.context.save();
+		canvas.context.translate(xcenter, ycenter); // translate to rotate about the center of the texture
+		canvas.context.rotate(rotation * 0.0174532925); // rotate uses radians, must convert
+		canvas.context.drawImage(texCanvas, -xcenter, -ycenter); // draw image, 
 		// The translate means that the top left corner is -width/2, -height/2
-		canvas.backCtx.restore(); // restore back to factory settings
+		canvas.context.restore(); // restore back to factory settings
 		jglVisualAngleCoordinates(); // go back to visualAngleCoordinates
 	} else {
 		// put texture on texCtx
 		texCtx.putImageData(texture, xpos, ypos);
-		canvas.backCtx.save();
-		canvas.backCtx.translate(xcenter, ycenter); //rotate about the center of the texture 
-		canvas.backCtx.rotate(rotation * 0.0174532925); // rotate in degrees
-		canvas.backCtx.drawImage(texCanvas, -xcenter, -ycenter);
-		canvas.backCtx.restore();
+		canvas.context.save();
+		canvas.context.translate(xcenter, ycenter); //rotate about the center of the texture 
+		canvas.context.rotate(rotation * 0.0174532925); // rotate in degrees
+		canvas.context.drawImage(texCanvas, -xcenter, -ycenter);
+		canvas.context.restore();
 	}
 	texCtx.clearRect(0,0,canvas.width, canvas.height); // clear texCtx
 

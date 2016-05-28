@@ -34,7 +34,11 @@ sortIndices = function (array,indices) {
  * returns the hex of your color.
  */
 con2hex = function(contrast) {
-	con = Math.round(Math.pow(contrast,1/myscreen.pow)*255);
+	if (myscreen.pow > -1) {
+		con = Math.round(Math.pow(contrast,1/myscreen.pow)*255);
+	} else {
+		con = contrast;
+	}
 	conS = con.toString(16);
 	if (conS.length == 1) {
 		conS = conS + conS;
