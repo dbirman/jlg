@@ -78,14 +78,12 @@ function initScreen() {
 	screen.checkForDroppedFrames = 1;
 	screen.dropThreshold = 1.05;
 	screen.ppi = 127;
-	screen.flushMode = 0;
-	
-	screen.framesPerSecond = 60;
-	screen.frametime = 1 / screen.framesPerSecond;
-	
+		
 	window.segTimeout = [];
 	window.drawInterval = null;
 	window.tnum = 0;
+
+	screen.allowEsc = false;
 	
 	return screen;
 	

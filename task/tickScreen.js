@@ -15,28 +15,8 @@ function tickScreen() {
 		task[i][tnum] = temp[0];
 		myscreen = temp[1];
 	}
-	
-	//TODO: skipped a bunch of volume stuff
-	switch (myscreen.flushMode) {
-	case 0:
-		jglFlush();
-		break;
-	case 1:
-		jglFlush();
-		myscreen.flushMode = -1;
-		break;
-	case 2:
-		jglNoFlushWait();
-		break;
-	case 3:
-		jglFlushAndWait();
-		break;
-	default:
-		myscreen.fliptime = Infinity;
-	}
 
-
-	if (myscreen.checkForDroppedFrames && myscreen.flushMode >= 0) {
+	if (myscreen.checkForDroppedFrames) {
 		var fliptime = jglGetSecs();
 		
 
@@ -52,10 +32,8 @@ function tickScreen() {
 	myscreen.tick++;
 
 
-	if (jglGetKeys().indexOf('esc') > -1) {
+	if (jglGetKeys().indexOf('esc') > -1 && myscreen.allowEsc) {
 		myscreen.userHitEsc = 1;
 		finishExp();
 	}
-	
-
 }

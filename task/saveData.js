@@ -72,30 +72,24 @@ function saveAllData() {
 	xml += genXML(jglData);
 	xml += "</jglData>";
 	
-	xml += "<task>";
-	xml += genXML(task);
-	xml += "</task>";
+	// xml += "<task>";
+	// xml += genXML(task);
+	// xml += "</task>";
 	
-	xml += "<myscreen>";
-	xml += genXML(myscreen);
-	xml += "</myscreen>";
+	// xml += "<myscreen>";
+	// xml += genXML(myscreen);
+	// xml += "</myscreen>";
 	
 	// Get all stimuli registered using initStimulus.
-	for (var i=0;i<myscreen.stimulusNames.length;i++) {
-		xml += "<" + myscreen.stimulusNames[i] + ">";
-		xml += eval("genXML(" + myscreen.stimulusNames[i] + ");");
-		xml += "</" + myscreen.stimulusNames[i] + ">";
-	}
+	// for (var i=0;i<myscreen.stimulusNames.length;i++) {
+	// 	xml += "<" + myscreen.stimulusNames[i] + ">";
+	// 	xml += eval("genXML(" + myscreen.stimulusNames[i] + ");");
+	// 	xml += "</" + myscreen.stimulusNames[i] + ">";
+	// }
 	
 	xml += "</object>";
 	
 	// Save data.
-	myscreen.psiTurk.recordUnstructuredData("experimentXML", xml);
-	myscreen.psiTurk.saveData({
-		success: function() {
-			myscreen.psiTurk.completeHIT();
-		},
-		error: function() {alert("error!!!");}
-	});
+	console.log('Record data to experiment factory here!!');
 	
 }

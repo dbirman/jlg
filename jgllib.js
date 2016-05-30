@@ -773,3 +773,33 @@ function jglGetParam(str) {
 function jglSetParam(param, val) {
 	eval("canvas." + param + " = " + val);
 }
+
+////////////////////
+// JGL PAGE CONTROLS
+////////////////////
+
+
+function jglGetPage(pagename) {
+	if (!(pagename in self.pages)){
+	    throw new Error(
+		["Attemping to load page before preloading: ",
+		pagename].join(""));
+	};
+	return self.pages[pagename];
+}
+
+function jglPreloadPages(pagenames) {
+	//code copied from psiturk
+	$(pagenames).each(function() {
+		$.ajax({
+			url: this,
+			success: function(page_html) { self.pages[this.url] = page_html;},
+			dataType: "html",
+			async: false
+		});
+	});
+}
+
+function jglChangePage(pagename) {
+	$('body').html(jglGetPage(pagename));
+}
