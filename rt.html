@@ -1,0 +1,38 @@
+<!doctype html>
+<html>
+  <head>
+    <title>RL Client</title>
+    <link rel="stylesheet" href="main.css" />
+
+  </head>
+  <body>
+
+    <div id="main" class="wrapper style1">
+      <div class="container">
+        <section id="content">
+          
+
+        
+          <div id="login" style="text-align:center;width:500px">
+            <a class="button special" onclick="studentLogin();">Student</a>
+            <a class="button special" onclick="taLogin();">TA</a>
+            <br><br>
+            <input type="text" id="section" placeholder="Section # (TA will tell you)"></input>
+            <input type="password" id="password" placeholder="Password (for TAs)"></input>
+          </div>
+
+          <div id="viewport">
+            <canvas id="canvas" width=1000 height=800></canvas>
+            <div id="ta_plot"></div>
+          </div>
+
+          <script src="/socket.io/socket.io.js"></script>
+      		<script src="game.client.js"></script>
+          <script src="jquery.min.js"></script>
+          <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+
+        </section>
+      </div>
+    </div>
+  </body>
+</html>
