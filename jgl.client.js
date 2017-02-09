@@ -1,5 +1,9 @@
 var socket = io();
 
+socket.on('startTrial', function(msg) {
+	startTrial(msg);
+});
+
 socket.on('treeA', function(msg){
 	
 });
@@ -8,10 +12,12 @@ socket.on('treeA', function(msg){
 //////////////////////// JGL FUNCTIONS ////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
 
-function startTrial() {
+function startTrial(params) {
+	params = params.split('.');
 
 }
 
-function tick() {
+function updateScreen() {
 
+	requestAnimationFrame(updateScreen);
 }
