@@ -1,0 +1,23 @@
+var socket = io();
+
+socket.on('startTrial', function(msg) {
+	startTrial(msg);
+});
+
+socket.on('treeA', function(msg){
+	
+});
+
+///////////////////////////////////////////////////////////////////////
+//////////////////////// JGL FUNCTIONS ////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+
+function startTrial(params) {
+	params = params.split('.');
+
+}
+
+function updateScreen() {
+
+	requestAnimationFrame(updateScreen);
+}
