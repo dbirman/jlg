@@ -9,5 +9,7 @@ window.onload = function() {
 };
 
 function openwindow() {
-	popup = window.open('{{ server_location }}/consent?hitId={{ hitid }}&assignmentId={{ assignmentid }}&workerId={{ workerid }}','Popup','toolbar=no,location=no,status=no,menubar=no,scrollbars=yes,resizable=no,width='+1024+',height='+768+'');
+	var path = location.pathname;
+	var expName = path.substr(path.indexOf('ad-')+3,path.indexOf('.html')-1);
+	popup = window.open('/exp.html?'+expName,'Popup','toolbar=no,status=no,menubar=no,scrollbars=yes,resizable=no,width='+1024+',height='+768+'');
 }
