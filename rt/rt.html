@@ -1,35 +1,19 @@
 <!doctype html>
 <html>
-  <head>
-    <title>RL Client</title>
-    <link rel="stylesheet" href="main.css" />
+<!-- 
+  This is a non-functional HTML page. It simply contains a set of
+  divs which will be used by the JGL server to render the task. Each
+  div should have its ID set to the trial-type associated with it.
+  Any CSS styling should be set in main.css. 
 
-  </head>
+  These will be pre-loaded into the exp.html file by the client-side js
+  and will then be 
+-->
   <body>
 
-    <div id="main" class="wrapper style1">
-      <div class="container">
-        <section id="content">
-          
-
-        
-          <div id="login" style="text-align:center;width:500px">
-            <!-- <a class="button special" onclick="studentLogin();">Student</a>
-            <a class="button special" onclick="taLogin();">TA</a>
-            <br><br>
-            <input type="text" id="section" placeholder="Section # (TA will tell you)"></input>
-            <input type="password" id="password" placeholder="Password (for TAs)"></input> -->
-            <a href="http://localhost:8080/index.html" target="_blank">Test</a>
-          </div>
-
-          <div id="active">
-            <canvas id="canvas" width=1000 height=800></canvas>
-          </div>
-
-        </section>
-      </div>
+    <div id="trial">
+      <canvas id="canvas" width=1000 height=800></canvas>
     </div>
 
-    <script src="mmturkey.js"></script>
   </body>
 </html>

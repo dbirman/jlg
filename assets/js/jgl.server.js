@@ -17,9 +17,9 @@ app.get( '/*' , function( req, res ) {
 io.on('connection', function(socket){
   console.log('Connection: ID ' + socket.id);
 
-  socket.on('disconnect', function(){logout(socket.id);});
+  socket.on('disconnect', function() {logout(socket.id);});
 
-  socket.on('login', function(msg) {login(socket.id,msg);});
+  socket.on('login', function(msg) {try {login(socket.id,msg);} catch(err) {console.log(err);}});
 });
 
 var port = 8080;
@@ -46,23 +46,14 @@ function login(id,msg) {
 }
 
 function logout(id) {
-  try {
-    console.log('Disconnection: ID ' + socket.id);
-    // delete connected[socket.id];
-    // disconnected[socket.id] = now(); // track server time, dispose of after 24 hours
-  } catch(err) {
-    console.log(err);
-  }
+  console.log('Disconnection: ID ' + socket.id);
 }
 
 ///////////////////////////////////////////////////////////////////////
 //////////////////////// JGL FUNCTIONS ////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
 
-var JGL = {}; // General experiment info, etc
-var connected = {}; // Which experiment a subject is in, which trial, etc
-// var disconnected = {}; // Dead subjects
-var data = {}; // Stores data from subjects
+var JGL = {};
 
 function saveData() {
   
