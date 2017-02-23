@@ -38,10 +38,10 @@ function login(id,msg) {
 
   // check if experiment is available
   if (JGL.experiments[experiment]!=undefined) {
-    console.log('Logging in: ' + socket.id ' for experiment ' + experiment);
+    console.log('Logging in: ' + socket.id + ' for experiment ' + experiment);
     JGL.experiments[experiment].newExp(socket.id)
   } else {
-    
+    console.log('Subject: ' + socket.id )
   }
 }
 
@@ -55,14 +55,31 @@ function logout(id) {
   }
 }
 
+function parseData(id,msg) {
+  data[id].push(JGL.experiments[users[id].experiment].dataParse(msg));
+}
+
+function continueTrial(id) {
+  // 
+  var trialinfo = 0;
+}
+
+function sendTrialInfo(id,trialinfo) {
+  // Send 
+}
+
 ///////////////////////////////////////////////////////////////////////
 //////////////////////// JGL FUNCTIONS ////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
 
 var JGL = {}; // General experiment info, etc
-var connected = {}; // Which experiment a subject is in, which trial, etc
+var users = {}; // Which experiment a subject is in, which trial, etc
 // var disconnected = {}; // Dead subjects
 var data = {}; // Stores data from subjects
+
+function endExp() {
+
+}
 
 function saveData() {
   
@@ -70,7 +87,7 @@ function saveData() {
 
 function tick() {
 	saveData();
-	garbageCollect();
+	garbage();
 
 	setTimeout(tick,60000); // repeat every minute
 }
@@ -88,8 +105,7 @@ function garbage() {
 
 }
 
-function removeSubject() {
-  delete disconnected[key];
-  delete JGL[key];
-  delete data[key];
-}
+// function removeSubject() {
+//   delete JGL[key];
+//   delete data[key];
+// }

@@ -1,0 +1,23 @@
+{
+  "name": "jgl",
+  "version": "1.0.0",
+  "description": "Javascript graphics library",
+  "main": "jgl.server.js",
+  "dependencies": {
+    "express": "^4.14.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dbirman/jgl.git"
+  },
+  "author": "Dan Birman",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/dbirman/jgl/issues"
+  },
+  "homepage": "https://github.com/dbirman/jgl#readme"
+}

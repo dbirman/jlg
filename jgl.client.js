@@ -21,3 +21,17 @@ function updateScreen() {
 
 	requestAnimationFrame(updateScreen);
 }
+
+window.onload = function () {
+	$("#preview").hide();
+	$("#active").hide();
+	$("#noturk").hide();
+	// startup
+	if (turk.previewMode) {
+		$("#preview").show();
+	} else if (!turk.previewMode && turk.assignmentId!='') {
+		$("#active").show();
+	} else {
+		$("#noturk").show();
+	}
+};
