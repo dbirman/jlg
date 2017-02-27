@@ -112,10 +112,22 @@ function submitConsent() {
 
 }
 
+function processTask() {
+	for (var ti=0;ti<task.length;ti++) {
+		if 
+		// BLOCK RANDOMIZATION
+
+		// SEGMENT TIMING
+
+	}
+}
+
 function loadTask_() {
 	task = [];
 	// Run the user defined function
 	loadTask();
+	// Take the task and process it
+	processTask();
 }
 
 ///////////////////////////////////////////////////////////////////////
