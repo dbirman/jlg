@@ -1,7 +1,18 @@
 ////////////////////
 // JGL PAGE CONTROLS
 ////////////////////
-
+function toggleFullScreen() {
+	if (!document.documentElement.requestFullscreen && document.documentElement.webkitRequestFullscreen) {
+		document.documentElement.requestFullscreen = document.documentElement.webkitRequestFullscreen;
+	}
+  if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen();
+  } else {
+    if (document.exitFullscreen) {
+      document.exitFullscreen(); 
+    }
+  }
+}
 
 function jglGetPage(pagename) {
 	if (!(pagename in self.pages)){
