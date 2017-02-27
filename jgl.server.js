@@ -1,3 +1,10 @@
+// JGL Server side code
+// * You should not need to modify this *
+
+// The JGL server deals with saving data, tracking participants, and
+// passing files to the client-side code. This uses node, express, and 
+// socket.io
+
 // Requirements
 var app = require('express')();
 var http = require('http').Server(app);
@@ -17,9 +24,9 @@ app.get( '/*' , function( req, res ) {
 io.on('connection', function(socket){
   console.log('Connection: ID ' + socket.id);
 
-  socket.on('disconnect', function(){logout(socket.id);});
+  socket.on('disconnect', function() {logout(socket.id);});
 
-  socket.on('login', function(msg) {login(socket.id,msg);});
+  socket.on('login', function(msg) {try {login(socket.id,msg);} catch(err) {console.log(err);}});
 });
 
 var port = 8080;
@@ -38,48 +45,22 @@ function login(id,msg) {
 
   // check if experiment is available
   if (JGL.experiments[experiment]!=undefined) {
-    console.log('Logging in: ' + socket.id + ' for experiment ' + experiment);
+    console.log('Logging in: ' + socket.id ' for experiment ' + experiment);
     JGL.experiments[experiment].newExp(socket.id)
   } else {
-    console.log('Subject: ' + socket.id )
+    
   }
 }
 
 function logout(id) {
-  try {
-    console.log('Disconnection: ID ' + socket.id);
-    // delete connected[socket.id];
-    // disconnected[socket.id] = now(); // track server time, dispose of after 24 hours
-  } catch(err) {
-    console.log(err);
-  }
-}
-
-function parseData(id,msg) {
-  data[id].push(JGL.experiments[users[id].experiment].dataParse(msg));
-}
-
-function continueTrial(id) {
-  // 
-  var trialinfo = 0;
-}
-
-function sendTrialInfo(id,trialinfo) {
-  // Send 
+  console.log('Disconnection: ID ' + socket.id);
 }
 
 ///////////////////////////////////////////////////////////////////////
 //////////////////////// JGL FUNCTIONS ////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
 
-var JGL = {}; // General experiment info, etc
-var users = {}; // Which experiment a subject is in, which trial, etc
-// var disconnected = {}; // Dead subjects
-var data = {}; // Stores data from subjects
-
-function endExp() {
-
-}
+var JGL = {};
 
 function saveData() {
   
@@ -87,7 +68,7 @@ function saveData() {
 
 function tick() {
 	saveData();
-	garbage();
+	garbageCollect();
 
 	setTimeout(tick,60000); // repeat every minute
 }
@@ -105,7 +86,8 @@ function garbage() {
 
 }
 
-// function removeSubject() {
-//   delete JGL[key];
-//   delete data[key];
-// }
+function removeSubject() {
+  delete disconnected[key];
+  delete JGL[key];
+  delete data[key];
+}

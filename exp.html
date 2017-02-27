@@ -1,9 +1,25 @@
+<!-- 
+  Experiment file
+
+  This file gets linked to from an ad webpage. It requires an HTML query
+  input ?exp= which specifies which folder to pull the experiment files from.
+
+  In addition a ?debug=true flag can be set, in which case the experiment
+  will run without communicating with the server.
+ -->
 <!doctype html>
 <html>
   <head>
     <title>RL Client</title>
-    <link rel="stylesheet" href="assets/css/jgl.css" />
+    <link rel=stylesheet href="assets/css/jgl.css" type="text/css">
+    <link rel=stylesheet href="assets/css/bootstrap.min.css" type="text/css">
 
+    <!-- JQUERY -->
+    <script
+      src="https://code.jquery.com/jquery-3.1.1.min.js"
+      integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
+      crossorigin="anonymous"></script>
+    <script src="assets/js/md5.min.js"></script>
   </head>
   <body>
 
@@ -11,10 +27,31 @@
       <div class="container">
         <section id="content">
 
+          
+          <div id="trial">
+            <div class="row">
+              <p>trial</p>
+              <canvas id="canvas"></canvas>
+            </div>
+          </div>
+
+          <div id="consent">
+            <div class="row">
+              <p>consent</p>
+            </div>
+          </div>
+
+          <div class="container-error row">
+            <div id="error" class="alert alert-danger">
+              <p>error</p>
+              <span id="error-text"></span>
+            </div>
+          </div>
         </section>
       </div>
     </div>
 
-    <script src="assets/js/mmturkey.js"></script>
+    <script src="assets/js/jgl.lib.js"></script>
+    <script src="assets/js/jgl.client.js"></script>
   </body>
 </html>
