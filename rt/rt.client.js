@@ -5,13 +5,14 @@ function loadTask() {
 	task[0] = {};
 	task[0].type = 'consent';
 	// consent is a default type with no callbacks
-	task[0].callbacks = [];
+	task[0].callbacks = {};
 	// consent has no data
 
 	// RT TRIALS
 	task[1] = {};
 	task[1].type = 'trial'; // this will give us use of the canvas
-	task[1].callbacks = [undefined,undefined,startSegment,undefined,undefined];
+	task[1].callbacks = {};
+	task[1].callbacks.startSegment = startSegment;
 	// RT task doesn't have any parameters, but this gets auto-populated with data
 	task[1].parameters = {};
 	// RT task won't log any variables either (these get set by the user somewhere in the callbacks)

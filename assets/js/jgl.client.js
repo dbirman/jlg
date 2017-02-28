@@ -150,7 +150,6 @@ function processTask(task) {
 			// VARIABLES
 			if (task[ti].variables!=undefined) {
 				var vars = Object.keys(task[ti].variables);
-				console.log(vars);
 				for (var vi=0;vi<vars.length;vi++) {
 					task[ti].trials[i][vars[vi]] = NaN;
 				}
@@ -224,6 +223,7 @@ function startBlock_(task) {
 				jgl.endBlockFunction = consentEnd;
 				break;
 			default:
+				if (task[jgl.curBlock].endBlockFunction==undefined) {error('An error occurred: no endblock function was defined, this task will never end');}
 				jgl.endBlockFunction = task[jgl.curBlock].endBlockFunction;
 		}
 	}
@@ -242,6 +242,10 @@ function endBlock_(task) {
 
 function startTrial_(task,trial) {
 	console.log('Starting trial: ' + trial);
+
+	jgl.trial = task[jgl.curBlock].trials[trial];
+
+	if (callbacks.startTrial) {callbacks.startTrial();}
 
 	return task;
 }
