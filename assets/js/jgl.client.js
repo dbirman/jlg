@@ -162,12 +162,14 @@ function processTask(task) {
 				if (task[ti].segmax==undefined) {error('An error occurred: segment maximum was not defined');}
 				else {
 					task[ti].trials[i].seglen = [];
+					task[ti].trials[i].length = 0;
 					for (var si=0;si<task[ti].segmin.length;si++) {
 						if (task[ti].segmin[si]==task[ti].segmax[si]) {
 							task[ti].trials[i].seglen[si] = task[ti].segmax[si];
 						} else {
 							task[ti].trials[i].seglen[si] = task[ti].segmin[si] + Math.random()*(task[ti].segmax[si]-task[ti].segmin[si]);
 						}
+						task[ti].trials[i].length += task[ti].trials[i].seglen[si];
 					}
 				}
 			}
@@ -192,33 +194,34 @@ function endExp_(task) {
 }
 
 // All JGL callbacks have an underscore, client callbacks are stored in the callbacks object
-function startBlock_(task) {
+function startBlock_() {
 	// increment block
 	jgl.curBlock++;
+	jgl.curTrial = -1;
+
+	// Check if we need to end the experiment
 	if (jgl.curBlock>jgl.task.length) {
 		task = endExp_(task);
 		return task;
 	}
-	// run standard code
-	var callbacks = task[jgl.curBlock].callbacks;
 
-	jgl.curTrial = -1;
-
+	// Setup the block
+	jgl.callbacks = task[jgl.curBlock].callbacks;
 	hideAll();
 	$("#"+task[jgl.curBlock].type).show();
-	console.log
 
 	// run the experiment callback if necessary
-	if (callbacks.startBlock) {task = callbacks.startBlock(task);}
+	if (jgl.callbacks.startBlock) {jgl.callbacks.startBlock();}
 
 	if (task[jgl.curBlock].type=='trial') {
-		// start trials
-		for (var ti=0;ti<task[jgl.curBlock].numTrials;ti++) {
-			jgl.curTrial++;
-			task = startTrial_(task,jgl.curTrial);
-		}
+		// trials use the update_() code and a canvas to render
+		// set up canvas
+		jgl.canvas = document.getElementById("canvas");
+		jgl.ctx = jgl.canvas.getContext("2d");
 	} else {
 		switch (task[jgl.curBlock].type) {
+			// Anything that isn't a trial/canvas just waits for a submit function
+			// (these could be instructions, forms, surveys, whatever)
 			case 'consent':
 				jgl.endBlockFunction = consentEnd;
 				break;
@@ -228,11 +231,31 @@ function startBlock_(task) {
 		}
 	}
 
-	return task;
+	if (task[jgl.curBlock].canvas==1) {
+		jgl.timing.block = now();
+		elapsed();
+		update_();
+	}
+}
+
+function update_() {
+	var t = elapsed(); // get elapsed time
+	// Check first trial
+	if (jgl.curTrial==-1) {startTrial_();}
+	// Check next trial
+	if ((now()-jgl.timing.trial)>jgl.trial.length) {startTrial_();}
+	// Check next segment
+	if ((now()-jgl.timing.segment)>jgl.trial.seglen[jgl.trial.thisseg]) {startSegment_();}
+
+	// Update screen
+	updateScreen_();
+
+	jgl.tick = requestAnimationFrame(update_);
 }
 
 function endBlock_(task) {
 	// run standard code
+	if (jgl.tick!=undefined) {cancelAnimationFrame(jgl.tick);}
 
 	// start the next block
 	task = startBlock_(task);
@@ -240,24 +263,36 @@ function endBlock_(task) {
 	return task;
 }
 
-function startTrial_(task,trial) {
+function startTrial_() {
+	jgl.curTrial++;
+	if (jgl.curTrial>=task[jgl.curBlock].numTrials) {endBlock_();return}
+	// Run trial:
+	jgl.timing.trial = now();
 	console.log('Starting trial: ' + trial);
-
 	jgl.trial = task[jgl.curBlock].trials[trial];
 
-	if (callbacks.startTrial) {callbacks.startTrial();}
+	// Start the segment immediately
+	jgl.trial.thisseg = -1;
+	startSegment_();
 
-	return task;
+	if (callbacks.startTrial) {callbacks.startTrial();}
 }
 
-function startSegment_() {
+function startSegment_(task) {
+	jgl.trial.thisseg++;
 
+	jgl.timing.segment = now();
+
+	if (callbacks.startSegment) {callbacks.startSegment();}
 }
 
 function updateScreen_() {
 
+	if (callbacks.updateScreen) {callbacks.updateScreen();}
 }
 
-function getResponse_(task) {
+function getResponse_(event) {
 	// called by the event listener on the canvas during trials
+
+	if (callbacks.getResponse) {callbacks.getResponse(event);}
 }

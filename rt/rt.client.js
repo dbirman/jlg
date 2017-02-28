@@ -12,7 +12,7 @@ function loadTask() {
 	task[1] = {};
 	task[1].type = 'trial'; // this will give us use of the canvas
 	task[1].callbacks = {};
-	task[1].callbacks.startSegment = startSegment;
+	task[1].callbacks.updateScreen = updateScreen;
 	// RT task doesn't have any parameters, but this gets auto-populated with data
 	task[1].parameters = {};
 	// RT task won't log any variables either (these get set by the user somewhere in the callbacks)
@@ -31,14 +31,7 @@ function loadTask() {
 	return task;
 }
 
-function startTrial() {
-
-}
-
-function startSegment() {
-
-}
-
-function updateScreen() {
+function updateScreen(task) {
 	
+	return task;
 }
