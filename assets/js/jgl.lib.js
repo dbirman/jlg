@@ -39,6 +39,22 @@ function jglChangePage(pagename) {
 	$('body').html(jglGetPage(pagename));
 }
 
+// TIMING
+
+var prev_tick;
+
+function elapsed() {
+	// Returns time since the last call to elapsed
+	var elapsed = now()-prev_tick;
+	prev_tick = now();
+	return elapsed;
+}
+
+function now() {
+	return performance.now();
+}
+
+
 //-------------------Drawing Different Shapes-------------------
 
 /**

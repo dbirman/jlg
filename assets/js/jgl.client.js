@@ -33,6 +33,7 @@ var jgl = {}; // stuff that gets tracked (worker id, etc)
 function launch() {
 	getExperiment(); // load the experiment from the query string
 	if (!debug) {getAmazonInfo();}
+	loadTemplate();
 	loadExperiment();
 	setTimeout(function() {
 		loadTask_();
@@ -56,11 +57,25 @@ function getExperiment() {
 
 function getAmazonInfo() {
 	// these are NOT accessible to the server!
-	jgl.assignmentId = opener.assignmentId;
-	jgl.workerId = opener.workerId;
-	// only the hash and hit ID are sent to the server--perfect anonymity, even across experiments
-	jgl.hash = md5(jgl.workerId + exp);
-	jgl.hitId = opener.hitId;
+	if (!debug) {
+		jgl.assignmentId = opener.assignmentId;
+		jgl.workerId = opener.workerId;
+		// only the hash and hit ID are sent to the server--perfect anonymity, even across experiments
+		jgl.hash = md5(jgl.workerId + exp);
+		jgl.hitId = opener.hitId;
+	} else {
+		jgl.assignmentId = 'debug';
+		jgl.workerId = 'debug' + Math.random()*10000;
+		jgl.hash = md5(jgl.workerId + exp);
+		jgl.hitId = 'debug';
+	}
+}
+
+function loadTemplate() {
+	var tempList = ['consent','trial'];
+	for (var i=0;i<tempList.length;i++) {
+		$.get('assets/templates/'+tempList[i]+'.html', function(data) {$('#content').append(data);})
+	}
 }
 
 function loadExperiment() {
@@ -72,8 +87,8 @@ function loadExperiment() {
 
 function updateFromServer() {
 	if (debug) {
-		jgl.curBlock = 0;
-		jgl.curTrial = 0;
+		jgl.curBlock = -1; // -1 before starting
+		jgl.curTrial = -1; // -1 before starting
 	} else {
 		console.log('not implemented');
 		// warning: experiment won't start until it receives notice
@@ -83,13 +98,14 @@ function updateFromServer() {
 }
 
 function hideAll() {
-	for (var div in divList) {
+	for (var di in divList) {
+		var div = divList[di];
 		$("#"+div).hide();
 	}
 }
 
 function start() {
-	startBlock_();
+	jgl.task = startBlock_(jgl.task);
 }
 
 function error(type) {
@@ -108,67 +124,133 @@ function error(type) {
 //////////////////////// DEFAULT CODE ////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
 
-function submitConsent() {
-
+function consentEnd() {
+	jgl.task = endBlock_(jgl.task);
 }
 
-function processTask() {
+function processTask(task) {
 	for (var ti=0;ti<task.length;ti++) {
-		if 
-		// BLOCK RANDOMIZATION
-
-		// SEGMENT TIMING
-
+		if (task[ti].type!=undefined) {
+			divList.push(task[ti].type);
+		}
+		// setup trials
+		task[ti].trials = [];
+		for (var i=0;i<task[ti].numTrials;i++) {
+			task[ti].trials[i] = {};
+			// RESPONSE WATCH
+			task[ti].trials[i].response = task[ti].response;
+			// BLOCK RANDOMIZATION (setup parameters)
+			if (task[ti].parameters!=undefined) {
+				console.log('WARNING: Block randomization is not implemented. Using equal probabilities.');
+				var params = Object.keys(task[ti].parameters);
+				for (var pi=0;pi<params.length;pi++) {
+					task[ti].trials[i][params[pi]] = randomElement(task[ti].parameters[params[pi]]);
+				}
+			}
+			// VARIABLES
+			if (task[ti].variables!=undefined) {
+				var vars = Object.keys(task[ti].variables);
+				console.log(vars);
+				for (var vi=0;vi<vars.length;vi++) {
+					task[ti].trials[i][vars[vi]] = NaN;
+				}
+			}
+			// SEGMENT TIMING (setup timing)
+			if (task[ti].seglen!=undefined) {
+				// seglen overrides min/max
+				task[ti].trials[i].seglen = task[ti].seglen;
+			} else if (task[ti].segmin!=undefined) {
+				if (task[ti].segmax==undefined) {error('An error occurred: segment maximum was not defined');}
+				else {
+					task[ti].trials[i].seglen = [];
+					for (var si=0;si<task[ti].segmin.length;si++) {
+						if (task[ti].segmin[si]==task[ti].segmax[si]) {
+							task[ti].trials[i].seglen[si] = task[ti].segmax[si];
+						} else {
+							task[ti].trials[i].seglen[si] = task[ti].segmin[si] + Math.random()*(task[ti].segmax[si]-task[ti].segmin[si]);
+						}
+					}
+				}
+			}
+		}
 	}
+	return task;
 }
 
 function loadTask_() {
-	task = [];
 	// Run the user defined function
-	loadTask();
+	jgl.task = loadTask();
 	// Take the task and process it
-	processTask();
-}
-
-///////////////////////////////////////////////////////////////////////
-//////////////////////// INITIALIZERS ////////////////////////////////
-///////////////////////////////////////////////////////////////////////
-
-function initialize_consent() {
-
-}
-
-function initialize_trial() {
-
+	jgl.task = processTask(jgl.task);
 }
 
 ///////////////////////////////////////////////////////////////////////
 //////////////////////// CALLBACKS ////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
 
+function endExp_(task) {
+	console.log('experiment complete');
+}
+
 // All JGL callbacks have an underscore, client callbacks are stored in the callbacks object
 function startBlock_(task) {
+	// increment block
+	jgl.curBlock++;
+	if (jgl.curBlock>jgl.task.length) {
+		task = endExp_(task);
+		return task;
+	}
 	// run standard code
+	var callbacks = task[jgl.curBlock].callbacks;
+
+	jgl.curTrial = -1;
+
+	hideAll();
+	$("#"+task[jgl.curBlock].type).show();
+	console.log
 
 	// run the experiment callback if necessary
 	if (callbacks.startBlock) {task = callbacks.startBlock(task);}
+
+	if (task[jgl.curBlock].type=='trial') {
+		// start trials
+		for (var ti=0;ti<task[jgl.curBlock].numTrials;ti++) {
+			jgl.curTrial++;
+			task = startTrial_(task,jgl.curTrial);
+		}
+	} else {
+		switch (task[jgl.curBlock].type) {
+			case 'consent':
+				jgl.endBlockFunction = consentEnd;
+				break;
+			default:
+				jgl.endBlockFunction = task[jgl.curBlock].endBlockFunction;
+		}
+	}
+
 	return task;
 }
 
 function endBlock_(task) {
 	// run standard code
 
+	// start the next block
+	task = startBlock_(task);
+	//
+	return task;
 }
 
-function startTrial_(task) {
+function startTrial_(task,trial) {
+	console.log('Starting trial: ' + trial);
+
+	return task;
+}
+
+function startSegment_() {
 
 }
 
-function startSegment_(task) {
-
-}
-
-function updateScreen_(task) {
+function updateScreen_() {
 
 }
 
