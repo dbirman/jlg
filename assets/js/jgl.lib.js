@@ -136,19 +136,16 @@ function jglFillArc(x, y, size, color, sAng, wAng) {
  * @param {String} color color in hex format #000000
  */
 function jglFillRect(x, y, size, color) {
+	if (typeof x == 'number') {
+		x = [x]; y = [y];
+	}
 	if (x.length != y.length || size.length != 2) {
 		//Error
 		throw "Fill Rect: Lengths dont match"
 	}
-	var upperLeft = {
-			x:0,
-			y:0
-	};
 	for (var i=0;i<x.length;i++) {
 		jgl.ctx.fillStyle = color;
-		upperLeft.x = x[i] - (size[0] / 2);
-		upperLeft.y = y[i] - (size[1] / 2);
-		jgl.ctx.fillRect(upperLeft.x, upperLeft.y, size[0], size[1]);
+		jgl.ctx.fillRect(x[i] - (size[0] / 2), y[i] - (size[1] / 2), size[0], size[1]);
 	}
 }
 
@@ -280,11 +277,7 @@ function jglVisualAngleCoordinates() {
 	jgl.ctx.save();
 	jgl.ctx.translate(jgl.canvas.width / 2, jgl.canvas.height / 2);
 	jgl.ctx.transform(jgl.canvas.pixPerDeg,0,0,jgl.canvas.pixPerDeg, 0,0);
-	
-	jgl.ctx.save();
-	jgl.ctx.translate(jgl.canvas.width / 2, jgl.canvas.height / 2);
-	jgl.ctx.transform(jgl.canvas.pixPerDeg,0,0,jgl.canvas.pixPerDeg, 0,0);
-	
+		
 	jgl.canvas.usingVisualAngles = true;
 }
 
@@ -329,6 +322,12 @@ function repmat(array,reps) {
 		out = out.concat(array);
 	}
 	return(out);
+}
+
+function jglClearScreen() {
+	// Clear screen
+	jgl.ctx.fillStyle = con2hex(jgl.canvas.background);
+	jgl.ctx.fillRect(-jgl.canvas.width/jgl.canvas.pixPerDeg/2,-jgl.canvas.height/jgl.canvas.pixPerDeg/2,jgl.canvas.width/jgl.canvas.pixPerDeg,jgl.canvas.height/jgl.canvas.pixPerDeg);
 }
 
 /**

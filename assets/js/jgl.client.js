@@ -192,8 +192,8 @@ function loadTask_() {
 
 function setupCanvas() {
 	jgl.canvas = document.getElementById("canvas");
-	jgl.canvas.width = window.screen.width;
-	jgl.canvas.height = window.screen.height;
+	jgl.canvas.width = window.innerWidth;
+	jgl.canvas.height = window.innerHeight;
 	jgl.ctx = jgl.canvas.getContext("2d");
 	console.log('remove when real visual angle coordinates est');
 	jgl.canvas.pixPerDeg = 40;
@@ -253,7 +253,7 @@ function startBlock_(task) {
 function update_() {
 	var t = elapsed(); // get elapsed time
 	// Check first trial
-	if (jgl.curTrial==-1) {startTrial_(jgl.task);}
+	if (jgl.curTrial==-1) {endTrial_(jgl.task); startTrial_(jgl.task);}
 	// Check next trial
 	if ((now()-jgl.timing.trial)>jgl.trial.length) {startTrial_(jgl.task);}
 	// Check next segment
@@ -289,6 +289,16 @@ function startTrial_(task) {
 	if (jgl.callbacks.startTrial) {jgl.callbacks.startTrial(task);}
 }
 
+function endTrial_(task) {
+	// save data into task[jgl.curBlock].datas 
+	var data = {};
+	// copy parameters
+
+	// copy variables
+
+	// copy defaults (RT, response, correct)
+}
+
 function startSegment_(task) {
 	jgl.trial.thisseg++;
 	jgl.trial.segname = task[jgl.curBlock].segnames[jgl.trial.thisseg];
@@ -301,9 +311,7 @@ function startSegment_(task) {
 function updateScreen_(task,time) {
 	var framerate = 1000/time;
 	// Clear screen
-	jgl.ctx.fillStyle = con2hex(jgl.canvas.background);
-	jgl.ctx.fillRect(0,0,jgl.canvas.width,jgl.canvas.height);
-
+	jglClearScreen();
 	// jgl.ctx.font="20px Georgia";
 	// jgl.ctx.fillText('Trial: ' + jgl.curTrial + ' Segment: ' + jgl.trial.thisseg,10,50);
 

@@ -36,6 +36,6 @@ function updateScreen(task) {
 		jglFixationCross();
 	}
 	if (jgl.trial.segname=='stim') {
-		jglFillRect(0,0,[20,20],'#ff0000');
+		jglFillRect(0,0,[1,1],'#ffffff');
 	}
 }
