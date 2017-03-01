@@ -31,13 +31,14 @@ var task; // task structure created by experiment code
 var jgl = {}; // stuff that gets tracked (worker id, etc)
 
 function launch() {
+	initJGL();
 	getExperiment(); // load the experiment from the query string
 	if (!debug) {getAmazonInfo();}
 	loadTemplate();
 	loadExperiment();
 	setTimeout(function() {
 		loadTask_();
-		updateFromServer();
+		updateFromServer(); // this also starts 
 		if (debug) {start();}
 	},100);
 }
@@ -53,6 +54,10 @@ function getExperiment() {
 		error('noexp');
 		return;
 	}
+}
+
+function initJGL() {
+	jgl.timing = {};
 }
 
 function getAmazonInfo() {
@@ -105,7 +110,8 @@ function hideAll() {
 }
 
 function start() {
-	jgl.task = startBlock_(jgl.task);
+	jgl.timing.experiment = now();
+	startBlock_(jgl.task);
 }
 
 function error(type) {
@@ -125,7 +131,7 @@ function error(type) {
 ///////////////////////////////////////////////////////////////////////
 
 function consentEnd() {
-	jgl.task = endBlock_(jgl.task);
+	endBlock_(jgl.task);
 }
 
 function processTask(task) {
@@ -175,14 +181,24 @@ function processTask(task) {
 			}
 		}
 	}
-	return task;
 }
 
 function loadTask_() {
 	// Run the user defined function
 	jgl.task = loadTask();
 	// Take the task and process it
-	jgl.task = processTask(jgl.task);
+	processTask(jgl.task);
+}
+
+function setupCanvas() {
+	jgl.canvas = document.getElementById("canvas");
+	jgl.canvas.width = window.screen.width;
+	jgl.canvas.height = window.screen.height;
+	jgl.ctx = jgl.canvas.getContext("2d");
+	console.log('remove when real visual angle coordinates est');
+	jgl.canvas.pixPerDeg = 40;
+	jgl.canvas.background = 0.5;
+	jglVisualAngleCoordinates();
 }
 
 ///////////////////////////////////////////////////////////////////////
@@ -194,16 +210,13 @@ function endExp_(task) {
 }
 
 // All JGL callbacks have an underscore, client callbacks are stored in the callbacks object
-function startBlock_() {
+function startBlock_(task) {
 	// increment block
 	jgl.curBlock++;
 	jgl.curTrial = -1;
 
 	// Check if we need to end the experiment
-	if (jgl.curBlock>jgl.task.length) {
-		task = endExp_(task);
-		return task;
-	}
+	if (jgl.curBlock>task.length) {endExp_(); return;}
 
 	// Setup the block
 	jgl.callbacks = task[jgl.curBlock].callbacks;
@@ -216,8 +229,7 @@ function startBlock_() {
 	if (task[jgl.curBlock].type=='trial') {
 		// trials use the update_() code and a canvas to render
 		// set up canvas
-		jgl.canvas = document.getElementById("canvas");
-		jgl.ctx = jgl.canvas.getContext("2d");
+		setupCanvas();
 	} else {
 		switch (task[jgl.curBlock].type) {
 			// Anything that isn't a trial/canvas just waits for a submit function
@@ -231,7 +243,7 @@ function startBlock_() {
 		}
 	}
 
-	if (task[jgl.curBlock].canvas==1) {
+	if (task[jgl.curBlock].type=='trial' || task[jgl.curBlock].canvas==1) {
 		jgl.timing.block = now();
 		elapsed();
 		update_();
@@ -241,14 +253,14 @@ function startBlock_() {
 function update_() {
 	var t = elapsed(); // get elapsed time
 	// Check first trial
-	if (jgl.curTrial==-1) {startTrial_();}
+	if (jgl.curTrial==-1) {startTrial_(jgl.task);}
 	// Check next trial
-	if ((now()-jgl.timing.trial)>jgl.trial.length) {startTrial_();}
+	if ((now()-jgl.timing.trial)>jgl.trial.length) {startTrial_(jgl.task);}
 	// Check next segment
-	if ((now()-jgl.timing.segment)>jgl.trial.seglen[jgl.trial.thisseg]) {startSegment_();}
+	if ((now()-jgl.timing.segment)>jgl.trial.seglen[jgl.trial.thisseg]) {startSegment_(jgl.task);}
 
 	// Update screen
-	updateScreen_();
+	updateScreen_(jgl.task,t);
 
 	jgl.tick = requestAnimationFrame(update_);
 }
@@ -258,41 +270,48 @@ function endBlock_(task) {
 	if (jgl.tick!=undefined) {cancelAnimationFrame(jgl.tick);}
 
 	// start the next block
-	task = startBlock_(task);
+	startBlock_(task);
 	//
-	return task;
 }
 
-function startTrial_() {
+function startTrial_(task) {
 	jgl.curTrial++;
-	if (jgl.curTrial>=task[jgl.curBlock].numTrials) {endBlock_();return}
+	if (jgl.curTrial>=task[jgl.curBlock].numTrials) {endBlock_(task);return}
 	// Run trial:
 	jgl.timing.trial = now();
-	console.log('Starting trial: ' + trial);
-	jgl.trial = task[jgl.curBlock].trials[trial];
+	console.log('Starting trial: ' + jgl.curTrial);
+	jgl.trial = task[jgl.curBlock].trials[jgl.curTrial];
 
 	// Start the segment immediately
 	jgl.trial.thisseg = -1;
-	startSegment_();
+	startSegment_(task);
 
-	if (callbacks.startTrial) {callbacks.startTrial();}
+	if (jgl.callbacks.startTrial) {jgl.callbacks.startTrial(task);}
 }
 
 function startSegment_(task) {
 	jgl.trial.thisseg++;
+	jgl.trial.segname = task[jgl.curBlock].segnames[jgl.trial.thisseg];
 
 	jgl.timing.segment = now();
 
-	if (callbacks.startSegment) {callbacks.startSegment();}
+	if (jgl.callbacks.startSegment) {jgl.callbacks.startSegment(task);}
 }
 
-function updateScreen_() {
+function updateScreen_(task,time) {
+	var framerate = 1000/time;
+	// Clear screen
+	jgl.ctx.fillStyle = con2hex(jgl.canvas.background);
+	jgl.ctx.fillRect(0,0,jgl.canvas.width,jgl.canvas.height);
 
-	if (callbacks.updateScreen) {callbacks.updateScreen();}
+	// jgl.ctx.font="20px Georgia";
+	// jgl.ctx.fillText('Trial: ' + jgl.curTrial + ' Segment: ' + jgl.trial.thisseg,10,50);
+
+	if (jgl.callbacks.updateScreen) {jgl.callbacks.updateScreen(task);}
 }
 
 function getResponse_(event) {
 	// called by the event listener on the canvas during trials
 
-	if (callbacks.getResponse) {callbacks.getResponse(event);}
+	if (jgl.callbacks.getResponse) {jgl.callbacks.getResponse(event);}
 }

@@ -32,6 +32,10 @@ function loadTask() {
 }
 
 function updateScreen(task) {
-	
-	return task;
+	if (jgl.trial.segname=='delay') {
+		jglFixationCross();
+	}
+	if (jgl.trial.segname=='stim') {
+		jglFillRect(0,0,[20,20],'#ff0000');
+	}
 }

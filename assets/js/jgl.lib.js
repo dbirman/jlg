@@ -145,10 +145,10 @@ function jglFillRect(x, y, size, color) {
 			y:0
 	};
 	for (var i=0;i<x.length;i++) {
-		canvas.context.fillStyle = color;
+		jgl.ctx.fillStyle = color;
 		upperLeft.x = x[i] - (size[0] / 2);
 		upperLeft.y = y[i] - (size[1] / 2);
-		canvas.context.fillRect(upperLeft.x, upperLeft.y, size[0], size[1]);
+		jgl.ctx.fillRect(upperLeft.x, upperLeft.y, size[0], size[1]);
 	}
 }
 
@@ -164,7 +164,7 @@ function jglFillRect(x, y, size, color) {
 function jglFixationCross(width, lineWidth, color, origin) {
 	
 	if (arguments.length == 0) {
-		if (canvas.usingVisualAngles) {
+		if (jgl.canvas.usingVisualAngles) {
 			width = 1;
 			lineWidth = 0.04;
 			color = "#ff0000";
@@ -173,20 +173,20 @@ function jglFixationCross(width, lineWidth, color, origin) {
 			width = 20;
 			lineWidth = 1;
 			color = "#ff0000";
-			origin = [canvas.backCanvas.width / 2 , backCanvas.height / 2];
+			origin = [jgl.canvas.width / 2 , jgl.canvas.height / 2];
 		}
 		
 	}
-	canvas.context.lineWidth = lineWidth;
-	canvas.context.strokeStyle = color;
-	canvas.context.beginPath();
-	canvas.context.moveTo(origin[0] - width / 2, origin[1]);
-	canvas.context.lineTo(origin[0] + width / 2, origin[1]);
-	canvas.context.stroke();
-	canvas.context.beginPath();
-	canvas.context.moveTo(origin[0], origin[1] - width / 2);
-	canvas.context.lineTo(origin[0], origin[1] + width / 2);
-	canvas.context.stroke();
+	jgl.ctx.lineWidth = lineWidth;
+	jgl.ctx.strokeStyle = color;
+	jgl.ctx.beginPath();
+	jgl.ctx.moveTo(origin[0] - width / 2, origin[1]);
+	jgl.ctx.lineTo(origin[0] + width / 2, origin[1]);
+	jgl.ctx.stroke();
+	jgl.ctx.beginPath();
+	jgl.ctx.moveTo(origin[0], origin[1] - width / 2);
+	jgl.ctx.lineTo(origin[0], origin[1] + width / 2);
+	jgl.ctx.stroke();
 }
 
 /**
@@ -277,15 +277,15 @@ function jglTextDraw(text, x, y) {
  * it does not effect the normal canvas. 
  */
 function jglVisualAngleCoordinates() {
-	canvas.context.save();
-	canvas.context.translate(canvas.width / 2, canvas.height / 2);
-	canvas.context.transform(canvas.pixPerDeg,0,0,canvas.pixPerDeg, 0,0);
+	jgl.ctx.save();
+	jgl.ctx.translate(jgl.canvas.width / 2, jgl.canvas.height / 2);
+	jgl.ctx.transform(jgl.canvas.pixPerDeg,0,0,jgl.canvas.pixPerDeg, 0,0);
 	
-	canvas.context.save();
-	canvas.context.translate(canvas.width / 2, canvas.height / 2);
-	canvas.context.transform(canvas.pixPerDeg,0,0,canvas.pixPerDeg, 0,0);
+	jgl.ctx.save();
+	jgl.ctx.translate(jgl.canvas.width / 2, jgl.canvas.height / 2);
+	jgl.ctx.transform(jgl.canvas.pixPerDeg,0,0,jgl.canvas.pixPerDeg, 0,0);
 	
-	canvas.usingVisualAngles = true;
+	jgl.canvas.usingVisualAngles = true;
 }
 
 
@@ -554,11 +554,12 @@ function sortIndices(array,indices) {
  * returns the hex of your color.
  */
 function con2hex(contrast) {
-	if (myscreen.pow > -1) {
-		con = Math.round(Math.pow(contrast,1/myscreen.pow)*255);
-	} else {
-		con = contrast;
-	}
+	// if (myscreen.pow > -1) {
+	// 	con = Math.round(Math.pow(contrast,1/myscreen.pow)*255);
+	// } else {
+	// 	con = contrast;
+	// }
+	con = Math.round(contrast*255);
 	conS = con.toString(16);
 	if (conS.length == 1) {
 		conS = conS + conS;
