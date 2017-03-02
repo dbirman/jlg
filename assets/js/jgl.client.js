@@ -273,7 +273,7 @@ function keyEvent(event) {
 	jgl.event.key = {};
 	jgl.event.key.keyCode = event.which;
 
-	getResponse_(jgl.task);
+	getResponse_();
 }
 
 function clickEvent(event) {
@@ -288,7 +288,7 @@ function clickEvent(event) {
 
   jgl.event.mouse.shift = event.shiftKey;
 
-  getResponse_(jgl.task);
+  getResponse_();
 }
 
 ///////////////////////////////////////////////////////////////////////
@@ -297,6 +297,8 @@ function clickEvent(event) {
 
 function endExp_() {
 	console.log('Experiment complete');
+
+	if (jgl.callbacks.endExp!=undefined) {jgl.callbacks.endExp();}
 }
 
 // All JGL callbacks have an underscore, client callbacks are stored in the callbacks object
