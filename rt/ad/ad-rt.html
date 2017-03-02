@@ -143,21 +143,21 @@ function getExperiment() {
 	debug = getQueryVariable('debug')=='true';
 }
 
-$(document).ready(function() {launch();});
+// $(document).ready(function() {launch();});
 
-function launch() {
-	debug = getQueryVariable('debug')=='true';
-	if (debug) {
-		$("#preview").show();
-		$("#active").show();
-	} else if (turk.previewMode) {
-		$("#preview").show();
-		$("#active").hide();
-	} else if (!turk.previewMode) {
-		$("#preview").hide();
-		$("#active").show();
-	}
-};
+// function launch() {
+// 	debug = getQueryVariable('debug')=='true';
+// 	if (debug) {
+// 		$("#preview").show();
+// 		$("#active").show();
+// 	} else if (turk.previewMode) {
+// 		$("#preview").show();
+// 		$("#active").hide();
+// 	} else if (!turk.previewMode) {
+// 		$("#preview").hide();
+// 		$("#active").show();
+// 	}
+// };
 
 var experimentWindow,path,expName;
 
