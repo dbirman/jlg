@@ -108,8 +108,11 @@ function loadTemplate() {
 function loadExperiment() {
 	// Load experiment code
 	$.getScript(exp+'/'+exp+'.client.js');
+
+	// JGL NOTE: Experiment divs will be stored as template html files, which get auto-loaded. This way
+	// people can't hide things from each other (better from a development standpoint...)
 	// Load experiment divs
-	$.get(exp+'/'+exp+'.html', function(data) {$(document.body).append(data);})
+	// $.get(exp+'/'+exp+'.html', function(data) {$(document.body).append(data);})
 }
 
 function updateFromServer() {
