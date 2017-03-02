@@ -8,12 +8,15 @@ function getExperiment() {
 
 window.onload = function() {
 	debug = getQueryVariable('debug')=='true';
-	if (debug || turk.previewMode==false) {
-		document.getElementById("preview").style.display="none";
+	if (debug) {
+		document.getElementById("preview").style.display="";
 		document.getElementById("active").style.display="";
-	} else {
+	} else if (turk.previewMode) {
 		document.getElementById("preview").style.display="";
 		document.getElementById("active").style.display="none";
+	} else if (!(turk.previewMode)) {
+		document.getElementById("preview").style.display="none";
+		document.getElementById("active").style.display="";
 	}
 };
 
