@@ -17,10 +17,25 @@ window.onload = function() {
 	}
 };
 
+var experimentWindow;
+
 function openwindow() {
 	var path = location.pathname;
-	var expName = path.substr(path.indexOf('ad-')+3,path.indexOf('.html')-1);
-	popup = window.open('http://localhost:8080/exp.html?exp='+expName,'Popup','toolbar=no,status=no,menubar=no,scrollbars=yes,resizable=no,width='+1024+',height='+768+'');
+	console.log(path);
+	var expName = path.substr(path.indexOf('ad-')+3,path.indexOf('.html')-(path.indexOf('ad-')+3));
+	console.log(expName);
+	experimentWindow = window.open('http://localhost:8080/exp.html?exp='+expName,'Popup','toolbar=no,status=no,menubar=no,scrollbars=yes,resizable=no,width='+1024+',height='+768+'');
+}
+
+function submit() {
+	var dataPackage = {
+		turk:turk,
+		path:path,
+		expName:expName,
+		success:true
+	}
+	experimentWindow.close();
+	turk.submit(dataPackage);
 }
 
 function getQueryVariable(variable) {
