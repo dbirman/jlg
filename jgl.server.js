@@ -105,7 +105,6 @@ function update(id) {
 }
 
 function data(id,data) {
-  console.log(data);
   console.log('ID ' + id + ' sent data for their current block');
   if (JGL[info[id].experiment][info[id].hash].data.length != JGL[info[id].experiment][info[id].hash].block) {
     console.log('WARNING: ' + id + ' sent data without incrementing their block counter');

@@ -12,7 +12,7 @@
 // i.e. if you call a function from within a function, there is no guarantee that the inner function returns before
 // the outer one continues. Keep this in mind when you write your code :)
 
-var socket = io();
+var socket;
 
 ///////////////////////////////////////////////////////////////////////
 //////////////////////// JGL FUNCTIONS ////////////////////////////////
@@ -30,24 +30,15 @@ function launch() {
 	var dpi_x = document.getElementById('dpi').offsetWidth;
 	var dpi_y = document.getElementById('dpi').offsetHeight;
 	if ((!(dpi_x==dpi_y)) || dpi_x==0 || dpi_y == 0) {error('There is an issue with your screen--you cannot continue');return}
-	jgl.pixPerDeg = dpi_x;
+	jgl.PPI = dpi_x;
+	jgl.screenSize = window.screen.width/jgl.PPI; // in inches
 	$("#dpi").hide();
 
-	var fList = [initJGL,loadTemplate,getExperiment,getAmazonInfo,loadExperiment,loadTask_,updateFromServer,function() {if (debug) {start();}}];
+	var fList = [initJGL,getExperiment,loadTemplate,getAmazonInfo,loadExperiment,loadTask_,updateFromServer,function() {if (debug) {start();}}];
 	
 	for (var fi=0;fi<fList.length;fi++) {
-		setTimeout(fList[fi],fi*50);
+		setTimeout(fList[fi],fi*200);
 	}
-	// initJGL();
-	// loadTemplate();
-	// getExperiment(); // load the experiment from the query string
-	// getAmazonInfo();
-	// loadExperiment();
-	// setTimeout(function() {
-	// 	loadTask_();
-	// 	updateFromServer(); // this also starts the experiment
-	// 	if (debug==1) {start();}
-	// },1000);
 }
 
 var exp, debug;
@@ -60,6 +51,27 @@ function getExperiment() {
 		error('noexp');
 		return;
 	}
+	if (!debug) {socket = io(); setupSocket();}
+}
+
+function setupSocket() {
+	socket.on('update', function(msg) {
+		console.log('Server connection succeeded currently at block ' + (Number(msg)+1));
+		// Format is block
+		// msg = msg.split('.');
+		jgl.curBlock = Number(msg); //[0];
+		jgl.curTrial = -1; // we only send data per block, so we're stuck re-starting at the first trial
+		start();
+	});
+
+	socket.on('check', function() {
+		jgl.serverConnected = true;
+	});
+
+	socket.on('submitted', function() {
+		jgl.live = false;
+		error('You already participated and submitted this HIT. Please release it for another participant.');
+	});
 }
 
 function initJGL() {
@@ -125,24 +137,6 @@ function updateFromServer() {
 		checkServerStatus();
 	}
 }
-
-socket.on('update', function(msg) {
-	console.log('Server connection succeeded currently at block ' + (Number(msg)+1));
-	// Format is block
-	// msg = msg.split('.');
-	jgl.curBlock = Number(msg); //[0];
-	jgl.curTrial = -1; // we only send data per block, so we're stuck re-starting at the first trial
-	start();
-});
-
-socket.on('check', function() {
-	jgl.serverConnected = true;
-});
-
-socket.on('submitted', function() {
-	jgl.live = false;
-	error('You already participated and submitted this HIT. Please release it for another participant.');
-});
 
 function checkServerStatus() {
 	if (!jgl.serverConnected) {
