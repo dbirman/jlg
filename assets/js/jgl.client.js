@@ -163,7 +163,8 @@ function error(type) {
 ///////////////////////////////////////////////////////////////////////
 
 function consentEnd() {
-	endBlock_(jgl.task);
+	jgl.trial.consent = true;
+	endBlock_();
 }
 
 function completeEnd() {

@@ -20,7 +20,6 @@ app.get( '/*' , function( req, res ) {
     res.sendfile("./" + file);
 }); 
 
-
 io.on('connection', function(socket){
   console.log('Connection: ID ' + socket.id);
 
@@ -34,7 +33,7 @@ io.on('connection', function(socket){
 
   socket.on('data', function(data) {try {data(socket.id,data);} catch(err) {console.log(err);}});
 
-  socket.on('block', function(block) {try {block(socket.id,block);} catch(err) {console.log(err);}});
+  socket.on('block', function(num) {try {block(socket.id,num);} catch(err) {console.log(err);}});
 });
 
 var port = 8080;
@@ -103,6 +102,8 @@ function data(id,data) {
 
 function block(id,block) {
   console.log('ID ' + id + ' is starting block '+ block);
+
+  console.log(JGL)
   JGL[experiment][hash].block = block;
 }
 
