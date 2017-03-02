@@ -14,10 +14,6 @@
 
 var socket = io();
 
-socket.on('startTrial', function(msg) {
-	startTrial(msg);
-});
-
 ///////////////////////////////////////////////////////////////////////
 //////////////////////// JGL FUNCTIONS ////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
@@ -38,8 +34,8 @@ function launch() {
 	setTimeout(function() {
 		loadTask_();
 		updateFromServer(); // this also starts the experiment
-		if (debug) {start();}
-	},100);
+		if (debug==1) {start();}
+	},1000);
 }
 
 var exp, debug;
@@ -57,6 +53,7 @@ function getExperiment() {
 function initJGL() {
 	jgl.timing = {};
 	jgl.live = false;
+	jgl.serverConnected = -1;
 }
 
 function getAmazonInfo() {
@@ -107,20 +104,19 @@ function updateFromServer() {
 		jgl.curTrial = -1; // -1 before starting
 	} else {
 		console.log('Attempting server connection');
+		socket.emit('login',exp+'.'+jgl.hash);
 		checkServerStatus();
-		socket.emit('update');
 	}
 }
 
 socket.on('update', function(msg) {
+	console.log('Server connection succeeded currently at block ' + Number(msg));
 	// Format is block
 	// msg = msg.split('.');
 	jgl.curBlock = Number(msg); //[0];
 	jgl.curTrial = -1; // we only send data per block, so we're stuck re-starting at the first trial
 	start();
 });
-
-var jgl.serverConnected = -1;
 
 socket.on('check', function() {
 	jgl.serverConnected = true;
@@ -293,6 +289,7 @@ function endExp_() {
 function startBlock_() {
 	// increment block
 	jgl.curBlock++;
+	if (!debug) {socket.emit('block',jgl.curBlock);}
 	jgl.curTrial = -1;
 
 	// Check if we need to end the experiment
@@ -398,6 +395,11 @@ function endTrial_() {
 	// copy variables
 
 	// copy defaults (RT, response, correct)
+
+	// send to server
+	if (!debug) {
+		socket.emit('data',data);
+	}
 }
 
 function startSegment_() {

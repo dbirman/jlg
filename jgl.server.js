@@ -56,7 +56,7 @@ function login(id,msg) {
     hash = msg[1];
 
   // Save info by socket id so we can pull it up later if we need to
-  info[id] = {experiment:experiment,hash:has};
+  info[id] = {experiment:experiment,hash:hash};
 
   // check if experiment is available
   if (JGL[experiment]==undefined) {
@@ -67,11 +67,15 @@ function login(id,msg) {
     // participant has never done this experiment before
     JGL[experiment][hash] = {}
     JGL[experiment][hash].connected = true;
-    JGL[experiment][hash].block = 0;
+    JGL[experiment][hash].block = -1;
     JGL[experiment][hash].data = [];
   } else {
     // participant already started experiment and is re-connecting
+    JGL[experiment][hash].connected = true;
+    console.log('Sending start signal to ' + ID + ' for block ' + JGL[experiment][hash].block);
   }
+
+  io.to(id).emit('update',JGL[experiment][hash].block); // send the client its block state
 }
 
 function logout(id) {
@@ -83,17 +87,22 @@ function logout(id) {
 }
 
 function update(id) {
-  if (inf[id]!=undefined) {
+  if (info[id]!=undefined) {
     console.log('Sending update info: ID ' + id);
     var block = JGL[info[id].experiment][info[id].hash].block;
   }
 }
 
 function data(id,data) {
+  console.log('ID ' + id + ' sent data for their current block');
+  if (JGL[experiment][hash].data.length != JGL[experiment][hash].block) {
+    console.log('WARNING: ' + id + ' sent data without incrementing their block counter');
+  }
   JGL[experiment][hash].data.push(data);
 }
 
 function block(id,block) {
+  console.log('ID ' + id + ' is starting block '+ block);
   JGL[experiment][hash].block = block;
 }
 
