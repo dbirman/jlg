@@ -48,63 +48,55 @@ This is not a best practice, but fuck that shit. -->
 					<img id="adlogo" src="https://dbirman.github.io/jgl/assets/images/stanford.png" alt="Lab Logo" />
 				</div>
 				<div class="col-xs-10">
+					<div id="preview">
+						<h1>Call for participants</h1>
+						<p>
+							The Gardner Lab at Stanford University is looking for online participants for a brief psychology experiment. The only requirements are that you are at least 18 years old and are a fluent English 
+							speaker. The task will take about 30 minutes and will pay $4 (approximately $8/hr).
+						</p>
+						<div class="alert alert-danger">
+							<strong>This task can only be completed once.</strong> 
+							If you have already completed this task before the system will not allow you to run again. If this looks familiar please return the HIT so someone else can participate.
+						</div>
+						<p>
+							Otherwise, please click the "Accept HIT" button on the Amazon site above to begin the task.
+						</p>
+					</div>
 
-							<!-- 
-								If assignmentid is "ASSIGNMENT_ID_NOT_AVAILABLE"
-								it means the participant has NOT accepted your hit. 
-								This should display the typical advertisement about
-								your experiment: who can participate, what the
-								payment is, the time, etc...
+					<div id="active">
+						<!-- 
+							OTHERWISE
+							If assignmentid is NOT "ASSIGNMENT_ID_NOT_AVAILABLE"
+							it means the participant has accepted your hit. 
+							You should thus show them instructions to begin the 
+							experiment ... usually a button to launch a new browser
+							window pointed at your server.
 
-							-->
-							<div id="preview">
-								<h1>Call for participants</h1>
-								<p>
-									The Gardner Lab at Stanford University is looking for online participants for a brief psychology experiment. The only requirements are that you are at least 18 years old and are a fluent English 
-									speaker. The task will take about 30 minutes and will pay $4 (approximately $8/hr).
-								</p>
-								<div class="alert alert-danger">
-									<strong>This task can only be completed once.</strong> 
-									If you have already completed this task before the system will not allow you to run again. If this looks familiar please return the HIT so someone else can participate.
-								</div>
-								<p>
-									Otherwise, please click the "Accept HIT" button on the Amazon site above to begin the task.
-								</p>
-							</div>
+							It is important you do not change the code for the
+							openwindow() function below if you want you experiment
+							to work.
+						-->
+						<h1>Thank you for accepting this HIT!</h1>
+						<p>
+							By clicking the following URL link, you will be taken to the experiment, including complete instructions and an informed consent agreement.
+						</p>
+						<div class="alert alert-danger">
+							<b>Warning</b>: Please keep this page open until the HIT completes.
+						</div>
+						<div class="alert alert-warning">
+							<b>Warning</b>: Please disable pop-up blockers before continuing.
+						</div>
 
-							<div id="active">
-								<!-- 
-									OTHERWISE
-									If assignmentid is NOT "ASSIGNMENT_ID_NOT_AVAILABLE"
-									it means the participant has accepted your hit. 
-									You should thus show them instructions to begin the 
-									experiment ... usually a button to launch a new browser
-									window pointed at your server.
-
-									It is important you do not change the code for the
-									openwindow() function below if you want you experiment
-									to work.
-								-->
-								<h1>Thank you for accepting this HIT!</h1>
-								<p>
-									By clicking the following URL link, you will be taken to the experiment, including complete instructions and an informed consent agreement.
-								</p>
-								<div class="alert alert-danger">
-									<b>Warning</b>: Please keep this page open until the HIT completes.
-								</div>
-								<div class="alert alert-warning">
-									<b>Warning</b>: Please disable pop-up blockers before continuing.
-								</div>
-
-								<button type="button" class="btn btn-primary btn-lg" onClick="openwindow();">Begin Experiment</button>
-							</div>
+						<button type="button" class="btn btn-primary btn-lg" onClick="openwindow();">Begin Experiment</button>
+					</div>
 							<!-- 
 								endif
 							-->
-						</div>
-					</div>
 				</div>
+			</div>
+		</div>
 
-		<script src="https://dbirman.github.io/jgl/assets/js/ad.logic.js"></script>
+	</div>
+	<script src="https://dbirman.github.io/jgl/assets/js/ad.logic.js"></script>
 </body>
-</html>
+</html>		
