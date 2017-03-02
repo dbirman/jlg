@@ -6,6 +6,8 @@ function loadTask() {
 	task[0].type = 'consent';
 	// consent is a default type with no callbacks
 	task[0].callbacks = {};
+	task[0].variables = {};
+	task[0].variables.consent = NaN;
 	// consent has no data
 
 	// RT TRIALS

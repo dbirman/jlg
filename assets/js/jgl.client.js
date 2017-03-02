@@ -385,8 +385,14 @@ function endBlock_() {
 			if (jgl.trial[defaults[di]]!=undefined) {data[defaults[di]] = jgl.trial[defaults[di]];}
 		}
 	} else {
-		console.log('add code for custom data sending?');
+		// copy variables
+		var variables = Object.keys(jgl.task[jgl.curBlock].variables);
+		for (var vi=0;vi<variables.length;vi++) {
+			data[variables[vi]] = jgl.trial[variables[vi]];
+		}
 	}
+
+	if (jgl.callbacks.endBlock) {jgl.callbacks.endBlock();}
 
 	// send to server
 	if (!debug) {
