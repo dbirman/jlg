@@ -32,62 +32,62 @@ io.on('connection', function(socket){
 var port = 8080;
 http.listen(port, function(){
   console.log('Server live on *: ' + port);
-  tick();
+  // tick();
 });
 
-//////////////////////////////////////////////////////////////////////////////
-//////////////////////// CONNECTION FUNCTIONS ////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////
+// //////////////////////////////////////////////////////////////////////////////
+// //////////////////////// CONNECTION FUNCTIONS ////////////////////////////////
+// //////////////////////////////////////////////////////////////////////////////
 
-function login(id,msg) {
-  msg = msg.split('.');
-  var experiment = msg[0]; // name of experiment
+// function login(id,msg) {
+//   msg = msg.split('.');
+//   var experiment = msg[0]; // name of experiment
 
-  // check if experiment is available
-  if (JGL.experiments[experiment]!=undefined) {
-    console.log('Logging in: ' + socket.id ' for experiment ' + experiment);
-    JGL.experiments[experiment].newExp(socket.id)
-  } else {
+//   // check if experiment is available
+//   if (JGL.experiments[experiment]!=undefined) {
+//     console.log('Logging in: ' + socket.id ' for experiment ' + experiment);
+//     JGL.experiments[experiment].newExp(socket.id)
+//   } else {
     
-  }
-}
+//   }
+// }
 
-function logout(id) {
-  console.log('Disconnection: ID ' + socket.id);
-}
+// function logout(id) {
+//   console.log('Disconnection: ID ' + socket.id);
+// }
 
-///////////////////////////////////////////////////////////////////////
-//////////////////////// JGL FUNCTIONS ////////////////////////////////
-///////////////////////////////////////////////////////////////////////
+// ///////////////////////////////////////////////////////////////////////
+// //////////////////////// JGL FUNCTIONS ////////////////////////////////
+// ///////////////////////////////////////////////////////////////////////
 
-var JGL = {};
+// var JGL = {};
 
-function saveData() {
+// function saveData() {
   
-}
+// }
 
-function tick() {
-	saveData();
-	garbageCollect();
+// function tick() {
+// 	saveData();
+// 	garbageCollect();
 
-	setTimeout(tick,60000); // repeat every minute
-}
+// 	setTimeout(tick,60000); // repeat every minute
+// }
 
-//////////////////////////////////////////////////////////////////////////////
-//////////////////////// GARBAGE FUNCTIONS ///////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////
+// //////////////////////////////////////////////////////////////////////////////
+// //////////////////////// GARBAGE FUNCTIONS ///////////////////////////////////
+// //////////////////////////////////////////////////////////////////////////////
 
-function garbage() {
-  // var dkeys = Object.keys(disconnect);
-  // for (var key in disconnected) {
-  //   // this officially removes someone from the study
-  //   if ((now() - disconnected[key]) > 86400) {removeSubject(key);}
-  // }
+// function garbage() {
+//   // var dkeys = Object.keys(disconnect);
+//   // for (var key in disconnected) {
+//   //   // this officially removes someone from the study
+//   //   if ((now() - disconnected[key]) > 86400) {removeSubject(key);}
+//   // }
 
-}
+// }
 
-function removeSubject() {
-  delete disconnected[key];
-  delete JGL[key];
-  delete data[key];
-}
+// function removeSubject() {
+//   delete disconnected[key];
+//   delete JGL[key];
+//   delete data[key];
+// }

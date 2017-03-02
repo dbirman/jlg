@@ -8,10 +8,9 @@
 // closes all windows and shuts down MTurk (via opener.turk, and the mmturkey)
 // plugin.
 
-// A warning about JGL compared to MGL. JGL relies on a string of commands
-// executing one after another. There is no "controller" calling the different
-// functions. In other words--if a function you write is very slow or crashes
-// then the entire system will crash.
+// A warning about JGL compared to MGL. JGL strings commands together at times--but they operate asynchronously:
+// i.e. if you call a function from within a function, there is no guarantee that the inner function returns before
+// the outer one continues. Keep this in mind when you write your code :)
 
 // var socket = io();
 
@@ -31,11 +30,10 @@ var task; // task structure created by experiment code
 var jgl = {}; // stuff that gets tracked (worker id, etc)
 
 function launch() {
-	jgl.live = false;
 	initJGL();
+	loadTemplate();
 	getExperiment(); // load the experiment from the query string
 	if (!debug) {getAmazonInfo();}
-	loadTemplate();
 	loadExperiment();
 	setTimeout(function() {
 		loadTask_();
@@ -59,6 +57,7 @@ function getExperiment() {
 
 function initJGL() {
 	jgl.timing = {};
+	jgl.live = false;
 }
 
 function getAmazonInfo() {
@@ -77,10 +76,22 @@ function getAmazonInfo() {
 	}
 }
 
+function submitHIT() {
+	if (debug) {
+		error('Normally the HIT would now be submitted');
+		return
+	}
+	if (opener==undefined) {
+		error('You did not keep the Amazon MTurk page open. Please re-open the HIT on MTurk and start again--it will take you directly to the final page and allow you to submit');
+		return
+	}
+	// Otherwise, communicate with the server and submit
+}
+
 function loadTemplate() {
-	var tempList = ['consent','trial'];
+	var tempList = ['complete'];
 	for (var i=0;i<tempList.length;i++) {
-		$.get('assets/templates/'+tempList[i]+'.html', function(data) {$('#content').append(data);})
+		addDiv(tempList[i]);
 	}
 }
 
@@ -111,6 +122,7 @@ function hideAll() {
 }
 
 function start() {
+	console.log('Experiment starting');
 	jgl.timing.experiment = now();
 	jgl.live = true;
 	startBlock_();
@@ -124,7 +136,7 @@ function error(type) {
 			$("#error-text").text('An error occurred: no experiment was specified in the html query string. Please send this error to the experimenter (gruturk@gmail.com).');
 			break;
 		default:
-			$("#error-text").text('An unknown error occured.');
+			$("#error-text").text('An error occurred: ' + type);
 	}
 }
 
@@ -136,10 +148,22 @@ function consentEnd() {
 	endBlock_(jgl.task);
 }
 
+function completeEnd() {
+	submitHIT();
+}
+
+function addDiv(div) {
+	console.log('Adding div: ' + div);
+	divList.push(div);
+	$.get('assets/templates/'+div+'.html', function(data) {$('#content').append(data);});
+}
+
 function processTask(task) {
 	for (var ti=0;ti<task.length;ti++) {
 		if (task[ti].type!=undefined) {
-			divList.push(task[ti].type);
+			if (divList.indexOf(task[ti].type)==-1) {
+				addDiv(task[ti].type);
+			}
 		}
 		// setup trials
 		task[ti].trials = [];
@@ -183,6 +207,7 @@ function processTask(task) {
 			}
 		}
 	}
+	task.push({type:'complete',callbacks:{}});
 }
 
 function loadTask_() {
@@ -239,19 +264,19 @@ function clickEvent(event) {
 ///////////////////////////////////////////////////////////////////////
 
 function endExp_() {
-	jgl.live = false;
-	console.log('experiment complete');
+	console.log('Experiment complete');
 }
 
 // All JGL callbacks have an underscore, client callbacks are stored in the callbacks object
 function startBlock_() {
-	if (!jgl.live) {return}
 	// increment block
 	jgl.curBlock++;
 	jgl.curTrial = -1;
 
 	// Check if we need to end the experiment
-	if (jgl.curBlock>=jgl.task.length) {endExp_(); return}
+	if (jgl.curBlock>=(jgl.task.length)) {endExp_(); return}
+
+	jgl.live = true;
 
 	// Setup the block
 	jgl.callbacks = jgl.task[jgl.curBlock].callbacks;
@@ -272,8 +297,11 @@ function startBlock_() {
 			case 'consent':
 				jgl.endBlockFunction = consentEnd;
 				break;
+			case 'complete':
+				jgl.endBlockFunction = completeEnd;
+				break;
 			default:
-				if (jgl.task[jgl.curBlock].endBlockFunction==undefined) {error('An error occurred: no endblock function was defined, this task will never end');}
+				if (jgl.task[jgl.curBlock].endBlockFunction==undefined) {error('An error occurred: no endblock function was defined, this block will never end');}
 				jgl.endBlockFunction = jgl.task[jgl.curBlock].endBlockFunction;
 		}
 	}
@@ -288,15 +316,15 @@ function startBlock_() {
 
 function update_() {
 	if (!jgl.live) {return}
-	if (jgl.tick==undefined) {return}
 
+	var cblock = jgl.curBlock;
 	var t = elapsed(); // get elapsed time
-	// Check end block	
-	if (jgl.curTrial>=jgl.task[jgl.curBlock].numTrials) {endBlock_();console.log('done');return}
 	// Check first trial
 	if (jgl.curTrial==-1) {startTrial_();}
 	// Check next trial
 	if ((now()-jgl.timing.trial)>jgl.trial.length) {startTrial_();}
+	// Next trial may have shut down the block, check this
+	if (cblock != jgl.curBlock) {return}
 	// Check next segment
 	if ((now()-jgl.timing.segment)>jgl.trial.seglen[jgl.trial.thisseg]) {startSegment_();}
 
@@ -307,12 +335,11 @@ function update_() {
 }
 
 function endBlock_() {
-	console.log('doing this');
-	if (!jgl.live) {return}
+	jgl.live = false;
 	// run standard code
-	if (jgl.tick!=undefined) {cancelAnimationFrame(jgl.tick); jgl.tick = undefined;}
+	cancelAnimationFrame(jgl.tick);
+
 	// remove event listeners
-	console.log(jgl.task)
 	if (jgl.task[jgl.curBlock].keys!=undefined) {document.removeEventListener('keydown',keyEvent);}
 	if (jgl.task[jgl.curBlock].mouse!=undefined) {document.removeEventListener('click',clickEvent);}
 
@@ -321,9 +348,10 @@ function endBlock_() {
 }
 
 function startTrial_() {
-	if (!jgl.live) {return}
-
 	jgl.curTrial++;
+	// Check end block	
+	if (jgl.curTrial>=jgl.task[jgl.curBlock].numTrials) {endBlock_();return}
+
 	// Run trial:
 	jgl.timing.trial = now();
 	console.log('Starting trial: ' + jgl.curTrial);
@@ -341,7 +369,6 @@ function startTrial_() {
 }
 
 function endTrial_() {
-	if (!jgl.live) {return}
 	// save data into task[jgl.curBlock].datas 
 	var data = {};
 	// copy parameters
@@ -352,7 +379,6 @@ function endTrial_() {
 }
 
 function startSegment_() {
-	if (!jgl.live) {return}
 
 	jgl.trial.thisseg++;
 	jgl.trial.segname = jgl.task[jgl.curBlock].segnames[jgl.trial.thisseg];
@@ -363,7 +389,6 @@ function startSegment_() {
 }
 
 function updateScreen_(time) {
-	if (!jgl.live) {return}
 
 	var framerate = 1000/time;
 	// Clear screen
