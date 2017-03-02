@@ -11,5 +11,5 @@ window.onload = function() {
 function openwindow() {
 	var path = location.pathname;
 	var expName = path.substr(path.indexOf('ad-')+3,path.indexOf('.html')-1);
-	popup = window.open('/exp.html?'+expName,'Popup','toolbar=no,status=no,menubar=no,scrollbars=yes,resizable=no,width='+1024+',height='+768+'');
+	popup = window.open('localhost:8080/exp.html?'+expName,'Popup','toolbar=no,status=no,menubar=no,scrollbars=yes,resizable=no,width='+1024+',height='+768+'');
 }
