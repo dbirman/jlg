@@ -22,7 +22,11 @@ var experimentWindow,path,expName;
 function openwindow() {
 	path = location.pathname;
 	expName = path.substr(path.indexOf('ad-')+3,path.indexOf('.html')-(path.indexOf('ad-')+3));
-	experimentWindow = window.open('http://localhost:8080/exp.html?exp='+expName,'Popup','toolbar=no,status=no,menubar=no,scrollbars=yes,resizable=no,width='+1024+',height='+768+'');
+	if (debug) {	
+		experimentWindow = window.open('http://localhost:8080/exp.html?exp='+expName+'&debug=1','Popup','toolbar=no,status=no,menubar=no,scrollbars=yes,resizable=no,width='+1024+',height='+768+'');
+	} else {
+		experimentWindow = window.open('http://localhost:8080/exp.html?exp='+expName,'Popup','toolbar=no,status=no,menubar=no,scrollbars=yes,resizable=no,width='+1024+',height='+768+'');
+	}
 }
 
 function submit() {

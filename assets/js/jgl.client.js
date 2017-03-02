@@ -26,6 +26,13 @@ var task; // task structure created by experiment code
 var jgl = {}; // stuff that gets tracked (worker id, etc)
 
 function launch() {
+	// Get DPI
+	var dpi_x = document.getElementById('dpi').offsetWidth;
+	var dpi_y = document.getElementById('dpi').offsetHeight;
+	if ((!(dpi_x==dpi_y)) || dpi_x==0 || dpi_y == 0) {error('There is an issue with your screen--you cannot continue');return}
+	jgl.pixPerDeg = dpi_x;
+	$("#dpi").hide();
+
 	var fList = [initJGL,loadTemplate,getExperiment,getAmazonInfo,loadExperiment,loadTask_,updateFromServer,function() {if (debug) {start();}}];
 	
 	for (var fi=0;fi<fList.length;fi++) {
@@ -255,7 +262,7 @@ function setupCanvas() {
 	jgl.canvas.height = window.innerHeight;
 	jgl.ctx = jgl.canvas.getContext("2d");
 	console.log('remove when real visual angle coordinates est');
-	jgl.canvas.pixPerDeg = 40;
+	jgl.canvas.pixPerDeg = jgl.pixPerDeg;
 	jgl.canvas.background = 0.5;
 	jglVisualAngleCoordinates();
 	// Add event listeners
