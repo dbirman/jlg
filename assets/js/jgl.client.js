@@ -361,6 +361,37 @@ function endBlock_() {
 	// remove event listeners
 	if (jgl.task[jgl.curBlock].keys!=undefined) {document.removeEventListener('keydown',keyEvent);}
 	if (jgl.task[jgl.curBlock].mouse!=undefined) {document.removeEventListener('click',clickEvent);}
+	
+	var data = {};
+		
+	if (jgl.task[jgl.curBlock].type=='trial') {
+		// save data into task[jgl.curBlock].datas 
+		// copy parameters
+		var params = Object.keys(jgl.task[jgl.curBlock].parameters);
+		for (var pi=0;pi<params.length;pi++) {
+			data[params[pi]] = jgl.trial[params[pi]];
+		}
+
+		// copy variables
+		var variables = Object.keys(jgl.task[jgl.curBlock].variables);
+		for (var vi=0;vi<variables.length;vi++) {
+			data[variables[vi]] = jgl.trial[variables[vi]];
+		}
+
+		// copy defaults (RT, response, correct)
+		var defaults = ['RT','response','correct'];
+		for (var di=0;di<defaults.length;di++) {
+			// these might not be defined, so don't just copy by default
+			if (jgl.trial[defaults[di]]!=undefined) {data[defaults[di]] = jgl.trial[defaults[di]];}
+		}
+	} else {
+		console.log('add code for custom data sending?');
+	}
+
+	// send to server
+	if (!debug) {
+		socket.emit('data',data);
+	}
 
 	// start the next block
 	startBlock_();
@@ -388,18 +419,8 @@ function startTrial_() {
 }
 
 function endTrial_() {
-	// save data into task[jgl.curBlock].datas 
-	var data = {};
-	// copy parameters
 
-	// copy variables
-
-	// copy defaults (RT, response, correct)
-
-	// send to server
-	if (!debug) {
-		socket.emit('data',data);
-	}
+	if (jgl.callbacks.endTrial) {jgl.callbacks.endTrial();}
 }
 
 function startSegment_() {
