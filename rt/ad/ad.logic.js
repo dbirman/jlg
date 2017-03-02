@@ -9,14 +9,14 @@ function getExperiment() {
 window.onload = function() {
 	debug = getQueryVariable('debug')=='true';
 	if (debug) {
-		document.getElementById("preview").style.display="";
-		document.getElementById("active").style.display="";
+		$("#preview").show();
+		$("#active").show();
 	} else if (turk.previewMode) {
-		document.getElementById("preview").style.display="";
-		document.getElementById("active").style.display="none";
-	} else if (!(turk.previewMode)) {
-		document.getElementById("preview").style.display="none";
-		document.getElementById("active").style.display="";
+		$("#preview").show();
+		$("#active").hide();
+	} else if (!turk.previewMode) {
+		$("#preview").hide();
+		$("#active").show();
 	}
 };
 
