@@ -17,13 +17,11 @@ window.onload = function() {
 	}
 };
 
-var experimentWindow;
+var experimentWindow,path,expName;
 
 function openwindow() {
-	var path = location.pathname;
-	console.log(path);
-	var expName = path.substr(path.indexOf('ad-')+3,path.indexOf('.html')-(path.indexOf('ad-')+3));
-	console.log(expName);
+	path = location.pathname;
+	expName = path.substr(path.indexOf('ad-')+3,path.indexOf('.html')-(path.indexOf('ad-')+3));
 	experimentWindow = window.open('http://localhost:8080/exp.html?exp='+expName,'Popup','toolbar=no,status=no,menubar=no,scrollbars=yes,resizable=no,width='+1024+',height='+768+'');
 }
 

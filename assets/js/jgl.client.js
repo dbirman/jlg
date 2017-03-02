@@ -20,22 +20,27 @@ var socket = io();
 
 $(document).ready(function() {launch();});
 
-var divList = ['error'];
+var divList = ['error','loading'];
 
 var task; // task structure created by experiment code
 var jgl = {}; // stuff that gets tracked (worker id, etc)
 
 function launch() {
-	initJGL();
-	loadTemplate();
-	getExperiment(); // load the experiment from the query string
-	getAmazonInfo();
-	loadExperiment();
-	setTimeout(function() {
-		loadTask_();
-		updateFromServer(); // this also starts the experiment
-		if (debug==1) {start();}
-	},1000);
+	var fList = [initJGL,loadTemplate,getExperiment,getAmazonInfo,loadExperiment,loadTask_,updateFromServer,function() {if (debug) {start();}}];
+	
+	for (var fi=0;fi<fList.length;fi++) {
+		setTimeout(fList[fi],fi*50);
+	}
+	// initJGL();
+	// loadTemplate();
+	// getExperiment(); // load the experiment from the query string
+	// getAmazonInfo();
+	// loadExperiment();
+	// setTimeout(function() {
+	// 	loadTask_();
+	// 	updateFromServer(); // this also starts the experiment
+	// 	if (debug==1) {start();}
+	// },1000);
 }
 
 var exp, debug;
@@ -66,7 +71,7 @@ function getAmazonInfo() {
 		jgl.hitId = opener.hitId;
 	} else {
 		jgl.assignmentId = 'debug';
-		jgl.workerId = 'debug' + Math.random()*10000;
+		jgl.workerId = 'debug';
 		jgl.hash = md5(jgl.workerId + exp);
 		jgl.hitId = 'debug';
 	}
@@ -82,6 +87,8 @@ function submitHIT() {
 		return
 	}
 	// Otherwise, communicate with the server and submit
+	socket.emit('submit');
+	opener.submit();
 }
 
 function loadTemplate() {
@@ -110,7 +117,7 @@ function updateFromServer() {
 }
 
 socket.on('update', function(msg) {
-	console.log('Server connection succeeded currently at block ' + Number(msg));
+	console.log('Server connection succeeded currently at block ' + (Number(msg)+1));
 	// Format is block
 	// msg = msg.split('.');
 	jgl.curBlock = Number(msg); //[0];
@@ -120,6 +127,11 @@ socket.on('update', function(msg) {
 
 socket.on('check', function() {
 	jgl.serverConnected = true;
+});
+
+socket.on('submitted', function() {
+	jgl.live = false;
+	error('You already participated and submitted this HIT. Please release it for another participant.');
 });
 
 function checkServerStatus() {
@@ -134,8 +146,7 @@ function checkServerStatus() {
 
 function hideAll() {
 	for (var di in divList) {
-		var div = divList[di];
-		$("#"+div).hide();
+		$("#"+divList[di]).hide();
 	}
 }
 
@@ -163,6 +174,7 @@ function error(type) {
 ///////////////////////////////////////////////////////////////////////
 
 function consentEnd() {
+	console.log(jgl.trial);
 	jgl.trial.consent = true;
 	endBlock_();
 }
@@ -175,6 +187,7 @@ function addDiv(div) {
 	console.log('Adding div: ' + div);
 	divList.push(div);
 	$.get('assets/templates/'+div+'.html', function(data) {$('#content').append(data);});
+	$("#"+div).hide();
 }
 
 function processTask(task) {
@@ -246,8 +259,8 @@ function setupCanvas() {
 	jgl.canvas.background = 0.5;
 	jglVisualAngleCoordinates();
 	// Add event listeners
-	if (jgl.task[jgl.curBlock].keys!=undefined) {document.addEventListener('keydown',keyEvent,true);}
-	if (jgl.task[jgl.curBlock].mouse!=undefined) {document.addEventListener('click',clickEvent,true);}
+	if (jgl.task[jgl.curBlock].keys!=undefined) {document.addEventListener('keydown',keyEvent,false);}
+	if (jgl.task[jgl.curBlock].mouse!=undefined) {document.addEventListener('click',clickEvent,false);}
 }
 
 ///////////////////////////////////////////////////////////////////////
@@ -299,7 +312,12 @@ function startBlock_() {
 	jgl.live = true;
 
 	// Setup the block
-	jgl.callbacks = jgl.task[jgl.curBlock].callbacks;
+	if (jgl.task[jgl.curBlock].callbacks!=undefined) {
+		jgl.callbacks = jgl.task[jgl.curBlock].callbacks;
+	} else {
+		jgl.callbacks = {};
+	}
+
 	hideAll();
 	$("#"+jgl.task[jgl.curBlock].type).show();
 
@@ -311,6 +329,7 @@ function startBlock_() {
 		// set up canvas
 		setupCanvas();
 	} else {
+		jgl.trial = {}; // we need this to store saved data
 		switch (jgl.task[jgl.curBlock].type) {
 			// Anything that isn't a trial/canvas just waits for a submit function
 			// (these could be instructions, forms, surveys, whatever)
@@ -349,7 +368,7 @@ function update_() {
 	if ((now()-jgl.timing.segment)>jgl.trial.seglen[jgl.trial.thisseg]) {startSegment_();}
 
 	// Update screen
-	updateScreen_(jgl.task,t);
+	updateScreen_(t);
 
 	jgl.tick = requestAnimationFrame(update_);
 }
@@ -360,8 +379,8 @@ function endBlock_() {
 	cancelAnimationFrame(jgl.tick);
 
 	// remove event listeners
-	if (jgl.task[jgl.curBlock].keys!=undefined) {document.removeEventListener('keydown',keyEvent);}
-	if (jgl.task[jgl.curBlock].mouse!=undefined) {document.removeEventListener('click',clickEvent);}
+	if (jgl.task[jgl.curBlock].keys!=undefined) {document.removeEventListener('keydown',keyEvent,false);}
+	if (jgl.task[jgl.curBlock].mouse!=undefined) {document.removeEventListener('click',clickEvent,false);}
 	
 	var data = {};
 		
@@ -441,12 +460,11 @@ function startSegment_() {
 }
 
 function updateScreen_(time) {
-
 	var framerate = 1000/time;
 	// Clear screen
 	jglClearScreen();
-	// jgl.ctx.font="20px Georgia";
-	// jgl.ctx.fillText('Trial: ' + jgl.curTrial + ' Segment: ' + jgl.trial.thisseg,10,50);
+	// jgl.ctx.font="1px Georgia";
+	// jgl.ctx.fillText('Trial: ' + jgl.curTrial + ' Segment: ' + jgl.trial.thisseg,-5,-5);
 
 	if (jgl.callbacks.updateScreen) {jgl.callbacks.updateScreen();}
 }

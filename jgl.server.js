@@ -9,6 +9,8 @@
 var app = require('express')();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
+var jsonfile = require('jsonfile');
+var mkdirp = require('mkdirp');
 
 // GET function
 app.get( '/*' , function( req, res ) {
@@ -31,7 +33,9 @@ io.on('connection', function(socket){
 
   socket.on('update', function() {try {update(socket.id);} catch(err) {console.log(err);}});
 
-  socket.on('data', function(data) {try {data(socket.id,data);} catch(err) {console.log(err);}});
+  socket.on('data', function(dat) {try {data(socket.id,dat);} catch(err) {console.log(err);}});
+
+  socket.on('submit', function() {try {JGL[info[socket.id].experiment][info[socket.id].hash].submitted=true;saveData();} catch(err) {console.log(err);}});
 
   socket.on('block', function(num) {try {block(socket.id,num);} catch(err) {console.log(err);}});
 });
@@ -66,15 +70,23 @@ function login(id,msg) {
     // participant has never done this experiment before
     JGL[experiment][hash] = {}
     JGL[experiment][hash].connected = true;
-    JGL[experiment][hash].block = -1;
+    JGL[experiment][hash].submitted = false;
+    JGL[experiment][hash].block = 0;
     JGL[experiment][hash].data = [];
   } else {
     // participant already started experiment and is re-connecting
     JGL[experiment][hash].connected = true;
-    console.log('Sending start signal to ' + ID + ' for block ' + JGL[experiment][hash].block);
+
+    console.log('Sending start signal to ' + id + ' for block ' + JGL[experiment][hash].block);
   }
 
-  io.to(id).emit('update',JGL[experiment][hash].block); // send the client its block state
+  if (JGL[experiment][hash].submitted) {
+    console.log('ID: ' + id + ' already submitted');
+    io.to(id).emit('submitted',true);
+  } else {  
+    // Note: we send -1, so that it increments to the right block
+    io.to(id).emit('update',JGL[experiment][hash].block-1); // send the client its block state
+  }
 }
 
 function logout(id) {
@@ -93,18 +105,18 @@ function update(id) {
 }
 
 function data(id,data) {
+  console.log(data);
   console.log('ID ' + id + ' sent data for their current block');
-  if (JGL[experiment][hash].data.length != JGL[experiment][hash].block) {
+  if (JGL[info[id].experiment][info[id].hash].data.length != JGL[info[id].experiment][info[id].hash].block) {
     console.log('WARNING: ' + id + ' sent data without incrementing their block counter');
   }
-  JGL[experiment][hash].data.push(data);
+  JGL[info[id].experiment][info[id].hash].data.push(data);
+  console.log(JGL[info[id].experiment][info[id].hash].data);
 }
 
 function block(id,block) {
   console.log('ID ' + id + ' is starting block '+ block);
-
-  console.log(JGL)
-  JGL[experiment][hash].block = block;
+  JGL[info[id].experiment][info[id].hash].block = block;
 }
 
 // ///////////////////////////////////////////////////////////////////////
@@ -116,10 +128,29 @@ var info = {};
 
 function saveState() {
   // Save the state of the JGL object but NOT the data: key for a correct shutdown
+  saveData();
+
+
 }
 
 function saveData() {
   // Go through all of the existing data and save it--remove data as you go (important for keeping overhead low)
+  var experiments = Object.keys(JGL);
+  for (var ei=0;ei<experiments.length;ei++) {
+    var cexp = JGL[experiments[ei]];
+    var subjects = Object.keys(cexp);
+    for (var si=0;si<subjects.length;si++) {
+      saveData_(experiments[ei],subjects[si],cexp[subjects[si]].data);
+    }
+  }
+}
+
+function saveData_(exp,subj,data) {
+  // Save ./exp/subj/data.json 
+  var folder = exp+'/'+subj+'/';
+  mkdirp(folder);
+  var file = folder+'data.json';
+  jsonfile.writeFile(file,data,function(err) {console.log(err);});
 }
 
 function tick() {

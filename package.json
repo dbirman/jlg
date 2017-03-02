@@ -4,7 +4,8 @@
   "description": "Javascript graphics library",
   "main": "jgl.server.js",
   "dependencies": {
-    "express": "^4.14.1"
+    "express": "^4.14.1",
+    "jsonfile": "^2.4.0"
   },
   "devDependencies": {},
   "scripts": {
