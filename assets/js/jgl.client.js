@@ -31,6 +31,7 @@ var task; // task structure created by experiment code
 var jgl = {}; // stuff that gets tracked (worker id, etc)
 
 function launch() {
+	jgl.live = false;
 	initJGL();
 	getExperiment(); // load the experiment from the query string
 	if (!debug) {getAmazonInfo();}
@@ -111,7 +112,8 @@ function hideAll() {
 
 function start() {
 	jgl.timing.experiment = now();
-	startBlock_(jgl.task);
+	jgl.live = true;
+	startBlock_();
 }
 
 function error(type) {
@@ -199,65 +201,104 @@ function setupCanvas() {
 	jgl.canvas.pixPerDeg = 40;
 	jgl.canvas.background = 0.5;
 	jglVisualAngleCoordinates();
+	// Add event listeners
+	if (jgl.task[jgl.curBlock].keys!=undefined) {document.addEventListener('keydown',keyEvent,true);}
+	if (jgl.task[jgl.curBlock].mouse!=undefined) {document.addEventListener('click',clickEvent,true);}
+}
+
+///////////////////////////////////////////////////////////////////////
+//////////////////////// EVENT HANDLERS ////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+
+function keyEvent(event) {
+	if (event.which==32) {event.preventDefault();} // block spacebar from dropping
+
+	jgl.event.key = {};
+	jgl.event.key.keyCode = event.which;
+
+	getResponse_(jgl.task);
+}
+
+function clickEvent(event) {
+	jgl.event.mouse = {};
+
+  var rect = jgl.canvas.getBoundingClientRect(), // abs. size of element
+    scaleX = jgl.canvas.width / rect.width,    // relationship bitmap vs. element for X
+    scaleY = jgl.canvas.height / rect.height;  // relationship bitmap vs. element for Y
+
+  jgl.event.mouse.x =  (event.clientX - rect.left) * scaleX;  // scale mouse coordinates after they have
+  jgl.event.mouse.y =  (event.clientY - rect.top) * scaleY;    // been adjusted to be relative to element
+
+  jgl.event.mouse.shift = event.shiftKey;
+
+  getResponse_(jgl.task);
 }
 
 ///////////////////////////////////////////////////////////////////////
 //////////////////////// CALLBACKS ////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
 
-function endExp_(task) {
+function endExp_() {
+	jgl.live = false;
 	console.log('experiment complete');
 }
 
 // All JGL callbacks have an underscore, client callbacks are stored in the callbacks object
-function startBlock_(task) {
+function startBlock_() {
+	if (!jgl.live) {return}
 	// increment block
 	jgl.curBlock++;
 	jgl.curTrial = -1;
 
 	// Check if we need to end the experiment
-	if (jgl.curBlock>task.length) {endExp_(); return;}
+	if (jgl.curBlock>=jgl.task.length) {endExp_(); return}
 
 	// Setup the block
-	jgl.callbacks = task[jgl.curBlock].callbacks;
+	jgl.callbacks = jgl.task[jgl.curBlock].callbacks;
 	hideAll();
-	$("#"+task[jgl.curBlock].type).show();
+	$("#"+jgl.task[jgl.curBlock].type).show();
 
 	// run the experiment callback if necessary
-	if (jgl.callbacks.startBlock) {jgl.callbacks.startBlock();}
+	if (jgl.callbacks.startBlock) {jgl.callbacks.startBlock(jgl.task);}
 
-	if (task[jgl.curBlock].type=='trial') {
+	if (jgl.task[jgl.curBlock].type=='trial') {
 		// trials use the update_() code and a canvas to render
 		// set up canvas
 		setupCanvas();
 	} else {
-		switch (task[jgl.curBlock].type) {
+		switch (jgl.task[jgl.curBlock].type) {
 			// Anything that isn't a trial/canvas just waits for a submit function
 			// (these could be instructions, forms, surveys, whatever)
 			case 'consent':
 				jgl.endBlockFunction = consentEnd;
 				break;
 			default:
-				if (task[jgl.curBlock].endBlockFunction==undefined) {error('An error occurred: no endblock function was defined, this task will never end');}
-				jgl.endBlockFunction = task[jgl.curBlock].endBlockFunction;
+				if (jgl.task[jgl.curBlock].endBlockFunction==undefined) {error('An error occurred: no endblock function was defined, this task will never end');}
+				jgl.endBlockFunction = jgl.task[jgl.curBlock].endBlockFunction;
 		}
 	}
 
-	if (task[jgl.curBlock].type=='trial' || task[jgl.curBlock].canvas==1) {
+	if (jgl.task[jgl.curBlock].type=='trial' || jgl.task[jgl.curBlock].canvas==1) {
 		jgl.timing.block = now();
 		elapsed();
+		jgl.tick=-1;
 		update_();
 	}
 }
 
 function update_() {
+	if (!jgl.live) {return}
+	if (jgl.tick==undefined) {return}
+
 	var t = elapsed(); // get elapsed time
+	// Check end block	
+	if (jgl.curTrial>=jgl.task[jgl.curBlock].numTrials) {endBlock_();console.log('done');return}
 	// Check first trial
-	if (jgl.curTrial==-1) {endTrial_(jgl.task); startTrial_(jgl.task);}
+	if (jgl.curTrial==-1) {startTrial_();}
 	// Check next trial
-	if ((now()-jgl.timing.trial)>jgl.trial.length) {startTrial_(jgl.task);}
+	if ((now()-jgl.timing.trial)>jgl.trial.length) {startTrial_();}
 	// Check next segment
-	if ((now()-jgl.timing.segment)>jgl.trial.seglen[jgl.trial.thisseg]) {startSegment_(jgl.task);}
+	if ((now()-jgl.timing.segment)>jgl.trial.seglen[jgl.trial.thisseg]) {startSegment_();}
 
 	// Update screen
 	updateScreen_(jgl.task,t);
@@ -265,31 +306,42 @@ function update_() {
 	jgl.tick = requestAnimationFrame(update_);
 }
 
-function endBlock_(task) {
+function endBlock_() {
+	console.log('doing this');
+	if (!jgl.live) {return}
 	// run standard code
-	if (jgl.tick!=undefined) {cancelAnimationFrame(jgl.tick);}
+	if (jgl.tick!=undefined) {cancelAnimationFrame(jgl.tick); jgl.tick = undefined;}
+	// remove event listeners
+	console.log(jgl.task)
+	if (jgl.task[jgl.curBlock].keys!=undefined) {document.removeEventListener('keydown',keyEvent);}
+	if (jgl.task[jgl.curBlock].mouse!=undefined) {document.removeEventListener('click',clickEvent);}
 
 	// start the next block
-	startBlock_(task);
-	//
+	startBlock_();
 }
 
-function startTrial_(task) {
+function startTrial_() {
+	if (!jgl.live) {return}
+
 	jgl.curTrial++;
-	if (jgl.curTrial>=task[jgl.curBlock].numTrials) {endBlock_(task);return}
 	// Run trial:
 	jgl.timing.trial = now();
 	console.log('Starting trial: ' + jgl.curTrial);
-	jgl.trial = task[jgl.curBlock].trials[jgl.curTrial];
+	jgl.trial = jgl.task[jgl.curBlock].trials[jgl.curTrial];
+
+	// Reset the event structure
+	jgl.event = {};
+	jgl.trial.responded = 0;
 
 	// Start the segment immediately
 	jgl.trial.thisseg = -1;
-	startSegment_(task);
+	startSegment_();
 
-	if (jgl.callbacks.startTrial) {jgl.callbacks.startTrial(task);}
+	if (jgl.callbacks.startTrial) {jgl.callbacks.startTrial();}
 }
 
-function endTrial_(task) {
+function endTrial_() {
+	if (!jgl.live) {return}
 	// save data into task[jgl.curBlock].datas 
 	var data = {};
 	// copy parameters
@@ -299,27 +351,42 @@ function endTrial_(task) {
 	// copy defaults (RT, response, correct)
 }
 
-function startSegment_(task) {
+function startSegment_() {
+	if (!jgl.live) {return}
+
 	jgl.trial.thisseg++;
-	jgl.trial.segname = task[jgl.curBlock].segnames[jgl.trial.thisseg];
+	jgl.trial.segname = jgl.task[jgl.curBlock].segnames[jgl.trial.thisseg];
 
 	jgl.timing.segment = now();
 
-	if (jgl.callbacks.startSegment) {jgl.callbacks.startSegment(task);}
+	if (jgl.callbacks.startSegment) {jgl.callbacks.startSegment();}
 }
 
-function updateScreen_(task,time) {
+function updateScreen_(time) {
+	if (!jgl.live) {return}
+
 	var framerate = 1000/time;
 	// Clear screen
 	jglClearScreen();
 	// jgl.ctx.font="20px Georgia";
 	// jgl.ctx.fillText('Trial: ' + jgl.curTrial + ' Segment: ' + jgl.trial.thisseg,10,50);
 
-	if (jgl.callbacks.updateScreen) {jgl.callbacks.updateScreen(task);}
+	if (jgl.callbacks.updateScreen) {jgl.callbacks.updateScreen();}
 }
 
-function getResponse_(event) {
-	// called by the event listener on the canvas during trials
-
-	if (jgl.callbacks.getResponse) {jgl.callbacks.getResponse(event);}
+function getResponse_() {
+	if (!jgl.live) {return}
+	// actual event -- do nothing unless subject requests
+	if (jgl.trial.response[jgl.trial.thisseg]) {
+		if (jgl.trial.responded>0) {
+			jgl.trial.responded++;
+			console.log('Multiple responses recorded: ' + jgl.trial.responded);
+			return
+		}
+		// called by the event listeners on the canvas during trials
+		jgl.trial.RT = now() - jgl.timing.segment;
+		jgl.trial.responded = true;		
+		// call the experiment callback
+		if (jgl.callbacks.getResponse && jgl.trial.responded) {jgl.callbacks.getResponse();}
+	}
 }

@@ -26,16 +26,22 @@ function loadTask() {
 	// Responses
 	task[1].response = [0,1,0];
 	// Trials
-	task[1].numTrials = 20; // can be infinite as well
+	task[1].numTrials = 1; // can be infinite as well
+	// Keys
+	task[1].keys = 32;
 
 	return task;
 }
 
-function updateScreen(task) {
+function updateScreen() {
 	if (jgl.trial.segname=='delay') {
 		jglFixationCross();
 	}
-	if (jgl.trial.segname=='stim') {
+	if (jgl.trial.segname=='stim' && !jgl.trial.responded) {
 		jglFillRect(0,0,[1,1],'#ffffff');
+	} else if (jgl.trial.responded) {
+		jgl.ctx.font="1px Georgia";
+		jgl.ctx.fillStyle = "#ffffff";
+		jglTextDraw(Math.round(jgl.trial.RT),0,0);
 	}
 }

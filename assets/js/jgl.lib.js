@@ -14,6 +14,23 @@ function toggleFullScreen() {
   }
 }
 
+function any(array1,array2) {
+	if (typeof array2 == 'number') {return any(array1,array2);}
+	// Checks if any values are equal
+	for (var i=0;i<array1.length;i++) {
+		if (value==array1[i]) {return true;}
+	}
+	return false;
+}
+
+function any_(array1,value) {
+	// Checks if any values are equal
+	for (var i=0;i<array1.length;i++) {
+		if (value==array1[i]) {return true;}
+	}
+	return false;
+}
+
 function jglGetPage(pagename) {
 	if (!(pagename in self.pages)){
 	    throw new Error(
@@ -262,7 +279,7 @@ function jglTextSet(fontName, fontSize, fontColor, fontBold, fontItalic) {
  * @param {Number} y the y coordinate of the beginning of the text
  */
 function jglTextDraw(text, x, y) {
-	canvas.context.fillText(text, x, y);
+	jgl.ctx.fillText(text, x, y);
 }
 
 
