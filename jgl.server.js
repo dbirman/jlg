@@ -24,70 +24,96 @@ app.get( '/*' , function( req, res ) {
 io.on('connection', function(socket){
   console.log('Connection: ID ' + socket.id);
 
-  socket.on('disconnect', function() {logout(socket.id);});
+  socket.on('disconnect', function() {try {logout(socket.id);} catch(err) {console.log(err);}});
 
   socket.on('login', function(msg) {try {login(socket.id,msg);} catch(err) {console.log(err);}});
+
+  socket.on('check', function() {try {io.to(socket.id).emit('check','');} catch(err) {console.log(err);}});
+
+  socket.on('update', function() {try {update(socket.id);} catch(err) {console.log(err);}});
+
+  socket.on('data', function(data) {try {data(socket.id,data);} catch(err) {console.log(err);}});
+
+  socket.on('block', function(block) {try {block(socket.id,block);} catch(err) {console.log(err);}});
 });
 
 var port = 8080;
 http.listen(port, function(){
   console.log('Server live on *: ' + port);
-  // tick();
+  tick();
 });
 
 // //////////////////////////////////////////////////////////////////////////////
 // //////////////////////// CONNECTION FUNCTIONS ////////////////////////////////
 // //////////////////////////////////////////////////////////////////////////////
 
-// function login(id,msg) {
-//   msg = msg.split('.');
-//   var experiment = msg[0]; // name of experiment
+function login(id,msg) {
+  console.log('Connection: ID ' + id);
+  // Login is exp.hash
 
-//   // check if experiment is available
-//   if (JGL.experiments[experiment]!=undefined) {
-//     console.log('Logging in: ' + socket.id ' for experiment ' + experiment);
-//     JGL.experiments[experiment].newExp(socket.id)
-//   } else {
-    
-//   }
-// }
+  msg = msg.split('.');
+  var experiment = msg[0], // name of experiment
+    hash = msg[1];
 
-// function logout(id) {
-//   console.log('Disconnection: ID ' + socket.id);
-// }
+  // Save info by socket id so we can pull it up later if we need to
+  info[id] = {experiment:experiment,hash:has};
+
+  // check if experiment is available
+  if (JGL[experiment]==undefined) {
+    JGL[experiment] = {};
+  }
+  // check for existing state
+  if (JGL[experiment][hash]==undefined) {
+    // participant has never done this experiment before
+    JGL[experiment][hash] = {}
+    JGL[experiment][hash].connected = true;
+    JGL[experiment][hash].block = 0;
+    JGL[experiment][hash].data = [];
+  } else {
+    // participant already started experiment and is re-connecting
+  }
+}
+
+function logout(id) {
+  console.log('Disconnection: ID ' + id);
+
+  if (info[id]!=undefined) {
+    JGL[info[id].experiment][info[id].hash].connected = false;
+  }
+}
+
+function update(id) {
+  if (inf[id]!=undefined) {
+    console.log('Sending update info: ID ' + id);
+    var block = JGL[info[id].experiment][info[id].hash].block;
+  }
+}
+
+function data(id,data) {
+  JGL[experiment][hash].data.push(data);
+}
+
+function block(id,block) {
+  JGL[experiment][hash].block = block;
+}
 
 // ///////////////////////////////////////////////////////////////////////
 // //////////////////////// JGL FUNCTIONS ////////////////////////////////
 // ///////////////////////////////////////////////////////////////////////
 
-// var JGL = {};
+var JGL = {};
+var info = {};
 
-// function saveData() {
-  
-// }
+function saveState() {
+  // Save the state of the JGL object but NOT the data: key for a correct shutdown
+}
 
-// function tick() {
-// 	saveData();
-// 	garbageCollect();
+function saveData() {
+  // Go through all of the existing data and save it--remove data as you go (important for keeping overhead low)
+}
 
-// 	setTimeout(tick,60000); // repeat every minute
-// }
+function tick() {
+  saveData();
 
-// //////////////////////////////////////////////////////////////////////////////
-// //////////////////////// GARBAGE FUNCTIONS ///////////////////////////////////
-// //////////////////////////////////////////////////////////////////////////////
-
-// function garbage() {
-//   // var dkeys = Object.keys(disconnect);
-//   // for (var key in disconnected) {
-//   //   // this officially removes someone from the study
-//   //   if ((now() - disconnected[key]) > 86400) {removeSubject(key);}
-//   // }
-
-// }
-
-// function removeSubject() {
-//   delete disconnected[key];
-//   delete JGL[key];
-//   delete data[key];
-// }
+  setTimeout(tick,60000); // repeat every minute
+}

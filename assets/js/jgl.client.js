@@ -12,11 +12,11 @@
 // i.e. if you call a function from within a function, there is no guarantee that the inner function returns before
 // the outer one continues. Keep this in mind when you write your code :)
 
-// var socket = io();
+var socket = io();
 
-// socket.on('startTrial', function(msg) {
-// 	startTrial(msg);
-// });
+socket.on('startTrial', function(msg) {
+	startTrial(msg);
+});
 
 ///////////////////////////////////////////////////////////////////////
 //////////////////////// JGL FUNCTIONS ////////////////////////////////
@@ -33,11 +33,11 @@ function launch() {
 	initJGL();
 	loadTemplate();
 	getExperiment(); // load the experiment from the query string
-	if (!debug) {getAmazonInfo();}
+	getAmazonInfo();
 	loadExperiment();
 	setTimeout(function() {
 		loadTask_();
-		updateFromServer(); // this also starts 
+		updateFromServer(); // this also starts the experiment
 		if (debug) {start();}
 	},100);
 }
@@ -46,8 +46,7 @@ var exp, debug;
 var callbackActive = [];
 
 function getExperiment() {
-	debug = getQueryVariable('debug');
-	debug = debug=='true';
+	debug = Number(getQueryVariable('debug'));
 	exp = getQueryVariable('exp');    
 	if (exp==undefined) {
 		error('noexp');
@@ -62,7 +61,7 @@ function initJGL() {
 
 function getAmazonInfo() {
 	// these are NOT accessible to the server!
-	if (!debug) {
+	if (debug==0) {
 		jgl.assignmentId = opener.assignmentId;
 		jgl.workerId = opener.workerId;
 		// only the hash and hit ID are sent to the server--perfect anonymity, even across experiments
@@ -103,15 +102,38 @@ function loadExperiment() {
 }
 
 function updateFromServer() {
-	if (debug) {
+	if (debug==1) {
 		jgl.curBlock = -1; // -1 before starting
 		jgl.curTrial = -1; // -1 before starting
 	} else {
-		console.log('not implemented');
-		// warning: experiment won't start until it receives notice
-		// that the server is properly connected!
-		setTimeout(checkServerStatus,10000);
+		console.log('Attempting server connection');
+		checkServerStatus();
+		socket.emit('update');
 	}
+}
+
+socket.on('update', function(msg) {
+	// Format is block
+	// msg = msg.split('.');
+	jgl.curBlock = Number(msg); //[0];
+	jgl.curTrial = -1; // we only send data per block, so we're stuck re-starting at the first trial
+	start();
+});
+
+var jgl.serverConnected = -1;
+
+socket.on('check', function() {
+	jgl.serverConnected = true;
+});
+
+function checkServerStatus() {
+	if (!jgl.serverConnected) {
+		alert('The server appears to be disconnected. Data from the current block will not be saved. Please re-connect via MTurk--if this persists please e-mail gruturk@gmail.com');
+	}
+	jgl.serverConnected = false;
+	socket.emit('check');
+
+	setTimeout(checkServerStatus,10000);
 }
 
 function hideAll() {
