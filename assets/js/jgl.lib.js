@@ -268,8 +268,9 @@ function jglTextSet(fontName, fontSize, fontColor, fontBold, fontItalic) {
 	}
 	
 	fontString = fontString.concat(fontSize, "px ", fontName);
-	canvas.context.font = fontString;
-	canvas.context.fillStyle = fontColor;
+	jgl.ctx.font = fontString;
+	jgl.ctx.fillStyle = fontColor;
+	jgl.ctx.testAlign="center";
 }
 
 /**

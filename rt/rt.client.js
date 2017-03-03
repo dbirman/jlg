@@ -41,8 +41,7 @@ function updateScreen() {
 	if (jgl.trial.segname=='stim' && !jgl.trial.responded) {
 		jglFillRect(0,0,[1,1],'#ffffff');
 	} else if (jgl.trial.responded) {
-		jgl.ctx.font="1px Georgia";
-		jgl.ctx.fillStyle = "#ffffff";
+		jglTextSet('Arial',1,'#ffffff');
 		jglTextDraw(Math.round(jgl.trial.RT),0,0);
 	}
 }

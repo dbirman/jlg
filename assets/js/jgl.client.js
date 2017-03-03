@@ -26,13 +26,7 @@ var task; // task structure created by experiment code
 var jgl = {}; // stuff that gets tracked (worker id, etc)
 
 function launch() {
-	// Get DPI
-	var dpi_x = document.getElementById('dpi').offsetWidth;
-	var dpi_y = document.getElementById('dpi').offsetHeight;
-	if ((!(dpi_x==dpi_y)) || dpi_x==0 || dpi_y == 0) {error('There is an issue with your screen--you cannot continue');return}
-	jgl.PPI = dpi_x;
-	jgl.screenSize = window.screen.width/jgl.PPI; // in inches
-	$("#dpi").hide();
+	jgl.screenInfo = screenInfo();
 
 	var fList = [initJGL,getExperiment,loadTemplate,getAmazonInfo,loadExperiment,loadTask_,updateFromServer,function() {if (debug) {start();}}];
 	
@@ -43,6 +37,24 @@ function launch() {
 
 var exp, debug;
 var callbackActive = [];
+
+function screenInfo() {
+	// Get DPI
+	var screenInfo = {};
+	var dpi_x = document.getElementById('dpi').offsetWidth;
+	var dpi_y = document.getElementById('dpi').offsetHeight;
+	if ((!(dpi_x==dpi_y)) || dpi_x==0 || dpi_y == 0) {error('There is an issue with your screen--you cannot continue');return}
+	screenInfo.PPI = dpi_x;
+	screenInfo.PPcm = screenInfo.PPI/2.54;
+	screenInfo.screenSize = window.screen.width/screenInfo.PPcm; // in cm
+	screenInfo.screenDistance = 60; // in cm
+	screenInfo.totalcm = 2*Math.PI*screenInfo.screenDistance; // Total CM for 360 degrees
+	screenInfo.pixPerDeg = screenInfo.PPcm*screenInfo.totalcm/360;
+
+	$("#dpi").hide();
+
+	return screenInfo;
+}
 
 function getExperiment() {
 	debug = Number(getQueryVariable('debug'));
@@ -255,11 +267,14 @@ function loadTask_() {
 
 function setupCanvas() {
 	jgl.canvas = document.getElementById("canvas");
-	jgl.canvas.width = window.innerWidth;
-	jgl.canvas.height = window.innerHeight;
+	jgl.canvas.width = 1024;
+	jgl.canvas.degX = jgl.canvas.width/jgl.screenInfo.pixPerDeg;
+	jgl.canvas.height = 768;
+	jgl.canvas.degY = jgl.canvas.height/jgl.screenInfo.pixPerDeg;
+	if (window.innerWidth<1024 || window.innerHeight<768) {error('Your screen is not large enough to support our experiment. Please maximize the window or switch to a larger screen and refresh the page.');}
 	jgl.ctx = jgl.canvas.getContext("2d");
 	console.log('remove when real visual angle coordinates est');
-	jgl.canvas.pixPerDeg = jgl.pixPerDeg;
+	jgl.canvas.pixPerDeg = jgl.screenInfo.pixPerDeg;
 	jgl.canvas.background = 0.5;
 	jglVisualAngleCoordinates();
 	// Add event listeners
