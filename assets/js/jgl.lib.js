@@ -181,12 +181,12 @@ function jglFixationCross(width, lineWidth, color, origin) {
 		if (jgl.canvas.usingVisualAngles) {
 			width = 1;
 			lineWidth = 0.04;
-			color = "#ff0000";
+			color = "#ffffff";
 			origin = [0 , 0];
 		} else {
 			width = 20;
 			lineWidth = 1;
-			color = "#ff0000";
+			color = "#ffffff";
 			origin = [jgl.canvas.width / 2 , jgl.canvas.height / 2];
 		}
 		
@@ -270,7 +270,8 @@ function jglTextSet(fontName, fontSize, fontColor, fontBold, fontItalic) {
 	fontString = fontString.concat(fontSize, "px ", fontName);
 	jgl.ctx.font = fontString;
 	jgl.ctx.fillStyle = fontColor;
-	jgl.ctx.testAlign="center";
+	jgl.ctx.textAlign="center";
+	jgl.ctx.textBaseline="middle";
 }
 
 /**

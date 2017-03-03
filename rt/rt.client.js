@@ -41,7 +41,11 @@ function updateScreen() {
 	if (jgl.trial.segname=='stim' && !jgl.trial.responded) {
 		jglFillRect(0,0,[1,1],'#ffffff');
 	} else if (jgl.trial.responded) {
-		jglTextSet('Arial',1,'#ffffff');
+		if (jgl.trial.RT<300) {
+			jglTextSet('Arial',1,'#00ff00');
+		} else {
+			jglTextSet('Arial',1,'#ff0000');
+		}
 		jglTextDraw(Math.round(jgl.trial.RT),0,0);
 	}
 }
