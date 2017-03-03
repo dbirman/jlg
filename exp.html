@@ -13,6 +13,7 @@
     <title>RL Client</title>
     <link rel=stylesheet href="assets/css/jgl.css" type="text/css">
     <link rel=stylesheet href="assets/css/bootstrap.min.css" type="text/css">
+    <link rel=stylesheet href="assets/css/style.css" type="text/css">
 
     <!-- JQUERY -->
     <script
@@ -28,12 +29,13 @@
       <div class="container">
         <section id="content">
          
-          <div id="loading">
-            <center>
+          <div id="loading" class="overlay row">
               <div class="row">
-              <h2>Loading... please wait</h2>
+                <div class="col-md-4"></div>
+                <div class="container vertical-center col-md-4">
+                  <h2>Loading... please wait</h2>
+                </div>
               </div>
-            </center>
           </div>
 
           <div id="error" class="container-error row" style="display:none">
