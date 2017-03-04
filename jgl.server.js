@@ -16,10 +16,10 @@ var mkdirp = require('mkdirp');
 app.get( '/*' , function( req, res ) {
     // this is the current file they have requested
     var file = req.params[0]; 
-    // console.log('\t :: Express :: file requested: ' + file);    
+    console.log('\t :: Express :: file requested: ' + file);    
 
     // give them what they want
-    res.sendfile("./" + file);
+    res.sendFile(__dirname + '/' + file);
 }); 
 
 io.on('connection', function(socket){
