@@ -95,13 +95,13 @@ function initJGL() {
 function getAmazonInfo() {
 	// these are NOT accessible to the server!
 	if (debug==0) {
-		jgl.assignmentId = opener.assignmentId;
-		jgl.workerId = opener.workerId;
+		jgl.assignmentId = opener.turk.assignmentId;
+		jgl.workerId = opener.turk.workerId;
 		// only the hash and hit ID are sent to the server--perfect anonymity, even across experiments
 		jgl.hash = md5(jgl.workerId + exp);
-		jgl.hitId = opener.hitId;
+		jgl.hitId = opener.turk.hitId;
 	} else {
-		jgl.assignmentId = 'debug';
+		jgl.assignmentId = 'debug'+randomInteger(500);
 		jgl.workerId = 'debug';
 		jgl.hash = md5(jgl.workerId + exp);
 		jgl.hitId = 'debug';
@@ -140,7 +140,7 @@ function updateFromServer() {
 		jgl.curTrial = -1; // -1 before starting
 	} else {
 		console.log('Attempting server connection');
-		socket.emit('login',exp+'.'+jgl.hash);
+		socket.emit('login',exp+'.'+jgl.hash+jgl.assignmentId);
 		checkServerStatus();
 	}
 }
@@ -505,8 +505,6 @@ function getResponse_() {
 	}
 }
 
-
-
 ///////////////////////////////////////////////////////////////////////
 //////////////////////// INSTRUCTIONS ////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
@@ -515,7 +513,54 @@ function preloadInstructions() {
 	// JGL NOTE: Only store instruction divs in the local exp.html file
 	// General templates should be shared in assets/templates so that 
 	// everybody can use them
-	$.get('exps/'+exp+'/'+exp+'.html', function(data) {$('#instructionsdiv').append(data);})
+	$.get('exps/'+exp+'/'+exp+'_instructions.html', function(data) {$('#instructionsdiv').append(data);})
+}
+
+function setupInstructions() {
+	jgl.instructions = jgl.task[jgl.curBlock].instructions;
+	jgl.instructions.push("instructions-end");
+	jgl.curInstructions = -1;
+
+	incInstructions(1);
+}
+
+function displayInstructions() {
+	for (var i=0;i<jgl.instructions.length;i++) {
+		$("#"+jgl.instructions[i]).hide();
+	}
+	$("#"+jgl.instructions[jgl.curInstructions]).show();
+}
+
+function incInstructions(increment) {
+	jgl.curInstructions+=increment;
+	// check end conditions
+	if (jgl.curInstructions>=jgl.instructions.length) {
+		jgl.endBlockFunction();
+	}
+	// set prev/next buttons
+	if (jgl.curInstructions==0) {
+		// disable prev
+		$("#inst-prev").prop("disabled",true);
+	} else {
+		$("#inst-prev").prop("disabled",false);
+	}
+	// show the right instructions slide
+	displayInstructions();
+}
+
+function instructionsEnd() {
+	endBlock_();
+}
+
+///////////////////////////////////////////////////////////////////////
+//////////////////////// SURVEYS ////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+
+function preloadSurvey() {
+	// JGL NOTE: Only store instruction divs in the local exp.html file
+	// General templates should be shared in assets/templates so that 
+	// everybody can use them
+	$.get('exps/'+exp+'/'+exp+'_instructions.html', function(data) {$('#instructionsdiv').append(data);})
 }
 
 function setupInstructions() {

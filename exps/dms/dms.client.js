@@ -10,11 +10,22 @@ function loadTask() {
 	// consent has no data
 
 	task[1] = {};
-	task[1].type = 'instructions';
+	task[1].type = 'survey';
+	// survey is a default type with no callbacks
+	// the demographics survey is a default type
+	task[1].surveys = {'demographics'};
+	task[1].variables = {};
+	// the default survey type needs an answer list that we can push to
+	// as we get answers
+	// if we don't set this it will be done automatically
+	task[1].variables.answers = [];
+
+	task[2] = {};
+	task[2].type = 'instructions';
 	// instructions is a default type with no callbacks
 	// it simply displays whatever divs we specify by adding them to an instruction page and showing/hiding them in order
-	task[1].variables = {};
-	task[1].instructions = ['instruct-1','instruct-2','instruct-3','instruct-4'];
+	task[2].variables = {};
+	task[2].instructions = ['instruct-1','instruct-2','instruct-3','instruct-4'];
 
 	// RT TRIALS
 	task[2] = {};
@@ -37,6 +48,11 @@ function loadTask() {
 	task[2].numTrials = 1; // can be infinite as well
 	// Keys
 	task[2].keys = 32;
+
+	// SURVEY 1
+	// task[3] = {};
+	// task[3].type = 'survey'; // a standard type which uses a surveyAnswer(value) callback to store data
+	// task[3].surveys = ['']
 
 	return task;
 }
