@@ -28,7 +28,7 @@ var jgl = {}; // stuff that gets tracked (worker id, etc)
 function launch() {
 	jgl.screenInfo = screenInfo();
 
-	var fList = [initJGL,getExperiment,loadTemplate,getAmazonInfo,loadExperiment,loadTask_,updateFromServer,function() {if (debug) {start();}}];
+	var fList = [initJGL,getExperiment,loadTemplate,getAmazonInfo,loadExperiment,loadTask_,preloadInstructions,updateFromServer,function() {if (debug) {start();}}];
 	
 	for (var fi=0;fi<fList.length;fi++) {
 		setTimeout(fList[fi],fi*200);
@@ -131,12 +131,7 @@ function loadTemplate() {
 
 function loadExperiment() {
 	// Load experiment code
-	$.getScript(exp+'/'+exp+'.client.js');
-
-	// JGL NOTE: Experiment divs will be stored as template html files, which get auto-loaded. This way
-	// people can't hide things from each other (better from a development standpoint...)
-	// Load experiment divs
-	// $.get(exp+'/'+exp+'.html', function(data) {$(document.body).append(data);})
+	$.getScript('exps/'+exp+'/'+exp+'.client.js');
 }
 
 function updateFromServer() {
@@ -190,7 +185,6 @@ function error(type) {
 ///////////////////////////////////////////////////////////////////////
 
 function consentEnd() {
-	console.log(jgl.trial);
 	jgl.trial.consent = true;
 	endBlock_();
 }
@@ -267,11 +261,11 @@ function loadTask_() {
 
 function setupCanvas() {
 	jgl.canvas = document.getElementById("canvas");
-	jgl.canvas.width = 1024;
+	jgl.canvas.width = window.innerWidth-50;
 	jgl.canvas.degX = jgl.canvas.width/jgl.screenInfo.pixPerDeg;
-	jgl.canvas.height = 768;
+	jgl.canvas.height = window.innerHeight-50;
 	jgl.canvas.degY = jgl.canvas.height/jgl.screenInfo.pixPerDeg;
-	if (window.innerWidth<1024 || window.innerHeight<768) {error('Your screen is not large enough to support our experiment. Please maximize the window or switch to a larger screen and refresh the page.');}
+	// if (window.innerWidth<1024 || window.innerHeight<768) {error('Your screen is not large enough to support our experiment. Please maximize the window or switch to a larger screen and refresh the page.');}
 	jgl.ctx = jgl.canvas.getContext("2d");
 	console.log('remove when real visual angle coordinates est');
 	jgl.canvas.pixPerDeg = jgl.screenInfo.pixPerDeg;
@@ -359,6 +353,10 @@ function startBlock_() {
 				break;
 			case 'complete':
 				jgl.endBlockFunction = completeEnd;
+				break;
+			case 'instructions':
+				setupInstructions();
+				jgl.endBlockFunction = instructionsEnd;
 				break;
 			default:
 				if (jgl.task[jgl.curBlock].endBlockFunction==undefined) {error('An error occurred: no endblock function was defined, this block will never end');}
@@ -505,4 +503,53 @@ function getResponse_() {
 		// call the experiment callback
 		if (jgl.callbacks.getResponse && jgl.trial.responded) {jgl.callbacks.getResponse();}
 	}
+}
+
+
+
+///////////////////////////////////////////////////////////////////////
+//////////////////////// INSTRUCTIONS ////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+
+function preloadInstructions() {
+	// JGL NOTE: Only store instruction divs in the local exp.html file
+	// General templates should be shared in assets/templates so that 
+	// everybody can use them
+	$.get('exps/'+exp+'/'+exp+'.html', function(data) {$('#instructionsdiv').append(data);})
+}
+
+function setupInstructions() {
+	jgl.instructions = jgl.task[jgl.curBlock].instructions;
+	jgl.instructions.push("instructions-end");
+	jgl.curInstructions = -1;
+
+	incInstructions(1);
+}
+
+function displayInstructions() {
+	for (var i=0;i<jgl.instructions.length;i++) {
+		$("#"+jgl.instructions[i]).hide();
+	}
+	$("#"+jgl.instructions[jgl.curInstructions]).show();
+}
+
+function incInstructions(increment) {
+	jgl.curInstructions+=increment;
+	// check end conditions
+	if (jgl.curInstructions>=jgl.instructions.length) {
+		jgl.endBlockFunction();
+	}
+	// set prev/next buttons
+	if (jgl.curInstructions==0) {
+		// disable prev
+		$("#inst-prev").prop("disabled",true);
+	} else {
+		$("#inst-prev").prop("disabled",false);
+	}
+	// show the right instructions slide
+	displayInstructions();
+}
+
+function instructionsEnd() {
+	endBlock_();
 }

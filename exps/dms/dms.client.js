@@ -9,27 +9,34 @@ function loadTask() {
 	task[0].variables.consent = NaN;
 	// consent has no data
 
-	// RT TRIALS
 	task[1] = {};
-	task[1].type = 'trial'; // this will give us use of the canvas
-	task[1].callbacks = {};
-	task[1].callbacks.updateScreen = updateScreen;
+	task[1].type = 'instructions';
+	// instructions is a default type with no callbacks
+	// it simply displays whatever divs we specify by adding them to an instruction page and showing/hiding them in order
+	task[1].variables = {};
+	task[1].instructions = ['instruct-1','instruct-2','instruct-3','instruct-4'];
+
+	// RT TRIALS
+	task[2] = {};
+	task[2].type = 'trial'; // this will give us use of the canvas
+	task[2].callbacks = {};
+	task[2].callbacks.updateScreen = updateScreen;
 	// RT task doesn't have any parameters, but this gets auto-populated with data
-	task[1].parameters = {};
+	task[2].parameters = {};
 	// RT task won't log any variables either (these get set by the user somewhere in the callbacks)
 	// caution: these need a value (e.g. NaN) or they won't run correctly
-	task[1].variables = {};
+	task[2].variables = {};
 	// Segment timing
-	task[1].segnames = ['delay','stim','iti'];
+	task[2].segnames = ['delay','stim','iti'];
 	// Seglen uses specific times
-	task[1].segmin = [500,1000,1000];
-	task[1].segmax = [2000,1000,3000];
+	task[2].segmin = [500,1000,1000];
+	task[2].segmax = [2000,1000,3000];
 	// Responses
-	task[1].response = [0,1,0];
+	task[2].response = [0,1,0];
 	// Trials
-	task[1].numTrials = 1; // can be infinite as well
+	task[2].numTrials = 1; // can be infinite as well
 	// Keys
-	task[1].keys = 32;
+	task[2].keys = 32;
 
 	return task;
 }
