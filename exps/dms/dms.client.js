@@ -9,17 +9,19 @@ function loadTask() {
 	task[0].variables.consent = NaN;
 	// consent has no data
 
+	// SURVEY DEMOGRAPHICS
 	task[1] = {};
 	task[1].type = 'survey';
 	// survey is a default type with no callbacks
 	// the demographics survey is a default type
-	task[1].surveys = {'demographics'};
+	task[1].surveys = ['survey-demo'];
 	task[1].variables = {};
 	// the default survey type needs an answer list that we can push to
 	// as we get answers
 	// if we don't set this it will be done automatically
 	task[1].variables.answers = [];
 
+	// INSTRUCTIONS
 	task[2] = {};
 	task[2].type = 'instructions';
 	// instructions is a default type with no callbacks
@@ -28,26 +30,26 @@ function loadTask() {
 	task[2].instructions = ['instruct-1','instruct-2','instruct-3','instruct-4'];
 
 	// RT TRIALS
-	task[2] = {};
-	task[2].type = 'trial'; // this will give us use of the canvas
-	task[2].callbacks = {};
-	task[2].callbacks.updateScreen = updateScreen;
+	task[3] = {};
+	task[3].type = 'trial'; // this will give us use of the canvas
+	task[3].callbacks = {};
+	task[3].callbacks.updateScreen = updateScreen;
 	// RT task doesn't have any parameters, but this gets auto-populated with data
-	task[2].parameters = {};
+	task[3].parameters = {};
 	// RT task won't log any variables either (these get set by the user somewhere in the callbacks)
 	// caution: these need a value (e.g. NaN) or they won't run correctly
-	task[2].variables = {};
+	task[3].variables = {};
 	// Segment timing
-	task[2].segnames = ['delay','stim','iti'];
+	task[3].segnames = ['delay','stim','iti'];
 	// Seglen uses specific times
-	task[2].segmin = [500,1000,1000];
-	task[2].segmax = [2000,1000,3000];
+	task[3].segmin = [500,1000,1000];
+	task[3].segmax = [2000,1000,3000];
 	// Responses
-	task[2].response = [0,1,0];
+	task[3].response = [0,1,0];
 	// Trials
-	task[2].numTrials = 1; // can be infinite as well
+	task[3].numTrials = 1; // can be infinite as well
 	// Keys
-	task[2].keys = 32;
+	task[3].keys = 32;
 
 	// SURVEY 1
 	// task[3] = {};

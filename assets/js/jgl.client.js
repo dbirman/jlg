@@ -22,13 +22,12 @@ $(document).ready(function() {launch();});
 
 var divList = ['error','loading'];
 
-var task; // task structure created by experiment code
 var jgl = {}; // stuff that gets tracked (worker id, etc)
 
 function launch() {
 	jgl.screenInfo = screenInfo();
 
-	var fList = [initJGL,getExperiment,loadTemplate,getAmazonInfo,loadExperiment,loadTask_,preloadInstructions,updateFromServer,function() {if (debug) {start();}}];
+	var fList = [initJGL,getExperiment,loadTemplate,getAmazonInfo,loadExperiment,loadTask_,preload,updateFromServer,function() {if (debug) {start();}}];
 	
 	for (var fi=0;fi<fList.length;fi++) {
 		setTimeout(fList[fi],fi*200);
@@ -36,14 +35,27 @@ function launch() {
 }
 
 var exp, debug;
-var callbackActive = [];
+
+function preload() {
+	var loadInstructions = false,
+		loadSurvey = false;
+	for (var i=0;i<jgl.task.length;i++) {
+		switch (jgl.task[i].type) {
+			case 'instructions': loadInstructions = true; break;
+			case 'survey': loadSurvey = true; break;
+		}
+	}
+
+	if (loadInstructions) {preloadInstructions();}
+	if (loadSurvey) {preloadSurvey();}
+}
 
 function screenInfo() {
 	// Get DPI
 	var screenInfo = {};
 	var dpi_x = document.getElementById('dpi').offsetWidth;
 	var dpi_y = document.getElementById('dpi').offsetHeight;
-	if ((!(dpi_x==dpi_y)) || dpi_x==0 || dpi_y == 0) {error('There is an issue with your screen--you cannot continue');return}
+	if ((dpi_x!=dpi_y) || dpi_x===0 || dpi_y===0) {error('There is an issue with your screen--you cannot continue');return;}
 	screenInfo.PPI = dpi_x;
 	screenInfo.PPcm = screenInfo.PPI/2.54;
 	screenInfo.screenSize = window.screen.width/screenInfo.PPcm; // in cm
@@ -358,6 +370,10 @@ function startBlock_() {
 				setupInstructions();
 				jgl.endBlockFunction = instructionsEnd;
 				break;
+			case 'survey':
+				setupSurvey();
+				jgl.endBlockFunction = surveyEnd;
+				break;
 			default:
 				if (jgl.task[jgl.curBlock].endBlockFunction==undefined) {error('An error occurred: no endblock function was defined, this block will never end');}
 				jgl.endBlockFunction = jgl.task[jgl.curBlock].endBlockFunction;
@@ -560,41 +576,55 @@ function preloadSurvey() {
 	// JGL NOTE: Only store instruction divs in the local exp.html file
 	// General templates should be shared in assets/templates so that 
 	// everybody can use them
-	$.get('exps/'+exp+'/'+exp+'_instructions.html', function(data) {$('#instructionsdiv').append(data);})
+	console.log('exps/'+exp+'/'+exp+'_survey.html')
+	$.get('exps/'+exp+'/'+exp+'_survey.html', function(data) {$('#surveydiv').append(data);})
+
+	var curSurvey = jgl.surveys[jgl.curSurvey].split('-');
+	var suffix = curSurvey[2];
+	jgl.curForm = suffix;
+	$("#"+jgl.curForm).change(function() {checkSurveySubmit();});
 }
 
-function setupInstructions() {
-	jgl.instructions = jgl.task[jgl.curBlock].instructions;
-	jgl.instructions.push("instructions-end");
-	jgl.curInstructions = -1;
-
-	incInstructions(1);
+function setupSurvey() {
+	jgl.surveys = jgl.task[jgl.curBlock].surveys;
+	jgl.curSurvey = 0;
+	displaySurvey();
 }
 
-function displayInstructions() {
-	for (var i=0;i<jgl.instructions.length;i++) {
-		$("#"+jgl.instructions[i]).hide();
+function displaySurvey() {
+	for (var i=0;i<jgl.surveys.length;i++) {
+		$("#"+jgl.surveys[i]).hide();
 	}
-	$("#"+jgl.instructions[jgl.curInstructions]).show();
+	$("#"+jgl.surveys[jgl.curSurvey]).show();
 }
 
-function incInstructions(increment) {
-	jgl.curInstructions+=increment;
-	// check end conditions
-	if (jgl.curInstructions>=jgl.instructions.length) {
-		jgl.endBlockFunction();
+function checkSurveySubmit() {
+	// Check whether the form is complete
+	var form = document.forms[jgl.curForm];
+	// check that each input is not empty
+	for (var i=0;i<form.length;i++) {
+		if (form[i]=='') {return false;}
 	}
-	// set prev/next buttons
-	if (jgl.curInstructions==0) {
-		// disable prev
-		$("#inst-prev").prop("disabled",true);
+	return true;
+	//
+	var check = checkSurveySubmit();
+	if (check) {
+		$("#survey-submit").prop("disabled",false);
 	} else {
-		$("#inst-prev").prop("disabled",false);
+		$("#survey-submit").prop("disabled",true);
+	}
+}
+
+function submitSurvey() {
+	jgl.curSurvey+=1;
+	// check end conditions
+	if (jgl.curSurvey>=jgl.surveys.length) {
+		jgl.endBlockFunction();
 	}
 	// show the right instructions slide
 	displayInstructions();
 }
 
-function instructionsEnd() {
+function surveyEnd() {
 	endBlock_();
 }
