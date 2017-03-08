@@ -496,6 +496,10 @@ function endBlock_() {
 }
 
 function jumpSegment() {
+	if (jgl.trial.seglen[jgl.trial.thisseg]==Infinity) {
+		jgl.trial.seglen[jgl.trial.thisseg]=now()-jgl.timing.segment;
+		jgl.trial.length = sum(jgl.trial.seglen);
+	}
 	startSegment_();
 }
 

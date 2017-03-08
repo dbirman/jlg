@@ -158,7 +158,7 @@ function saveState() {
 
 function saveData_(exp,subj,data) {
   // Save ./exp/subj/data.json 
-  var folder = exp+'/'+subj+'/';
+  var folder = 'exps/'+exp+'/'+subj+'/';
   mkdirp(folder);
   var file = folder+'data_'+Date.now()+'.json';
   jsonfile.writeFile(file,data,function(err) {console.log(err);});
