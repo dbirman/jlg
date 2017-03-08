@@ -35,7 +35,7 @@ io.on('connection', function(socket){
 
   socket.on('data', function(dat) {try {data(socket.id,dat);} catch(err) {console.log(err);}});
 
-  socket.on('submit', function() {try {JGL[info[socket.id].experiment][info[socket.id].hash].submitted=true;saveData();} catch(err) {console.log(err);}});
+  socket.on('submit', function() {try {complete(socket.id);} catch(err) {console.log(err);}});
 
   socket.on('block', function(num) {try {block(socket.id,num);} catch(err) {console.log(err);}});
 });
@@ -123,6 +123,13 @@ function data(id,data) {
 function block(id,block) {
   console.log('ID ' + id + ' is starting block '+ block);
   JGL[info[id].experiment][info[id].hash].block = block;
+}
+
+function complete(id) {
+  // Signal sent when a subject has completed their experiment
+  JGL[info[id].experiment][info[id].hash].submitted=true;
+  saveData();
+  JGL[info[id].experiment][info[id].hash].data = {};
 }
 
 // ///////////////////////////////////////////////////////////////////////
