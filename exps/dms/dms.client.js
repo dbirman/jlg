@@ -32,7 +32,13 @@ function loadTask() {
 	// RT TRIALS
 	task[3] = {};
 	task[3].type = 'trial'; // this will give us use of the canvas
+	// Set minimum screen dimensions 
+	task[3].minX = 5;
+	task[3].minY = 5;
+	// Setup callback functions
 	task[3].callbacks = {};
+	task[3].callbacks.startBlock = startBlock;
+	task[3].callbacks.endBlock = endBlock;
 	task[3].callbacks.updateScreen = updateScreen;
 	// RT task doesn't have any parameters, but this gets auto-populated with data
 	task[3].parameters = {};
@@ -40,16 +46,19 @@ function loadTask() {
 	// caution: these need a value (e.g. NaN) or they won't run correctly
 	task[3].variables = {};
 	// Segment timing
-	task[3].segnames = ['delay','stim','iti'];
+	task[3].segnames = ['wait','sample','delay','test','resp','iti'];
 	// Seglen uses specific times
-	task[3].segmin = [500,1000,1000];
-	task[3].segmax = [2000,1000,3000];
+	task[3].segmin = [Infinity,650,650,650,1500,500];
+	task[3].segmax = [Infinity,650,650,650,1500,1500];
 	// Responses
-	task[3].response = [0,1,0];
+	task[3].response = [0,0,0,0,0,1,0];
+	// Backgroud color (defaults to 0.5)
+	task[3].background = 0.5;
+	// If you give different keys 
+	task[3].keys = 32;
 	// Trials
 	task[3].numTrials = 1; // can be infinite as well
 	// Keys
-	task[3].keys = 32;
 
 	// SURVEY 1
 	// task[3] = {};
@@ -57,6 +66,20 @@ function loadTask() {
 	// task[3].surveys = ['']
 
 	return task;
+}
+
+function startBlock() {
+	document.addEventListener("keyup",checkStartTrial,false);
+}
+
+function endBlock() {
+	document.removeEventListener("keyup",checkStartTrial,false);
+}
+
+function checkStartTrial(event) {
+	if (jgl.trial.segname=='wait' && event.which==32) {
+		jumpSegment();
+	}
 }
 
 function updateScreen() {

@@ -102,6 +102,8 @@ function initJGL() {
 	jgl.timing = {};
 	jgl.live = false;
 	jgl.serverConnected = -1;
+	jgl.data = [];
+	jgl.eventListeners = [];
 }
 
 function getAmazonInfo() {
@@ -219,44 +221,56 @@ function processTask(task) {
 				addDiv(task[ti].type);
 			}
 		}
-		// setup trials
-		task[ti].trials = [];
-		for (var i=0;i<task[ti].numTrials;i++) {
-			task[ti].trials[i] = {};
-			// RESPONSE WATCH
-			task[ti].trials[i].response = task[ti].response;
-			// BLOCK RANDOMIZATION (setup parameters)
-			if (task[ti].parameters!=undefined) {
-				console.log('WARNING: Block randomization is not implemented. Using equal probabilities.');
-				var params = Object.keys(task[ti].parameters);
-				for (var pi=0;pi<params.length;pi++) {
-					task[ti].trials[i][params[pi]] = randomElement(task[ti].parameters[params[pi]]);
+		if (task[ti].type=='trial') {
+			// setup trials
+			task[ti].trials = [];
+			for (var i=0;i<task[ti].numTrials;i++) {
+				task[ti].trials[i] = {};
+				// RESPONSE WATCH
+				task[ti].trials[i].response = task[ti].response;
+				// BLOCK RANDOMIZATION (setup parameters)
+				if (task[ti].parameters!=undefined) {
+					console.log('WARNING: Block randomization is not implemented. Using equal probabilities.');
+					var params = Object.keys(task[ti].parameters);
+					for (var pi=0;pi<params.length;pi++) {
+						task[ti].trials[i][params[pi]] = randomElement(task[ti].parameters[params[pi]]);
+					}
+				}
+				// VARIABLES
+				if (task[ti].variables!=undefined) {
+					var vars = Object.keys(task[ti].variables);
+					for (var vi=0;vi<vars.length;vi++) {
+						task[ti].trials[i][vars[vi]] = NaN;
+					}
+				}
+				// SEGMENT TIMING (setup timing)
+				if (task[ti].seglen!=undefined) {
+					// seglen overrides min/max
+					task[ti].trials[i].seglen = task[ti].seglen;
+				} else if (task[ti].segmin!=undefined) {
+					if (task[ti].segmax==undefined) {error('An error occurred: segment maximum was not defined');}
+					else {
+						task[ti].trials[i].seglen = [];
+						task[ti].trials[i].length = 0;
+						for (var si=0;si<task[ti].segmin.length;si++) {
+							if (task[ti].segmin[si]==task[ti].segmax[si]) {
+								task[ti].trials[i].seglen[si] = task[ti].segmax[si];
+							} else {
+								task[ti].trials[i].seglen[si] = task[ti].segmin[si] + Math.random()*(task[ti].segmax[si]-task[ti].segmin[si]);
+							}
+							task[ti].trials[i].length += task[ti].trials[i].seglen[si];
+						}
+					}
 				}
 			}
+		}
+		else {
 			// VARIABLES
+			task[ti].trial = {};
 			if (task[ti].variables!=undefined) {
 				var vars = Object.keys(task[ti].variables);
 				for (var vi=0;vi<vars.length;vi++) {
-					task[ti].trials[i][vars[vi]] = NaN;
-				}
-			}
-			// SEGMENT TIMING (setup timing)
-			if (task[ti].seglen!=undefined) {
-				// seglen overrides min/max
-				task[ti].trials[i].seglen = task[ti].seglen;
-			} else if (task[ti].segmin!=undefined) {
-				if (task[ti].segmax==undefined) {error('An error occurred: segment maximum was not defined');}
-				else {
-					task[ti].trials[i].seglen = [];
-					task[ti].trials[i].length = 0;
-					for (var si=0;si<task[ti].segmin.length;si++) {
-						if (task[ti].segmin[si]==task[ti].segmax[si]) {
-							task[ti].trials[i].seglen[si] = task[ti].segmax[si];
-						} else {
-							task[ti].trials[i].seglen[si] = task[ti].segmin[si] + Math.random()*(task[ti].segmax[si]-task[ti].segmin[si]);
-						}
-						task[ti].trials[i].length += task[ti].trials[i].seglen[si];
-					}
+					task[ti].trial[vars[vi]] = NaN;
 				}
 			}
 		}
@@ -277,15 +291,30 @@ function setupCanvas() {
 	jgl.canvas.degX = jgl.canvas.width/jgl.screenInfo.pixPerDeg;
 	jgl.canvas.height = window.innerHeight-50;
 	jgl.canvas.degY = jgl.canvas.height/jgl.screenInfo.pixPerDeg;
-	// if (window.innerWidth<1024 || window.innerHeight<768) {error('Your screen is not large enough to support our experiment. Please maximize the window or switch to a larger screen and refresh the page.');}
+	if (jgl.canvas.degX<jgl.task[jgl.curBlock].minX || jgl.canvas.degY<jgl.task[jgl.curBlock].minY) {error('Your screen is not large enough to support our experiment. Please maximize the window or switch to a larger screen and refresh the page.');}
 	jgl.ctx = jgl.canvas.getContext("2d");
-	console.log('remove when real visual angle coordinates est');
 	jgl.canvas.pixPerDeg = jgl.screenInfo.pixPerDeg;
-	jgl.canvas.background = 0.5;
 	jglVisualAngleCoordinates();
+	// Background color
+	if (jgl.task[jgl.curBlock].background!==undefined) {
+		jgl.canvas.background = jgl.task[jgl.curBlock].background;
+	} else {
+		jgl.canvas.background = 0.5;
+	}
 	// Add event listeners
-	if (jgl.task[jgl.curBlock].keys!=undefined) {document.addEventListener('keydown',keyEvent,false);}
-	if (jgl.task[jgl.curBlock].mouse!=undefined) {document.addEventListener('click',clickEvent,false);}
+	if (jgl.task[jgl.curBlock].keys!=undefined) {eventListenerAdd('keydown',keyEvent);}
+	if (jgl.task[jgl.curBlock].mouse!=undefined) {eventListenerAdd('click',clickEvent);}
+}
+
+function eventListenerAdd(trigger,func) {
+	jgl.eventListeners.push({trigger:trigger,func:func});
+	document.addEventListener(trigger,func,false);
+}
+
+function eventListenerRemoveAll() {
+	for (var i=0;i<jgl.eventListeners.length;i++) {
+		document.removeEventListener(jgl.eventListeners[i].trigger,jgl.eventListeners[i].func,false);
+	}
 }
 
 ///////////////////////////////////////////////////////////////////////
@@ -356,7 +385,7 @@ function startBlock_() {
 		// set up canvas
 		setupCanvas();
 	} else {
-		jgl.trial = {}; // we need this to store saved data
+		jgl.trial = jgl.task[jgl.curBlock].trial; // we need this to store saved data
 		switch (jgl.task[jgl.curBlock].type) {
 			// Anything that isn't a trial/canvas just waits for a submit function
 			// (these could be instructions, forms, surveys, whatever)
@@ -393,7 +422,14 @@ function update_() {
 
 	var cblock = jgl.curBlock;
 	var t = elapsed(); // get elapsed time
-	// Check first trial
+
+	// SPECIAL CASE: CUR TRIAL -1 AND BLOCK START < 3000 MS
+	if (jgl.curTrial==-1 && (now()-jgl.timing.block)<3000) {
+		updateScreen_(t);
+		jgl.tick = requestAnimationFrame(update_);
+		return;
+	}
+	// Check first trial (waits a bit)
 	if (jgl.curTrial==-1) {startTrial_();}
 	// Check next trial
 	if ((now()-jgl.timing.trial)>jgl.trial.length) {startTrial_();}
@@ -405,6 +441,7 @@ function update_() {
 	// Update screen
 	updateScreen_(t);
 
+	// Start repeats
 	jgl.tick = requestAnimationFrame(update_);
 }
 
@@ -414,8 +451,7 @@ function endBlock_() {
 	cancelAnimationFrame(jgl.tick);
 
 	// remove event listeners
-	if (jgl.task[jgl.curBlock].keys!=undefined) {document.removeEventListener('keydown',keyEvent,false);}
-	if (jgl.task[jgl.curBlock].mouse!=undefined) {document.removeEventListener('click',clickEvent,false);}
+	eventListenerRemoveAll();
 	
 	var data = {};
 		
@@ -450,12 +486,17 @@ function endBlock_() {
 	if (jgl.callbacks.endBlock) {jgl.callbacks.endBlock();}
 
 	// send to server
+	jgl.data.push(data);
 	if (!debug) {
 		socket.emit('data',data);
 	}
 
 	// start the next block
 	startBlock_();
+}
+
+function jumpSegment() {
+	startSegment_();
 }
 
 function startTrial_() {
@@ -470,7 +511,8 @@ function startTrial_() {
 
 	// Reset the event structure
 	jgl.event = {};
-	jgl.trial.responded = 0;
+	jgl.trial.RT = zeros(jgl.task[jgl.curBlock].response.length);
+	jgl.trial.responded = zeros(jgl.task[jgl.curBlock].response.length);
 
 	// Start the segment immediately
 	jgl.trial.thisseg = -1;
@@ -500,6 +542,7 @@ function updateScreen_(time) {
 	jglClearScreen();
 	// jgl.ctx.font="1px Georgia";
 	// jgl.ctx.fillText('Trial: ' + jgl.curTrial + ' Segment: ' + jgl.trial.thisseg,-5,-5);
+	if (jgl.curTrial===-1) {getReady();}
 
 	if (jgl.callbacks.updateScreen) {jgl.callbacks.updateScreen();}
 }
@@ -507,18 +550,29 @@ function updateScreen_(time) {
 function getResponse_() {
 	if (!jgl.live) {return}
 	// actual event -- do nothing unless subject requests
-	if (jgl.trial.response[jgl.trial.thisseg]) {
-		if (jgl.trial.responded>0) {
-			jgl.trial.responded++;
+	if (jgl.trial.response[jgl.trial.thisseg]===1) {
+		if (jgl.trial.responded[jgl.trial.thisseg]>0) {
+			jgl.trial.responded[jgl.trial.thisseg]++;
 			console.log('Multiple responses recorded: ' + jgl.trial.responded);
 			return
 		}
 		// called by the event listeners on the canvas during trials
-		jgl.trial.RT = now() - jgl.timing.segment;
-		jgl.trial.responded = true;		
+		jgl.trial.RT[jgl.trial.thisseg] = now() - jgl.timing.segment;
+		jgl.trial.responded[jgl.trial.thisseg] = true;		
 		// call the experiment callback
-		if (jgl.callbacks.getResponse && jgl.trial.responded) {jgl.callbacks.getResponse();}
+		if (jgl.callbacks.getResponse) {jgl.callbacks.getResponse();}
 	}
+}
+///////////////////////////////////////////////////////////////////////
+//////////////////////// GET READY ////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+
+// This is a special updateScreen callback that just displays
+// "get ready!" on the screen
+
+function getReady() {
+	jglTextSet('Courier New',2,'#ffffff');
+	jglTextDraw('Get Ready',0,0);
 }
 
 ///////////////////////////////////////////////////////////////////////
@@ -552,6 +606,7 @@ function incInstructions(increment) {
 	// check end conditions
 	if (jgl.curInstructions>=jgl.instructions.length) {
 		jgl.endBlockFunction();
+		return;
 	}
 	// set prev/next buttons
 	if (jgl.curInstructions==0) {
@@ -576,19 +631,22 @@ function preloadSurvey() {
 	// JGL NOTE: Only store instruction divs in the local exp.html file
 	// General templates should be shared in assets/templates so that 
 	// everybody can use them
-	console.log('exps/'+exp+'/'+exp+'_survey.html')
 	$.get('exps/'+exp+'/'+exp+'_survey.html', function(data) {$('#surveydiv').append(data);})
-
-	var curSurvey = jgl.surveys[jgl.curSurvey].split('-');
-	var suffix = curSurvey[2];
-	jgl.curForm = suffix;
-	$("#"+jgl.curForm).change(function() {checkSurveySubmit();});
+	// Block enter key on all forms
+	$(document).on("keypress", "form", function(event) { 
+    return event.keyCode != 13;
+	});
 }
 
 function setupSurvey() {
 	jgl.surveys = jgl.task[jgl.curBlock].surveys;
 	jgl.curSurvey = 0;
-	displaySurvey();
+	var cur = jgl.surveys[jgl.curSurvey].split('-');
+	var suffix = cur[1];
+	jgl.curForm = suffix;
+	displaySurvey();	
+	$("#survey-submit").prop("disabled",true);
+	$("#"+jgl.curForm).change(function() {setSurveySubmit();});
 }
 
 function displaySurvey() {
@@ -598,31 +656,39 @@ function displaySurvey() {
 	$("#"+jgl.surveys[jgl.curSurvey]).show();
 }
 
-function checkSurveySubmit() {
-	// Check whether the form is complete
-	var form = document.forms[jgl.curForm];
-	// check that each input is not empty
-	for (var i=0;i<form.length;i++) {
-		if (form[i]=='') {return false;}
-	}
-	return true;
-	//
-	var check = checkSurveySubmit();
-	if (check) {
+function setSurveySubmit() {
+	if (checkSurveySubmit()) {
 		$("#survey-submit").prop("disabled",false);
 	} else {
 		$("#survey-submit").prop("disabled",true);
 	}
 }
 
+function checkSurveySubmit() {
+	// Check whether the form is complete
+	var form = document.forms[jgl.curForm];
+	// check that each input is not empty
+	for (var i=0;i<form.length;i++) {
+		if (form[i].value=="") {return false;}
+	}
+	return true;
+}
+
 function submitSurvey() {
+	var form = document.forms[jgl.curForm];
+	// check that each input is not empty
+	jgl.trial.answers = {};
+	for (var i=0;i<form.length;i++) {
+		jgl.trial.answers[form[i].id] = form[i].value;
+	}
 	jgl.curSurvey+=1;
 	// check end conditions
 	if (jgl.curSurvey>=jgl.surveys.length) {
 		jgl.endBlockFunction();
+		return
 	}
 	// show the right instructions slide
-	displayInstructions();
+	displaySurvey();
 }
 
 function surveyEnd() {
