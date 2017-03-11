@@ -36,6 +36,9 @@ function launch() {
 
 var exp, debug;
 
+// PRELOAD
+//	preload the instruction and surveys called for by this particular
+//	experiment
 function preload() {
 	var loadInstructions = false,
 		loadSurvey = false;
@@ -50,6 +53,9 @@ function preload() {
 	if (loadSurvey) {preloadSurvey();}
 }
 
+// SCREENINFO
+//	set up the screen information: get pixels per cm and scale screen
+//	then hide the pixels per inch measurement div
 function screenInfo() {
 	// Get DPI
 	var screenInfo = {};
@@ -68,6 +74,8 @@ function screenInfo() {
 	return screenInfo;
 }
 
+// GETEXPERIMENT
+//	Figure out what experiment was requested and whether we are in debug mode
 function getExperiment() {
 	debug = Number(getQueryVariable('debug'));
 	exp = getQueryVariable('exp');    
@@ -78,6 +86,9 @@ function getExperiment() {
 	if (!debug) {socket = io(); setupSocket();}
 }
 
+// SETUPSOCKET
+// 	Sets up the socket object to recognize the various messages that the
+//	server can send
 function setupSocket() {
 	socket.on('update', function(msg) {
 		console.log('Server connection succeeded currently at block ' + (Number(msg)+1));
@@ -98,6 +109,8 @@ function setupSocket() {
 	});
 }
 
+// INITJGL
+//	Initialize the JGL object
 function initJGL() {
 	jgl.timing = {};
 	jgl.live = false;
@@ -106,6 +119,10 @@ function initJGL() {
 	jgl.eventListeners = [];
 }
 
+// GETAMAZONINFO
+//	Pulls from the mmturkey object information about the worker, HIT and
+//	assignment. Also generates a hash of the worker ID and experiment name
+//	which is what actually gets sent to the server to store data
 function getAmazonInfo() {
 	// these are NOT accessible to the server!
 	if (debug==0) {
@@ -122,6 +139,8 @@ function getAmazonInfo() {
 	}
 }
 
+// SUBMITHIT
+//	Submits the HIT and disables the experiment	
 function submitHIT() {
 	if (debug) {
 		error('Normally the HIT would now be submitted');
@@ -133,9 +152,14 @@ function submitHIT() {
 	}
 	// Otherwise, communicate with the server and submit
 	socket.emit('submit');
+	// Warning: opener.submit actually closes this window!
+	// some browsers might not allow this
 	opener.submit();
+	setTimeout(error('Please close this window'),5000);
 }
 
+// LOADTEMPLATE
+//	Load all of the default template files (usually just complete)
 function loadTemplate() {
 	var tempList = ['complete'];
 	for (var i=0;i<tempList.length;i++) {
@@ -143,11 +167,16 @@ function loadTemplate() {
 	}
 }
 
+// LOADEXPERIMENT
+//	Load the experiment script
 function loadExperiment() {
 	// Load experiment code
 	$.getScript('exps/'+exp+'/'+exp+'.client.js');
 }
 
+// UPDATEFROMSERVER
+//	Login to the server and wait for the server to tell us to start
+//  the current block
 function updateFromServer() {
 	if (debug==1) {
 		jgl.curBlock = -1; // -1 before starting
