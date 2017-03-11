@@ -68,6 +68,7 @@ function screenInfo() {
 	screenInfo.screenDistance = 60; // in cm
 	screenInfo.totalcm = 2*Math.PI*screenInfo.screenDistance; // Total CM for 360 degrees
 	screenInfo.pixPerDeg = screenInfo.PPcm*screenInfo.totalcm/360;
+	screenInfo.screenSizeDeg = window.screen.width/screenInfo.pixPerDeg; // in cm
 
 	$("#dpi").hide();
 
@@ -257,6 +258,10 @@ function processTask(task) {
 				task[ti].trials[i] = {};
 				// RESPONSE WATCH
 				task[ti].trials[i].response = task[ti].response;
+				// DEFAULTS
+				task[ti].trials[i].RT = NaN;
+				task[ti].trials[i].correct = NaN;
+				task[ti].trials[i].response = NaN;
 				// BLOCK RANDOMIZATION (setup parameters)
 				if (task[ti].parameters!=undefined) {
 					console.log('WARNING: Block randomization is not implemented. Using equal probabilities.');
@@ -461,7 +466,7 @@ function update_() {
 	// Check first trial (waits a bit)
 	if (jgl.curTrial==-1) {startTrial_();}
 	// Check next trial
-	if ((now()-jgl.timing.trial)>jgl.trial.length) {startTrial_();}
+	if ((now()-jgl.timing.trial)>jgl.trial.length) {endTrial_(); startTrial_();}
 	// Next trial may have shut down the block, check this
 	if (cblock != jgl.curBlock) {return}
 	// Check next segment
@@ -565,6 +570,12 @@ function endTrial_() {
 function startSegment_() {
 
 	jgl.trial.thisseg++;
+
+	// check if we went too far
+	if (jgl.trial.thisseg>=jgl.task[jgl.curBlock].segnames.length) {
+		// end trial
+		return 
+	}
 	jgl.trial.segname = jgl.task[jgl.curBlock].segnames[jgl.trial.thisseg];
 
 	jgl.timing.segment = now();
@@ -572,15 +583,15 @@ function startSegment_() {
 	if (jgl.callbacks.startSegment) {jgl.callbacks.startSegment();}
 }
 
-function updateScreen_(time) {
-	jgl.trial.framerate.push(time);
+function updateScreen_(t) {
+	jgl.trial.framerate.push(t);
 	// Clear screen
 	jglClearScreen();
 	// jgl.ctx.font="1px Georgia";
 	// jgl.ctx.fillText('Trial: ' + jgl.curTrial + ' Segment: ' + jgl.trial.thisseg,-5,-5);
 	if (jgl.curTrial===-1) {getReady();}
 
-	if (jgl.callbacks.updateScreen) {jgl.callbacks.updateScreen(time);}
+	if (jgl.callbacks.updateScreen) {jgl.callbacks.updateScreen(t);}
 }
 
 function getResponse_() {

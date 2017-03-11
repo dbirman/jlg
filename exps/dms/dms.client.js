@@ -41,7 +41,7 @@ function loadTask() {
 
 	jgl.live = {}; // use this for tracking what's happening
 
-	jgl.live.dots = 
+	jgl.live.dots = initDots(500,10,10,1,0,6,1);
 
 	return task;
 }
@@ -63,9 +63,12 @@ function addTaskBlock(numTrials,practice) {
 	// RT task doesn't have any parameters, but this gets auto-populated with data
 	taskblock.parameters = {};
 	taskblock.parameters.practice = 1;
+	taskblock.parameters.match = [0, 1];
+	taskblock.parameters.dir1 = [0, Math.PI*1/4, Math.PI*1/2, Math.PI*3/4, Math.PI, Math.PI*5/4, Math.PI*6/4, Math.PI*7/4];
 	// RT task won't log any variables either (these get set by the user somewhere in the callbacks)
 	// caution: these need a value (e.g. NaN) or they won't run correctly
 	taskblock.variables = {};
+	taskblock.variables.dir2 = NaN;
 	// Segment timing
 	taskblock.segnames = ['wait','sample','delay','test','resp','iti'];
 	// Seglen uses specific times
@@ -102,35 +105,62 @@ function checkStartTrial(event) {
 }
 
 function checkEndTrial(event) {
-
+	if (jgl.trial.segname=='iti' && event.which==32) {
+		event.preventDefault();
+		jumpSegment();
+	}
 }
 
 function startSegment() {
 	jgl.live.fix = 0;
+	jgl.live.fixColor = "#ffffff";
 	jgl.live.dots = 0;
+	jgl.live.resp = 0;
 	switch(jgl.trial.segname) {
 		case 'wait':
 			jgl.live.fix = 1;
 			break;
 		case 'sample':
 			jgl.live.fix = 1;
+			jgl.live.dots = 1;
+			jgl.live.dir = jgl.trial.dir1;
 			break;
 		case 'delay':
 			jgl.live.fix = 1;
 			break;
 		case 'test':
 			jgl.live.fix = 1;
+			jgl.live.dots = 1;
+			jgl.live.dir = jgl.trial.dir2;
 			break;
 		case 'resp':
+			jgl.live.fix = 1;
+			jgl.live.fixColor = "#ffff00";
 			break;
 		case 'iti':
 			break;
 	}
 }
 
-function updateScreen() {
-	if (jgl.live.fix) {jglFixationCross();}
-	if (jgl.live.dots) {drawDots();}
+function upResp() {
+	if (jgl.trial.correct==1) {
+		jgl.ctx.fillStyle = "#00ff00";
+		jglTextDraw("Correct",0,0);
+	} else (jgl.trial.correct==0) {
+		jgl.ctx.fillStyle = "#ff0000";
+		jglTextDraw("Wrong",0,0);
+	}
+}
+
+function updateScreen(t) {
+	if (jgl.live.fix) {jglFixationCross(1,0.04,jgl.live.fixColor,[0,0]);}
+	if (jgl.live.dots) {
+		updateDots(jgl.live.dots,1,jgl.live.dir,)
+		drawDots(t);
+	}
+	if (jgl.live.resp) {
+		upResp();
+	}
 }
 
 
@@ -142,8 +172,8 @@ function initDots(n,maxx,maxy,coherent,dir,spd,sz) {
 	}
 	var dots = {};
 	dots.n = n;
-	dots.minx = 0;
-	dots.miny = 0;
+	dots.minx = -maxx;
+	dots.miny = -maxy;
 	dots.maxx = maxx;
 	dots.maxy = maxy;
 	dots.x = zeros(n);
@@ -179,17 +209,21 @@ function updateDots(dots,coherent,dir,elapsed) {
 		}
 		dots.x[i] += xs*dots.speed*elapsed;
 		dots.y[i] += ys*dots.speed*elapsed;
-		if (dots.x[i]>dots.maxx) {dots.x[i] -= dots.maxx;}
-		if (dots.y[i]>dots.maxy) {dots.y[i] -= dots.maxy;}
-		if (dots.x[i]<0) {dots.x[i] += dots.maxx;}
-		if (dots.x[i]<0) {dots.y[i] += dots.maxy;}
+		if (dots.x[i]>dots.maxx) {dots.x[i] -= dots.maxx*2;}
+		if (dots.y[i]>dots.maxy) {dots.y[i] -= dots.maxy*2;}
+		if (dots.x[i]<0) {dots.x[i] += dots.maxx*2;}
+		if (dots.x[i]<0) {dots.y[i] += dots.maxy*@;}
 	}
 	return dots;
 }
 
 function drawDots(dots,ctx) {
-	ctx.fillStyle = "#ffffff";
+	jgl.ctx.fillStyle = "#ffffff";
+	jgl.ctx.save();
+	jgl.ctx.arc(0,0,jgl.screenInfo.screenSizeDeg/2,0,Math.PI*2,false);
+	jgl.ctx.clip();
 	for (var i=0;i<dots.n;i++) {
-		ctx.fillRect(Math.round(dots.x[i])-dots.szoff,Math.round(dots.y[i])-dots.szoff,dots.size,dots.size);
+		jgl.ctx.fillRect(Math.round(dots.x[i])-dots.szoff,Math.round(dots.y[i])-dots.szoff,dots.size,dots.size);
 	}
+	jgl.ctx.restore();
 }
