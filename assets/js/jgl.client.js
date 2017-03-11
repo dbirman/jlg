@@ -499,7 +499,7 @@ function endBlock_() {
 		}
 
 		// copy defaults (RT, response, correct)
-		var defaults = ['RT','response','correct'];
+		var defaults = ['RT','response','correct','framerate'];
 		for (var di=0;di<defaults.length;di++) {
 			// these might not be defined, so don't just copy by default
 			if (jgl.trial[defaults[di]]!=undefined) {data[defaults[di]] = jgl.trial[defaults[di]];}
@@ -524,9 +524,10 @@ function endBlock_() {
 	startBlock_();
 }
 
-function jumpSegment() {
+function jumpSegment(delay) {
+	if (delay===undefined) {delay = 0;}
 	if (jgl.trial.seglen[jgl.trial.thisseg]==Infinity) {
-		jgl.trial.seglen[jgl.trial.thisseg]=now()-jgl.timing.segment;
+		jgl.trial.seglen[jgl.trial.thisseg]=now()-jgl.timing.segment+delay;
 		jgl.trial.length = sum(jgl.trial.seglen);
 	}
 	startSegment_();
@@ -541,6 +542,7 @@ function startTrial_() {
 	jgl.timing.trial = now();
 	console.log('Starting trial: ' + jgl.curTrial);
 	jgl.trial = jgl.task[jgl.curBlock].trials[jgl.curTrial];
+	jgl.trial.framerate = [];
 
 	// Reset the event structure
 	jgl.event = {};
@@ -555,6 +557,7 @@ function startTrial_() {
 }
 
 function endTrial_() {
+	jgl.trial.framerate = 1000/mean(jgl.trial.framerate);
 
 	if (jgl.callbacks.endTrial) {jgl.callbacks.endTrial();}
 }
@@ -570,14 +573,14 @@ function startSegment_() {
 }
 
 function updateScreen_(time) {
-	var framerate = 1000/time;
+	jgl.trial.framerate.push(time);
 	// Clear screen
 	jglClearScreen();
 	// jgl.ctx.font="1px Georgia";
 	// jgl.ctx.fillText('Trial: ' + jgl.curTrial + ' Segment: ' + jgl.trial.thisseg,-5,-5);
 	if (jgl.curTrial===-1) {getReady();}
 
-	if (jgl.callbacks.updateScreen) {jgl.callbacks.updateScreen();}
+	if (jgl.callbacks.updateScreen) {jgl.callbacks.updateScreen(time);}
 }
 
 function getResponse_() {
