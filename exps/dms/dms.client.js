@@ -32,12 +32,12 @@ function loadTask() {
 	task[3] = addTaskBlock(10);
 
 	// FIRST BLOCK
-	task[2] = {};
-	task[2].type = 'instructions';
+	task[4] = {};
+	task[4].type = 'instructions';
 	// instructions is a default type with no callbacks
 	// it simply displays whatever divs we specify by adding them to an instruction page and showing/hiding them in order
-	task[2].variables = {};
-	task[2].instructions = ['instruct-block1'];
+	task[4].variables = {};
+	task[4].instructions = ['instruct-block1'];
 
 	jgl.live = {}; // use this for tracking what's happening
 
@@ -116,7 +116,7 @@ function startSegment() {
 	jgl.live.fixColor = "#ffffff";
 	jgl.live.dots = 0;
 	jgl.live.resp = 0;
-	switch(jgl.trial.segname) {
+	switch (jgl.trial.segname) {
 		case 'wait':
 			jgl.live.fix = 1;
 			break;
@@ -146,7 +146,7 @@ function upResp() {
 	if (jgl.trial.correct==1) {
 		jgl.ctx.fillStyle = "#00ff00";
 		jglTextDraw("Correct",0,0);
-	} else (jgl.trial.correct==0) {
+	} else {
 		jgl.ctx.fillStyle = "#ff0000";
 		jglTextDraw("Wrong",0,0);
 	}
@@ -155,7 +155,7 @@ function upResp() {
 function updateScreen(t) {
 	if (jgl.live.fix) {jglFixationCross(1,0.04,jgl.live.fixColor,[0,0]);}
 	if (jgl.live.dots) {
-		updateDots(jgl.live.dots,1,jgl.live.dir,)
+		updateDots(jgl.live.dots,1,jgl.live.dir,t);
 		drawDots(t);
 	}
 	if (jgl.live.resp) {
@@ -212,7 +212,7 @@ function updateDots(dots,coherent,dir,elapsed) {
 		if (dots.x[i]>dots.maxx) {dots.x[i] -= dots.maxx*2;}
 		if (dots.y[i]>dots.maxy) {dots.y[i] -= dots.maxy*2;}
 		if (dots.x[i]<0) {dots.x[i] += dots.maxx*2;}
-		if (dots.x[i]<0) {dots.y[i] += dots.maxy*@;}
+		if (dots.x[i]<0) {dots.y[i] += dots.maxy*2;}
 	}
 }
 

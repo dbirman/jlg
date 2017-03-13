@@ -584,7 +584,7 @@ function startSegment_() {
 }
 
 function updateScreen_(t) {
-	jgl.trial.framerate.push(t);
+	// jgl.trial.framerate.push(t);
 	// Clear screen
 	jglClearScreen();
 	// jgl.ctx.font="1px Georgia";
