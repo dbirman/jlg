@@ -27,9 +27,9 @@ function loadTask() {
 	// instructions is a default type with no callbacks
 	// it simply displays whatever divs we specify by adding them to an instruction page and showing/hiding them in order
 	task[2].variables = {};
-	task[2].instructions = ['instruct-1','instruct-2','instruct-3','instruct-4'];
+	task[2].instructions = ['instruct-1','instruct-2','instruct-3','instruct-4','instruct-5'];
 
-	task[3] = addTaskBlock(10);
+	task[3] = addTaskBlock(10,true);
 
 	// FIRST BLOCK
 	task[4] = {};
@@ -39,9 +39,18 @@ function loadTask() {
 	task[4].variables = {};
 	task[4].instructions = ['instruct-block1'];
 
-	jgl.live = {}; // use this for tracking what's happening
+	task[5] = addTaskBlock(10,false);
 
-	jgl.live.dots = initDots(500,10,10,1,0,6,1);
+	// SURVEY RULE
+	task[6] = {};
+	task[6].type = 'survey';
+	task[6].surveys = ['survey-rule'];
+	task[6].variables = {};
+	task[6].variables.answers = [];
+
+	jgl.active = {}; // use this for tracking what's happening
+
+	jgl.active.dots = initDots(500,10,10,1,0,6,1);
 
 	return task;
 }
@@ -98,46 +107,53 @@ function endBlock() {
 }
 
 function checkStartTrial(event) {
-	if (jgl.trial.segname=='wait' && event.which==32) {
-		event.preventDefault();
-		jumpSegment();
+	if (event.which==32) {
+		jgl.active.pressed = true;
+		if (jgl.trial.segname=='wait') {
+			event.preventDefault();
+			jumpSegment();
+		}
 	}
 }
 
 function checkEndTrial(event) {
-	if (jgl.trial.segname=='iti' && event.which==32) {
-		event.preventDefault();
-		jumpSegment();
+	if (event.which==32) {
+		jgl.active.pressed = false;
+		if (jgl.trial.segname=='iti') {
+			event.preventDefault();
+			jumpSegment();
+		}
 	}
 }
 
 function startSegment() {
-	jgl.live.fix = 0;
-	jgl.live.fixColor = "#ffffff";
-	jgl.live.dots = 0;
-	jgl.live.resp = 0;
+	jgl.active.fix = 0;
+	jgl.active.fixColor = "#ffffff";
+	jgl.active.dots = 0;
+	jgl.active.resp = 0;
 	switch (jgl.trial.segname) {
 		case 'wait':
-			jgl.live.fix = 1;
+			jgl.active.fix = 1;
 			break;
 		case 'sample':
-			jgl.live.fix = 1;
-			jgl.live.dots = 1;
-			jgl.live.dir = jgl.trial.dir1;
+			jgl.active.fix = 1;
+			jgl.active.dots = 1;
+			jgl.active.dir = jgl.trial.dir1;
 			break;
 		case 'delay':
-			jgl.live.fix = 1;
+			jgl.active.fix = 1;
 			break;
 		case 'test':
-			jgl.live.fix = 1;
-			jgl.live.dots = 1;
-			jgl.live.dir = jgl.trial.dir2;
+			jgl.active.fix = 1;
+			jgl.active.dots = 1;
+			jgl.active.dir = jgl.trial.dir2;
 			break;
 		case 'resp':
-			jgl.live.fix = 1;
-			jgl.live.fixColor = "#ffff00";
+			jgl.active.fix = 1;
+			jgl.active.fixColor = "#ffff00";
 			break;
 		case 'iti':
+			if (!jgl.active.pressed) {jumpSegment();}
 			break;
 	}
 }
@@ -153,12 +169,12 @@ function upResp() {
 }
 
 function updateScreen(t) {
-	if (jgl.live.fix) {jglFixationCross(1,0.04,jgl.live.fixColor,[0,0]);}
-	if (jgl.live.dots) {
-		updateDots(jgl.live.dots,1,jgl.live.dir,t);
+	if (jgl.active.fix) {jglFixationCross(1,0.04,jgl.active.fixColor,[0,0]);}
+	if (jgl.active.dots) {
+		updateDots(jgl.active.dots,1,jgl.active.dir,t);
 		drawDots(t);
 	}
-	if (jgl.live.resp) {
+	if (jgl.active.resp) {
 		upResp();
 	}
 }

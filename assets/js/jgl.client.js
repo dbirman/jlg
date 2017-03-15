@@ -242,7 +242,7 @@ function addDiv(div) {
 	divList.push(div);
 	$.get('assets/templates/'+div+'.html', function(data) {$('#content').append(data);});
 	$("#"+div).hide();
-}
+} 
 
 function processTask(task) {
 	for (var ti=0;ti<task.length;ti++) {
@@ -304,6 +304,26 @@ function processTask(task) {
 				var vars = Object.keys(task[ti].variables);
 				for (var vi=0;vi<vars.length;vi++) {
 					task[ti].trial[vars[vi]] = NaN;
+				}
+			}
+		}
+		// If task is a survey, track the surveys in surveylist
+		if (task[ti].type=='survey') {
+			if (jgl.surveyList===undefined) {jgl.surveyList = [];}
+			for (var i=0;i<task[ti].surveys.length;i++) {
+				var csurvey = task[ti].surveys[i];
+				if (!(csurvey in jgl.surveyList)) {
+					jgl.surveyList.push(csurvey);
+				}
+			}
+		}		
+		// If task is instructions, track the instructions in instructionList
+		if (task[ti].type=='instructions') {
+			if (jgl.instructionList===undefined) {jgl.instructionList = ['instructions-end'];}
+			for (var i=0;i<task[ti].instructions.length;i++) {
+				var cinst = task[ti].instructions[i];
+				if (!(cinst in jgl.instructionList)) {
+					jgl.instructionList.push(cinst);
 				}
 			}
 		}
@@ -643,8 +663,8 @@ function setupInstructions() {
 }
 
 function displayInstructions() {
-	for (var i=0;i<jgl.instructions.length;i++) {
-		$("#"+jgl.instructions[i]).hide();
+	for (var i=0;i<jgl.instructionList.length;i++) {
+		$("#"+jgl.instructionList[i]).hide();
 	}
 	$("#"+jgl.instructions[jgl.curInstructions]).show();
 }
@@ -698,8 +718,8 @@ function setupSurvey() {
 }
 
 function displaySurvey() {
-	for (var i=0;i<jgl.surveys.length;i++) {
-		$("#"+jgl.surveys[i]).hide();
+	for (var i=0;i<jgl.surveyList.length;i++) {
+		$("#"+jgl.surveyList[i]).hide();
 	}
 	$("#"+jgl.surveys[jgl.curSurvey]).show();
 }
