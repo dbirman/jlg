@@ -144,7 +144,7 @@ function getAmazonInfo() {
 //	Submits the HIT and disables the experiment	
 function submitHIT() {
 	if (debug) {
-		error('Normally the HIT would now be submitted');
+		error('Normally the HIT would now be submitted: '+JSON.stringify(jgl.data));
 		return
 	}
 	if (opener==undefined) {
@@ -259,9 +259,8 @@ function processTask(task) {
 				// RESPONSE WATCH
 				task[ti].trials[i].response = task[ti].response;
 				// DEFAULTS
-				task[ti].trials[i].RT = NaN;
+				task[ti].trials[i].RT = zeros(task[ti].response.length);
 				task[ti].trials[i].correct = NaN;
-				task[ti].trials[i].response = NaN;
 				// BLOCK RANDOMIZATION (setup parameters)
 				if (task[ti].parameters!=undefined) {
 					console.log('WARNING: Block randomization is not implemented. Using equal probabilities.');
@@ -356,27 +355,31 @@ function eventListenerRemoveAll() {
 ///////////////////////////////////////////////////////////////////////
 
 function keyEvent(event) {
-	if (event.which==32) {event.preventDefault();} // block spacebar from dropping
+	if (jgl.curTrial>-1 && jgl.trial.response[jgl.trial.thisseg]===1) {
+		if (event.which==32) {event.preventDefault();} // block spacebar from dropping
 
-	jgl.event.key = {};
-	jgl.event.key.keyCode = event.which;
+		jgl.event.key = {};
+		jgl.event.key.keyCode = event.which;
 
-	getResponse_();
+		getResponse_();
+	}
 }
 
 function clickEvent(event) {
-	jgl.event.mouse = {};
+	if (jgl.curTrial>-1 && jgl.trial.response[jgl.trial.thisseg]===1) {
+		jgl.event.mouse = {};
 
-  var rect = jgl.canvas.getBoundingClientRect(), // abs. size of element
-    scaleX = jgl.canvas.width / rect.width,    // relationship bitmap vs. element for X
-    scaleY = jgl.canvas.height / rect.height;  // relationship bitmap vs. element for Y
+	  var rect = jgl.canvas.getBoundingClientRect(), // abs. size of element
+	    scaleX = jgl.canvas.width / rect.width,    // relationship bitmap vs. element for X
+	    scaleY = jgl.canvas.height / rect.height;  // relationship bitmap vs. element for Y
 
-  jgl.event.mouse.x =  (event.clientX - rect.left) * scaleX;  // scale mouse coordinates after they have
-  jgl.event.mouse.y =  (event.clientY - rect.top) * scaleY;    // been adjusted to be relative to element
+	  jgl.event.mouse.x =  (event.clientX - rect.left) * scaleX;  // scale mouse coordinates after they have
+	  jgl.event.mouse.y =  (event.clientY - rect.top) * scaleY;    // been adjusted to be relative to element
 
-  jgl.event.mouse.shift = event.shiftKey;
+	  jgl.event.mouse.shift = event.shiftKey;
 
-  getResponse_();
+	  getResponse_();
+	}
 }
 
 ///////////////////////////////////////////////////////////////////////
@@ -589,7 +592,7 @@ function updateScreen_(t) {
 	jglClearScreen();
 	// jgl.ctx.font="1px Georgia";
 	// jgl.ctx.fillText('Trial: ' + jgl.curTrial + ' Segment: ' + jgl.trial.thisseg,-5,-5);
-	if (jgl.curTrial===-1) {getReady();}
+	if (jgl.curTrial===-1) {getReady();return;}
 
 	if (jgl.callbacks.updateScreen) {jgl.callbacks.updateScreen(t);}
 }
@@ -597,18 +600,16 @@ function updateScreen_(t) {
 function getResponse_() {
 	if (!jgl.live) {return}
 	// actual event -- do nothing unless subject requests
-	if (jgl.trial.response[jgl.trial.thisseg]===1) {
-		if (jgl.trial.responded[jgl.trial.thisseg]>0) {
-			jgl.trial.responded[jgl.trial.thisseg]++;
-			console.log('Multiple responses recorded: ' + jgl.trial.responded);
-			return
-		}
-		// called by the event listeners on the canvas during trials
-		jgl.trial.RT[jgl.trial.thisseg] = now() - jgl.timing.segment;
-		jgl.trial.responded[jgl.trial.thisseg] = true;		
-		// call the experiment callback
-		if (jgl.callbacks.getResponse) {jgl.callbacks.getResponse();}
+	if (jgl.trial.responded[jgl.trial.thisseg]>0) {
+		jgl.trial.responded[jgl.trial.thisseg]++;
+		console.log('Multiple responses recorded: ' + jgl.trial.responded);
+		return
 	}
+	// called by the event listeners on the canvas during trials
+	jgl.trial.RT[jgl.trial.thisseg] = now() - jgl.timing.segment;
+	jgl.trial.responded[jgl.trial.thisseg] = true;		
+	// call the experiment callback
+	if (jgl.callbacks.getResponse) {jgl.callbacks.getResponse();}
 }
 ///////////////////////////////////////////////////////////////////////
 //////////////////////// GET READY ////////////////////////////////
