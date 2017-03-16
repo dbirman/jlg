@@ -2,55 +2,53 @@
 function loadTask() {
 	var task = [];
 	// CONSENT
-	task[0] = {};
-	task[0].type = 'consent';
-	// consent is a default type with no callbacks
-	task[0].variables = {};
-	task[0].variables.consent = NaN;
-	// consent has no data
+	// task[0] = {};
+	// task[0].type = 'consent';
+	// // consent is a default type with no callbacks
+	// task[0].variables = {};
+	// task[0].variables.consent = NaN;
+	// // consent has no data
 
-	// SURVEY DEMOGRAPHICS
-	task[1] = {};
-	task[1].type = 'survey';
-	// survey is a default type with no callbacks
-	// the demographics survey is a default type
-	task[1].surveys = ['survey-demo'];
-	task[1].variables = {};
-	// the default survey type needs an answer list that we can push to
-	// as we get answers
-	// if we don't set this it will be done automatically
-	task[1].variables.answers = [];
+	// // SURVEY DEMOGRAPHICS
+	// task[1] = {};
+	// task[1].type = 'survey';
+	// // survey is a default type with no callbacks
+	// // the demographics survey is a default type
+	// task[1].surveys = ['survey-demo'];
+	// task[1].variables = {};
+	// // the default survey type needs an answer list that we can push to
+	// // as we get answers
+	// // if we don't set this it will be done automatically
+	// task[1].variables.answers = [];
 
-	// INSTRUCTIONS
-	task[2] = {};
-	task[2].type = 'instructions';
-	// instructions is a default type with no callbacks
-	// it simply displays whatever divs we specify by adding them to an instruction page and showing/hiding them in order
-	task[2].variables = {};
-	task[2].instructions = ['instruct-1','instruct-2','instruct-3','instruct-4','instruct-5'];
+	// // INSTRUCTIONS
+	// task[2] = {};
+	// task[2].type = 'instructions';
+	// // instructions is a default type with no callbacks
+	// // it simply displays whatever divs we specify by adding them to an instruction page and showing/hiding them in order
+	// task[2].variables = {};
+	// task[2].instructions = ['instruct-1','instruct-2','instruct-3','instruct-4','instruct-5'];
 
-	task[3] = addTaskBlock(10,true);
+	task[0] = addTaskBlock(10,true);
 
 	// FIRST BLOCK
-	task[4] = {};
-	task[4].type = 'instructions';
-	// instructions is a default type with no callbacks
-	// it simply displays whatever divs we specify by adding them to an instruction page and showing/hiding them in order
-	task[4].variables = {};
-	task[4].instructions = ['instruct-block1'];
+	// task[4] = {};
+	// task[4].type = 'instructions';
+	// // instructions is a default type with no callbacks
+	// // it simply displays whatever divs we specify by adding them to an instruction page and showing/hiding them in order
+	// task[4].variables = {};
+	// task[4].instructions = ['instruct-block1'];
 
-	task[5] = addTaskBlock(10,false);
+	// task[5] = addTaskBlock(10,false);
 
-	// SURVEY RULE
-	task[6] = {};
-	task[6].type = 'survey';
-	task[6].surveys = ['survey-rule'];
-	task[6].variables = {};
-	task[6].variables.answers = [];
+	// // SURVEY RULE
+	// task[6] = {};
+	// task[6].type = 'survey';
+	// task[6].surveys = ['survey-rule'];
+	// task[6].variables = {};
+	// task[6].variables.answers = [];
 
 	jgl.active = {}; // use this for tracking what's happening
-
-	jgl.active.dots = initDots(500,10,10,1,0,6,1);
 
 	return task;
 }
@@ -66,12 +64,13 @@ function addTaskBlock(numTrials,practice) {
 	// Setup callback functions
 	taskblock.callbacks = {};
 	taskblock.callbacks.startBlock = startBlock;
+	taskblock.callbacks.startTrial = startTrial;
 	taskblock.callbacks.startSegment = startSegment;
 	taskblock.callbacks.endBlock = endBlock;
 	taskblock.callbacks.updateScreen = updateScreen;
 	// RT task doesn't have any parameters, but this gets auto-populated with data
 	taskblock.parameters = {};
-	taskblock.parameters.practice = 1;
+	taskblock.parameters.practice = practice;
 	taskblock.parameters.match = [0, 1];
 	taskblock.parameters.dir1 = [0, Math.PI*1/4, Math.PI*1/2, Math.PI*3/4, Math.PI, Math.PI*5/4, Math.PI*6/4, Math.PI*7/4];
 	// RT task won't log any variables either (these get set by the user somewhere in the callbacks)
@@ -84,7 +83,7 @@ function addTaskBlock(numTrials,practice) {
 	taskblock.segmin = [Infinity,650,650,650,1500,Infinity];
 	taskblock.segmax = [Infinity,650,650,650,1500,Infinity];
 	// Responses
-	taskblock.response = [0,0,0,0,0,1,0];
+	taskblock.response = [0,0,0,0,1,0];
 	// Backgroud color (defaults to 0.5)
 	taskblock.background = 0.5;
 	// If you give different keys 
@@ -97,6 +96,8 @@ function addTaskBlock(numTrials,practice) {
 }
 
 function startBlock() {
+	jgl.active.dots = initDots(500,10,10,1,0,6,1);
+
 	document.addEventListener("keydown",checkStartTrial,false);
 	document.addEventListener("keyup",checkEndTrial,false);
 }
@@ -107,8 +108,9 @@ function endBlock() {
 }
 
 function checkStartTrial(event) {
-	if (event.which==32) {
+	if (event.which==32 && !jgl.active.pressed) {
 		jgl.active.pressed = true;
+		console.log(jgl.active.pressed);
 		if (jgl.trial.segname=='wait') {
 			event.preventDefault();
 			jumpSegment();
@@ -119,6 +121,7 @@ function checkStartTrial(event) {
 function checkEndTrial(event) {
 	if (event.which==32) {
 		jgl.active.pressed = false;
+		console.log(jgl.active.pressed);
 		if (jgl.trial.segname=='iti') {
 			event.preventDefault();
 			jumpSegment();
@@ -126,18 +129,23 @@ function checkEndTrial(event) {
 	}
 }
 
+function startTrial() {
+	jgl.trial.dir2 = 0;
+}
+
 function startSegment() {
 	jgl.active.fix = 0;
 	jgl.active.fixColor = "#ffffff";
-	jgl.active.dots = 0;
+	jgl.active.drawDots = 0;
 	jgl.active.resp = 0;
+	jgl.active.dir = 0;
 	switch (jgl.trial.segname) {
 		case 'wait':
 			jgl.active.fix = 1;
 			break;
 		case 'sample':
 			jgl.active.fix = 1;
-			jgl.active.dots = 1;
+			jgl.active.drawDots = 1;
 			jgl.active.dir = jgl.trial.dir1;
 			break;
 		case 'delay':
@@ -145,7 +153,7 @@ function startSegment() {
 			break;
 		case 'test':
 			jgl.active.fix = 1;
-			jgl.active.dots = 1;
+			jgl.active.drawDots = 1;
 			jgl.active.dir = jgl.trial.dir2;
 			break;
 		case 'resp':
@@ -169,71 +177,15 @@ function upResp() {
 }
 
 function updateScreen(t) {
-	if (jgl.active.fix) {jglFixationCross(1,0.04,jgl.active.fixColor,[0,0]);}
-	if (jgl.active.dots) {
-		updateDots(jgl.active.dots,1,jgl.active.dir,t);
-		drawDots(t);
+	if (jgl.active.fix) {jglFixationCross(jgl.screenInfo.pixPerDeg,1,jgl.active.fixColor,[0,0]);}
+	if (jgl.active.drawDots) {
+		jgl.active.dots = updateDots(jgl.active.dots,1,jgl.active.dir,t);
+		drawDots(jgl.active.dots,jgl.ctx);
 	}
 	if (jgl.active.resp) {
 		upResp();
 	}
 }
-
-
-// A dots drawing package for changing motion coherence
-
-function initDots(n,maxx,maxy,coherent,dir,spd,sz) {
-	if (arguments.length < 7) {
-		throw new Error('Not enough arguments for initDots()');
-	}
-	var dots = {};
-	dots.n = n;
-	dots.minx = -maxx;
-	dots.miny = -maxy;
-	dots.maxx = maxx;
-	dots.maxy = maxy;
-	dots.x = zeros(n);
-	dots.y = zeros(n);
-	dots.coherent = [];
-	dots.speed = spd;
-	dots.size = sz;
-	dots.szoff = Math.floor(dots.size/2);
-	dots.dir = dir;
-	for (var i=0;i<n;i++) {
-		dots.x[i] = Math.random()*dots.maxx;
-		dots.y[i] = Math.random()*dots.maxy;
-		dots.coherent.push(Math.random()<coherent);
-	}
-	if (!((dots.size % 2)==1)) {
-		console.log('Dot size must be odd');
-	}
-	return dots;
-}
-
-function updateDots(dots,coherent,dir,elapsed) {
-	if (typeof(dir) !== 'undefined') {dots.dir = dir;}
-
-	for (var i=0;i<dots.n;i++) {
-		dots.coherent[i] = Math.random()<coherent;
-		var xs, ys;
-		if (dots.coherent[i]) {
-			xs = Math.cos(dots.dir);
-			ys = Math.sin(dots.dir);
-		} else {
-			xs = Math.cos(Math.random()*2*Math.PI);
-			ys = Math.sin(Math.random()*2*Math.PI);
-		}
-		dots.x[i] += xs*dots.speed*elapsed;
-		dots.y[i] += ys*dots.speed*elapsed;
-		if (dots.x[i]>dots.maxx) {dots.x[i] -= dots.maxx*2;}
-		if (dots.y[i]>dots.maxy) {dots.y[i] -= dots.maxy*2;}
-		if (dots.x[i]<0) {dots.x[i] += dots.maxx*2;}
-		if (dots.x[i]<0) {dots.y[i] += dots.maxy*2;}
-	}
-}
-
-
-
 
 // DOTS FUNCTIONALITY
 
@@ -245,14 +197,14 @@ function initDots(n,maxx,maxy,coherent,dir,spd,sz) {
 	}
 	var dots = {};
 	dots.n = n;
-	dots.minx = 0;
-	dots.miny = 0;
-	dots.maxx = maxx;
-	dots.maxy = maxy;
+	dots.minx = -maxx*jgl.screenInfo.pixPerDeg;
+	dots.miny = -maxy*jgl.screenInfo.pixPerDeg;
+	dots.maxx = maxx*jgl.screenInfo.pixPerDeg;
+	dots.maxy = maxy*jgl.screenInfo.pixPerDeg;
 	dots.x = zeros(n);
 	dots.y = zeros(n);
 	dots.coherent = [];
-	dots.speed = spd;
+	dots.speed = spd * jgl.screenInfo.pixPerDeg;
 	dots.size = sz;
 	dots.szoff = Math.floor(dots.size/2);
 	dots.dir = dir;
@@ -280,22 +232,24 @@ function updateDots(dots,coherent,dir,elapsed) {
 			xs = Math.cos(Math.random()*2*Math.PI);
 			ys = Math.sin(Math.random()*2*Math.PI);
 		}
-		dots.x[i] += xs*dots.speed*elapsed;
-		dots.y[i] += ys*dots.speed*elapsed;
-		if (dots.x[i]>dots.maxx) {dots.x[i] -= dots.maxx;}
-		if (dots.y[i]>dots.maxy) {dots.y[i] -= dots.maxy;}
-		if (dots.x[i]<0) {dots.x[i] += dots.maxx;}
-		if (dots.x[i]<0) {dots.y[i] += dots.maxy;}
+		dots.x[i] += xs*dots.speed*elapsed/1000;
+		dots.y[i] += ys*dots.speed*elapsed/1000;
+		if (dots.x[i]>dots.maxx) {dots.x[i] -= dots.maxx*2;}
+		if (dots.y[i]>dots.maxy) {dots.y[i] -= dots.maxy*2;}
+		if (dots.x[i]<dots.maxx) {dots.x[i] += dots.maxx*2;}
+		if (dots.y[i]<dots.maxy) {dots.y[i] += dots.maxy*2;}
 	}
+	return dots;
 }
 
 function drawDots(dots,ctx) {
-	jgl.ctx.fillStyle = "#ffffff";
-	jgl.ctx.save();
-	jgl.ctx.arc(0,0,jgl.screenInfo.screenSizeDeg/2,0,Math.PI*2,false);
-	jgl.ctx.clip();
-	for (var i=0;i<dots.n;i++) {
-		jgl.ctx.fillRect(Math.round(dots.x[i])-dots.szoff,Math.round(dots.y[i])-dots.szoff,dots.size,dots.size);
-	}
-	jgl.ctx.restore();
+	ctx.fillStyle = "#ffffff";
+	// jgl.ctx.save();
+	// jgl.ctx.arc(0,0,jgl.screenInfo.screenSizeDeg/2,0,Math.PI*2,false);
+	// jgl.ctx.clip();
+	jglPoints2(dots.x,dots.y,5,"#ffffff");
+	// for (var i=0;i<dots.n;i++) {
+	// 	ctx.fillRect(Math.round(dots.x[i])-dots.szoff,Math.round(dots.y[i])-dots.szoff,dots.size,dots.size);
+	// }
+	// jgl.ctx.restore();
 }

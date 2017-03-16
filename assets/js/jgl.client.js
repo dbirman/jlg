@@ -355,7 +355,7 @@ function setupCanvas() {
 		jgl.canvas.background = 0.5;
 	}
 	// Add event listeners
-	if (jgl.task[jgl.curBlock].keys!=undefined) {eventListenerAdd('keydown',keyEvent);}
+	if (jgl.task[jgl.curBlock].keys!=undefined) {eventListenerAdd('keypress',keyEvent);}
 	if (jgl.task[jgl.curBlock].mouse!=undefined) {eventListenerAdd('click',clickEvent);}
 }
 
@@ -639,7 +639,7 @@ function getResponse_() {
 // "get ready!" on the screen
 
 function getReady() {
-	jglTextSet('Courier New',2,'#ffffff');
+	jglTextSet('Courier New',30,'#ffffff');
 	jglTextDraw('Get Ready',0,0);
 }
 

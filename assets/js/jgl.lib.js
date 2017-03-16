@@ -86,14 +86,22 @@ function jglPoints2(x, y, size, color) {
 		// Error
 		throw "Points2: Lengths dont match";
 	}
+	jgl.ctx.fillStyle=color;
 	for (var i=0;i<x.length;i++) {
-		canvas.context.fillStyle=color;
-		canvas.context.beginPath();
-		canvas.context.arc(x[i], y[i], size/2, 0, 2*Math.PI);
-		canvas.context.fill();
-		canvas.context.closePath();
+		jgl.ctx.beginPath();
+		jgl.ctx.arc(x[i], y[i], size/2, 0, 2*Math.PI);
+		jgl.ctx.fill();
+		jgl.ctx.closePath();
 	}
 	//screen.context.save();
+}
+
+function min(array) {
+	var minimum = Infinity;
+	for (var i=0;i<array.length;i++) {
+		if (array[i]<minimum) {minimum=array[i];}
+	}
+	return minimum;
 }
 
 /**
@@ -179,8 +187,8 @@ function jglFixationCross(width, lineWidth, color, origin) {
 	
 	if (arguments.length == 0) {
 		if (jgl.canvas.usingVisualAngles) {
-			width = 1;
-			lineWidth = 0.04;
+			width = jgl.screenInfo.pixPerDeg;
+			lineWidth = 1;
 			color = "#ffffff";
 			origin = [0 , 0];
 		} else {
@@ -295,7 +303,7 @@ function jglTextDraw(text, x, y) {
 function jglVisualAngleCoordinates() {
 	jgl.ctx.save();
 	jgl.ctx.translate(jgl.canvas.width / 2, jgl.canvas.height / 2);
-	jgl.ctx.transform(jgl.canvas.pixPerDeg,0,0,jgl.canvas.pixPerDeg, 0,0);
+	// jgl.ctx.transform(jgl.canvas.pixPerDeg,0,0,jgl.canvas.pixPerDeg, 0,0);
 		
 	jgl.canvas.usingVisualAngles = true;
 }
@@ -346,7 +354,7 @@ function repmat(array,reps) {
 function jglClearScreen() {
 	// Clear screen
 	jgl.ctx.fillStyle = con2hex(jgl.canvas.background);
-	jgl.ctx.fillRect(-jgl.canvas.width/jgl.canvas.pixPerDeg/2,-jgl.canvas.height/jgl.canvas.pixPerDeg/2,jgl.canvas.width/jgl.canvas.pixPerDeg,jgl.canvas.height/jgl.canvas.pixPerDeg);
+	jgl.ctx.fillRect(-jgl.canvas.width/2,-jgl.canvas.height/2,jgl.canvas.width,jgl.canvas.height);
 }
 
 /**
