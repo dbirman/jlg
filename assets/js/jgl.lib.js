@@ -168,6 +168,8 @@ function jglFillRect(x, y, size, color) {
 		//Error
 		throw "Fill Rect: Lengths dont match"
 	}
+	size[0] = size[0]*jgl.screenInfo.pixPerDeg;
+	size[1] = size[1]*jgl.screenInfo.pixPerDeg;
 	for (var i=0;i<x.length;i++) {
 		jgl.ctx.fillStyle = color;
 		jgl.ctx.fillRect(x[i] - (size[0] / 2), y[i] - (size[1] / 2), size[0], size[1]);
