@@ -91,9 +91,7 @@ function jglPoints2(x, y, size, color) {
 		jgl.ctx.beginPath();
 		jgl.ctx.arc(x[i], y[i], size/2, 0, 2*Math.PI);
 		jgl.ctx.fill();
-		jgl.ctx.closePath();
 	}
-	//screen.context.save();
 }
 
 function min(array) {

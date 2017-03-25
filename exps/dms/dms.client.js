@@ -87,7 +87,7 @@ function addTaskBlock(numTrials,practice) {
 	// Backgroud color (defaults to 0.5)
 	taskblock.background = 0.5;
 	// If you give different keys 
-	taskblock.keys = 32;
+	// taskblock.keys = 32;
 	// Trials
 	taskblock.numTrials = numTrials; // can be infinite as well
 	// Keys
@@ -96,7 +96,7 @@ function addTaskBlock(numTrials,practice) {
 }
 
 function startBlock() {
-	jgl.active.dots = initDots(500,10,10,1,0,6,1);
+	jgl.active.dots = initDots(500,5,5,1,0,12,1);
 
 	document.addEventListener("keydown",checkStartTrial,false);
 	document.addEventListener("keyup",checkEndTrial,false);
@@ -110,7 +110,6 @@ function endBlock() {
 function checkStartTrial(event) {
 	if (event.which==32 && !jgl.active.pressed) {
 		jgl.active.pressed = true;
-		console.log(jgl.active.pressed);
 		if (jgl.trial.segname=='wait') {
 			event.preventDefault();
 			jumpSegment();
@@ -121,7 +120,6 @@ function checkStartTrial(event) {
 function checkEndTrial(event) {
 	if (event.which==32) {
 		jgl.active.pressed = false;
-		console.log(jgl.active.pressed);
 		if (jgl.trial.segname=='iti') {
 			event.preventDefault();
 			jumpSegment();
@@ -179,8 +177,8 @@ function upResp() {
 function updateScreen(t) {
 	if (jgl.active.fix) {jglFixationCross(jgl.screenInfo.pixPerDeg,1,jgl.active.fixColor,[0,0]);}
 	if (jgl.active.drawDots) {
-		jgl.active.dots = updateDots(jgl.active.dots,1,jgl.active.dir,t);
-		drawDots(jgl.active.dots,jgl.ctx);
+		updateDots(jgl.active.dots,1,jgl.active.dir,t);
+		drawDots(jgl.active.dots);
 	}
 	if (jgl.active.resp) {
 		upResp();
@@ -209,9 +207,9 @@ function initDots(n,maxx,maxy,coherent,dir,spd,sz) {
 	dots.szoff = Math.floor(dots.size/2);
 	dots.dir = dir;
 	for (var i=0;i<n;i++) {
-		dots.x[i] = Math.random()*dots.maxx;
-		dots.y[i] = Math.random()*dots.maxy;
-		dots.coherent.push(Math.random()<coherent);
+		dots.x[i] = Math.random()*dots.maxx*2-dots.maxx;
+		dots.y[i] = Math.random()*dots.maxy*2-dots.maxy;
+		dots.coherent.push(Math.random()<=coherent);
 	}
 	if (!((dots.size % 2)==1)) {
 		console.log('Dot size must be odd');
@@ -222,34 +220,29 @@ function initDots(n,maxx,maxy,coherent,dir,spd,sz) {
 function updateDots(dots,coherent,dir,elapsed) {
 	if (typeof(dir) !== 'undefined') {dots.dir = dir;}
 
-	for (var i=0;i<dots.n;i++) {
+	var xs = Math.cos(dots.dir),
+		ys = Math.sin(dots.dir),
+		rate = dots.speed*elapsed/1000;
+	for (var i=0;i<dots.x.length;i++) {
 		dots.coherent[i] = Math.random()<coherent;
-		var xs, ys;
-		if (dots.coherent[i]) {
-			xs = Math.cos(dots.dir);
-			ys = Math.sin(dots.dir);
-		} else {
+		if (!dots.coherent[i]) {
 			xs = Math.cos(Math.random()*2*Math.PI);
 			ys = Math.sin(Math.random()*2*Math.PI);
-		}
-		dots.x[i] += xs*dots.speed*elapsed/1000;
-		dots.y[i] += ys*dots.speed*elapsed/1000;
+		}		
+		dots.x[i] += xs*rate;
+		dots.y[i] += ys*rate;
 		if (dots.x[i]>dots.maxx) {dots.x[i] -= dots.maxx*2;}
 		if (dots.y[i]>dots.maxy) {dots.y[i] -= dots.maxy*2;}
-		if (dots.x[i]<dots.maxx) {dots.x[i] += dots.maxx*2;}
-		if (dots.y[i]<dots.maxy) {dots.y[i] += dots.maxy*2;}
+		if (dots.x[i]<(-dots.maxx)) {dots.x[i] += dots.maxx*2;}
+		if (dots.y[i]<(-dots.maxy)) {dots.y[i] += dots.maxy*2;}
 	}
-	return dots;
 }
 
-function drawDots(dots,ctx) {
-	ctx.fillStyle = "#ffffff";
-	// jgl.ctx.save();
-	// jgl.ctx.arc(0,0,jgl.screenInfo.screenSizeDeg/2,0,Math.PI*2,false);
-	// jgl.ctx.clip();
+function drawDots(dots) {
+	jgl.ctx.save();
+	jgl.ctx.beginPath();
+	jgl.ctx.arc(0,0,5*jgl.screenInfo.pixPerDeg,0,Math.PI*2);
+	jgl.ctx.clip();
 	jglPoints2(dots.x,dots.y,5,"#ffffff");
-	// for (var i=0;i<dots.n;i++) {
-	// 	ctx.fillRect(Math.round(dots.x[i])-dots.szoff,Math.round(dots.y[i])-dots.szoff,dots.size,dots.size);
-	// }
-	// jgl.ctx.restore();
+	jgl.ctx.restore();
 }
