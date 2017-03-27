@@ -38,6 +38,8 @@ io.on('connection', function(socket){
   socket.on('submit', function() {try {complete(socket.id);} catch(err) {console.log(err);}});
 
   socket.on('block', function(num) {try {block(socket.id,num);} catch(err) {console.log(err);}});
+
+  socket.on('vlogin', function(hash) {try {viewerLogin(socket.id,hash);} catch(err) {console.log(err);}});
 });
 
 var port = 8080;
@@ -46,9 +48,16 @@ http.listen(port, function(){
   // tick();
 });
 
-// //////////////////////////////////////////////////////////////////////////////
-// //////////////////////// CONNECTION FUNCTIONS ////////////////////////////////
-// //////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+//////////////////////// NODE FUNCTIONS ////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+
+function viewerLogin(id,hash) {
+  var vInfo = jsonfile.readFileSync('hash.json');
+  if (hash==vInfo.hash) {
+    io.to(id).emit('vlogin');
+  }
+}
 
 function login(id,msg) {
   console.log('Connection: ID ' + id);
@@ -107,9 +116,9 @@ function update(id) {
 
 function data(id,data) {
   console.log('ID ' + id + ' sent data for their current block');
-  if (JGL[info[id].experiment][info[id].hash].data.length != JGL[info[id].experiment][info[id].hash].block) {
-    console.log('WARNING: ' + id + ' sent data without incrementing their block counter');
-  }
+  // if (JGL[info[id].experiment][info[id].hash].block) {
+  //   console.log('WARNING: ' + id + ' sent data without incrementing their block counter');
+  // }
   // Rather than store data on the server we're going to save it immediately
   var exp = info[id].experiment;
   var hash = info[id].hash;
@@ -132,6 +141,8 @@ function complete(id) {
   JGL[info[id].experiment][info[id].hash].data = {};
 }
 
+
+
 // ///////////////////////////////////////////////////////////////////////
 // //////////////////////// JGL FUNCTIONS ////////////////////////////////
 // ///////////////////////////////////////////////////////////////////////
@@ -139,9 +150,18 @@ function complete(id) {
 var JGL = {};
 var info = {};
 
+var jglFile = 'JGL.json',
+  infoFile = 'info.json';
+
 function saveState() {
   // Save the state of the JGL object but NOT the data: key for a correct shutdown
-  // saveData();
+  jsonfile.writeFile(jglFile,JGL,function(err) {console.log(err);});
+  jsonfile.writeFile(infoFile,info,function(err) {console.log(err);});
+}
+
+function loadState() {
+  JGL = jsonfile.readFileSync(jglFile);
+  info = jsonfile.readFileSync(infoFile);
 }
 
 // function saveData() {
@@ -158,7 +178,9 @@ function saveState() {
 
 function saveData_(exp,subj,data) {
   // Save ./exp/subj/data.json 
-  var folder = 'exps/'+exp+'/'+subj+'/';
+  var tfolder = 'data/'+exp;
+  mkdirp(tfolder);
+  var folder = tfolder+'/'+subj+'/';
   mkdirp(folder);
   var file = folder+'data_'+Date.now()+'.json';
   jsonfile.writeFile(file,data,function(err) {console.log(err);});
