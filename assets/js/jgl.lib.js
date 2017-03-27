@@ -289,7 +289,7 @@ function jglTextSet(fontName, fontSize, fontColor, fontBold, fontItalic) {
  * @param {Number} y the y coordinate of the beginning of the text
  */
 function jglTextDraw(text, x, y) {
-	jgl.ctx.fillText(text, x, y);
+	jgl.ctx.fillText(text, x*jgl.screenInfo.pixPerDeg, y*jgl.screenInfo.pixPerDeg);
 }
 
 

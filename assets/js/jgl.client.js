@@ -266,7 +266,11 @@ function processTask(task) {
 					console.log('WARNING: Block randomization is not implemented. Using equal probabilities.');
 					var params = Object.keys(task[ti].parameters);
 					for (var pi=0;pi<params.length;pi++) {
-						task[ti].trials[i][params[pi]] = randomElement(task[ti].parameters[params[pi]]);
+						if (task[ti].parameters[params[pi]].length != undefined) {
+							task[ti].trials[i][params[pi]] = randomElement(task[ti].parameters[params[pi]]);
+						} else {
+							task[ti].trials[i][params[pi]] = task[ti].parameters[params[pi]];
+						}
 					}
 				}
 				// VARIABLES
@@ -513,27 +517,38 @@ function endBlock_() {
 	var data = {};
 		
 	if (jgl.task[jgl.curBlock].type=='trial') {
-		// save data into task[jgl.curBlock].datas 
+		// We need to copy from each trial in jgl.trials
+		// all of the variables, parameters, etc
+		// and save them into corresponding lists in data
+
 		// copy parameters
 		var params = Object.keys(jgl.task[jgl.curBlock].parameters);
 		for (var pi=0;pi<params.length;pi++) {
-			data[params[pi]] = jgl.trial[params[pi]];
+			data[params[pi]] = [];
+			for (var ti=0;ti<jgl.task[jgl.curBlock].numTrials;ti++) {
+				data[params[pi]].push(jgl.task[jgl.curBlock].trials[ti][params[pi]]);
+			}
 		}
 
 		// copy variables
 		var variables = Object.keys(jgl.task[jgl.curBlock].variables);
 		for (var vi=0;vi<variables.length;vi++) {
-			data[variables[vi]] = jgl.trial[variables[vi]];
+			data[variables[vi]] = [];
+			for (var ti=0;ti<jgl.task[jgl.curBlock].numTrials;ti++) {
+				data[variables[vi]].push(jgl.task[jgl.curBlock].trials[ti][variables[vi]]);
+			}
 		}
 
-		// copy defaults (RT, response, correct)
+		// copy defaults (RT, response, correct,framerate)
 		var defaults = ['RT','response','correct','framerate'];
 		for (var di=0;di<defaults.length;di++) {
-			// these might not be defined, so don't just copy by default
-			if (jgl.trial[defaults[di]]!=undefined) {data[defaults[di]] = jgl.trial[defaults[di]];}
+			data[defaults[di]] = [];
+			for (var ti=0;ti<jgl.task[jgl.curBlock].numTrials;ti++) {
+				data[defaults[di]].push(jgl.task[jgl.curBlock].trials[ti][defaults[di]]);
+			}
 		}
 	} else {
-		// copy variables
+		// copy variables from the one trial object
 		var variables = Object.keys(jgl.task[jgl.curBlock].variables);
 		for (var vi=0;vi<variables.length;vi++) {
 			data[variables[vi]] = jgl.trial[variables[vi]];
@@ -568,7 +583,7 @@ function startTrial_() {
 
 	// Run trial:
 	jgl.timing.trial = now();
-	console.log('Starting trial: ' + jgl.curTrial);
+	console.log('Starting trial: ' + (jgl.curTrial+1));
 	jgl.trial = jgl.task[jgl.curBlock].trials[jgl.curTrial];
 	jgl.trial.framerate = [];
 
@@ -586,6 +601,9 @@ function startTrial_() {
 
 function endTrial_() {
 	jgl.trial.framerate = 1000/mean(jgl.trial.framerate);
+
+	// Copy the current trial into the trials structure
+	jgl.task[jgl.curBlock].trials[jgl.curTrial] = jgl.trial;
 
 	if (jgl.callbacks.endTrial) {jgl.callbacks.endTrial();}
 }
