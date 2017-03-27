@@ -29,7 +29,7 @@ function loadTask() {
 	task[2].variables = {};
 	task[2].instructions = ['instruct-1','instruct-2','instruct-3','instruct-4','instruct-5'];
 
-	task[3] = addTaskBlock(3,true);
+	task[3] = addTaskBlock(5,true);
 
 	// FIRST BLOCK
 	task[4] = {};
@@ -39,7 +39,7 @@ function loadTask() {
 	task[4].variables = {};
 	task[4].instructions = ['instruct-block1'];
 
-	task[5] = addTaskBlock(3,false);
+	task[5] = addTaskBlock(10,false);
 
 	// // SURVEY RULE
 	task[6] = {};
