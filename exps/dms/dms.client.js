@@ -77,6 +77,7 @@ function addTaskBlock(numTrials,practice) {
 	// caution: these need a value (e.g. NaN) or they won't run correctly
 	taskblock.variables = {};
 	taskblock.variables.dir2 = NaN;
+	taskblock.variables.nmResp = NaN;
 	// Segment timing
 	taskblock.segnames = ['wait','sample','delay','test','resp','iti'];
 	// Seglen uses specific times
@@ -120,15 +121,47 @@ function checkStartTrial(event) {
 function checkEndTrial(event) {
 	if (event.which==32) {
 		jgl.active.pressed = false;
+		if (jgl.trial.segname=='resp') {
+			if (jgl.trial.responded[jgl.trial.thisseg]==0) {
+				jgl.trial.responded[jgl.trial.thisseg]==1;
+				jgl.trial.nmResp = 0;
+				checkCorrect(jgl.trial.nmResp);
+				jgl.trial.RT[jgl.trial.thisseg] = now() - jgl.timing.segment;
+
+			}
+		}
 		if (jgl.trial.segname=='iti') {
+			if (jgl.trial.responded[jgl.trial.thisseg-1]==0) {
+				jgl.trial.responded[jgl.trial.thisseg]==1;
+				jgl.trial.nmResp=1;
+				checkCorrect(jgl.trial.nmResp);
+				jgl.trial.RT[jgl.trial.thisseg]=0;
+			}
 			event.preventDefault();
 			jumpSegment();
 		}
 	}
 }
 
+function checkCorrect(nmResp) {
+	if (jgl.trial.match!=nmResp) {
+		jgl.trial.correct=1;
+		jgl.active.fixColor="#00ff00";
+	} else {
+		jgl.trial.correct=0;
+		jgl.active.fixColor="#ff0000";
+	}
+}
+
 function startTrial() {
-	jgl.trial.dir2 = 0;
+	if (jgl.trial.match) {
+		jgl.trial.dir2 = jgl.trial.dir1;
+	} else {
+		jgl.trial.dir2 = randomElement([0, Math.PI*1/4, Math.PI*1/2, Math.PI*3/4, Math.PI, Math.PI*5/4, Math.PI*6/4, Math.PI*7/4]);
+		while (jgl.trial.dir1==jgl.trial.dir2) {
+			jgl.trial.dir2 = randomElement([0, Math.PI*1/4, Math.PI*1/2, Math.PI*3/4, Math.PI, Math.PI*5/4, Math.PI*6/4, Math.PI*7/4]);
+		}
+	}
 }
 
 function startSegment() {
@@ -159,7 +192,14 @@ function startSegment() {
 			jgl.active.fixColor = "#ffff00";
 			break;
 		case 'iti':
-			if (!jgl.active.pressed) {jumpSegment();}
+			if (isNaN(jgl.trial.correct)) {
+				jgl.trial.responded[jgl.trial.thisseg]==1;
+				jgl.trial.nmResp=1;
+				checkCorrect(jgl.trial.nmResp);
+				jgl.trial.RT[jgl.trial.thisseg]=0;
+				jgl.active.fix = 1;
+			}
+			if (!jgl.active.pressed) {setTimeout(jumpSegment,1000);}
 			break;
 	}
 }
