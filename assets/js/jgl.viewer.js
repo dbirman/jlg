@@ -7,16 +7,25 @@ $(document).ready(function() {launch();});
 function launch() {
 	document.addEventListener('keypress',keyPressed,false);
 
+	$("#experiments").append("\<h2 id=\"login\"\>Please log in\</h2\>");
 	socket.on('vlogin',function() {login();});
 
 	socket.on('vJGL', function(jgl) {parseJGL(jgl);});
 	socket.on('vinfo',function(info) {parseInfo(info);});
+
+	tick();
+}
+
+function tick() {
+	getInfo();
+
+	setTimeout(tick,5000);
 }
 
 function login() {
 	document.removeEventListener('keypress',keyPressed,false);
 	console.log('Successful login to server');
-	$("#login").hide();
+	$("#experiments").html("");
 	populate();
 }
 
@@ -49,7 +58,7 @@ function parseInfo(info) {
 }
 
 function populate() {
-	$("#controls").append("<button type=\"button\" id=\"getinfo\" class=\"btn btn-primary btn-lg\" onclick=\"getInfo();\">Get info</button>");
+	// $("#controls").append("<button type=\"button\" id=\"getinfo\" class=\"btn btn-primary btn-lg\" onclick=\"getInfo();\">Get info</button>");
 }
 
 function getInfo() {

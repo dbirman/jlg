@@ -194,9 +194,9 @@ function loadState() {
 
 function saveData_(exp,subj,data) {
   // Save ./exp/subj/data.json 
-  var tfolder = 'data/'+exp;
+  var tfolder = 'data/'+exp+'/';
   mkdirp(tfolder);
-  var folder = tfolder+'/'+subj+'/';
+  var folder = tfolder+subj+'/';
   mkdirp(folder);
   var file = folder+'data_'+Date.now()+'.json';
   jsonfile.writeFile(file,data,function(err) {console.log(err);});
