@@ -40,6 +40,8 @@ io.on('connection', function(socket){
   socket.on('block', function(num) {try {block(socket.id,num);} catch(err) {console.log(err);}});
 
   socket.on('vlogin', function(hash) {try {viewerLogin(socket.id,hash);} catch(err) {console.log(err);}});
+  
+  socket.on('vinfo', function() {try {viewerInfo(socket.id);} catch(err) {console.log(err);}});
 });
 
 var port = 8080;
@@ -55,7 +57,17 @@ http.listen(port, function(){
 function viewerLogin(id,hash) {
   var vInfo = jsonfile.readFileSync('hash.json');
   if (hash==vInfo.hash) {
+    // Succesful login (correct password)
+    // store that this ID is allowed to access viewer functions
+    info[id] = true;
     io.to(id).emit('vlogin');
+  }
+}
+
+function viewerInfo(id) {
+  if (info[id]===true) {
+    io.to(id).emit('vJGL',JGL);
+    io.to(id).emit('vinfo',info);
   }
 }
 
@@ -103,7 +115,11 @@ function logout(id) {
   console.log('Disconnection: ID ' + id);
 
   if (info[id]!=undefined) {
-    JGL[info[id].experiment][info[id].hash].connected = false;
+    if (info[id]===true) {
+      delete info[id];
+    } else {
+      JGL[info[id].experiment][info[id].hash].connected = false;
+    }
   }
 }
 
