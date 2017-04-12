@@ -4,3 +4,7 @@ auth.json
 auth.json.zip
 
 hash.json
+
+node_modules/*
+
+node_modules\*
