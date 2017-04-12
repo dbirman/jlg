@@ -10,7 +10,19 @@ var app = require('express')();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
 var jsonfile = require('jsonfile');
+var mturk = require('mturk-api');
 var mkdirp = require('mkdirp');
+
+//////////////////////////////////////////////////////////////////////////////
+//////////////////////// SECURITY FUNCTIONS ////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+
+var helmet = require('helmet')
+app.use(helmet())
+
+//////////////////////////////////////////////////////////////////////////////
+//////////////////////// APP FUNCTIONALITY FUNCTIONS ////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
 
 // GET function
 app.get( '/*' , function( req, res ) {
@@ -158,7 +170,6 @@ function complete(id) {
 }
 
 
-
 // ///////////////////////////////////////////////////////////////////////
 // //////////////////////// JGL FUNCTIONS ////////////////////////////////
 // ///////////////////////////////////////////////////////////////////////
@@ -180,18 +191,6 @@ function loadState() {
   info = jsonfile.readFileSync(infoFile);
 }
 
-// function saveData() {
-//   // Go through all of the existing data and save it--remove data as you go (important for keeping overhead low)
-//   var experiments = Object.keys(JGL);
-//   for (var ei=0;ei<experiments.length;ei++) {
-//     var cexp = JGL[experiments[ei]];
-//     var subjects = Object.keys(cexp);
-//     for (var si=0;si<subjects.length;si++) {
-//       saveData_(experiments[ei],subjects[si],cexp[subjects[si]].data);
-//     }
-//   }
-// }
-
 function saveData_(exp,subj,data) {
   // Save ./exp/subj/data.json 
   var tfolder = 'data/'+exp+'/';
@@ -202,8 +201,69 @@ function saveData_(exp,subj,data) {
   jsonfile.writeFile(file,data,function(err) {console.log(err);});
 }
 
-// function tick() {
-//   saveData();
 
-//   setTimeout(tick,60000); // repeat every minute
-// }
+///////////////////////////////////////////////////////////////////////
+//////////////////////// MTURK FUNCTIONS //////////////////////////////
+///////////////////////////////////////////////////////////////////////
+
+// HIT information
+// Each HIT has:
+//   HIT.experiment - experiment name
+//   HIT.hitID
+//   HIT.assignments
+//   HIT.settings. {title, description, keywords, url, frame_height, duration, delay, reward, quals}
+var HIT = {};
+
+// Save the HIT object
+function saveHIT() {
+
+}
+
+// Load the HIT object
+function loadHIT() {
+
+}
+
+function createHIT() {
+
+}
+
+// Creates actual 9-person batches and tracks them correctly
+function createHITbatch() {
+
+}
+
+function updateHIT() {
+
+}
+
+function addHITassignments() {
+
+}
+
+function addHITtime() {
+
+}
+
+function expireHIT() {
+
+}
+
+// Overall status
+function status() {
+
+}
+
+// Individual HIt status
+function statusHIT() {
+
+}
+
+function history() {
+
+}
+
+// Reset the HIT tracking file (HIT.json)
+function eraseHistory() {
+
+}
