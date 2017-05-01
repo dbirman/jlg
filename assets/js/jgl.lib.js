@@ -70,7 +70,32 @@ function elapsed() {
 function now() {
 	return performance.now();
 }
+//------------------- SOUNDS -------------------
 
+function jglInitSounds() {
+	jgl.sounds = {};
+	jgl.sounds.sound = {}; // actual sound dictionary
+	window.AudioContext = window.AudioContext || window.webkitAudioContext;
+  jgl.sounds.context = new AudioContext();
+}
+
+function jglInitTone(freq, length, name) {
+	// Length in ms
+	// Freq in Hz
+	// Name is a string
+
+	// create Oscillator node
+	jgl.sounds.sound[name] = jgl.sounds.context.createOscillator();
+
+	jgl.sounds.sound[name].type = 'square';
+	jgl.sounds.sound[name].frequency.value = freq; // value in hertz
+}
+
+function jglPlayTone(name) {
+	jgl.sounds.sound[name].start();
+	jgl.sounds.sound[name].stop(jgl.sounds.context.currentTime + 0.200); // stop 2 seconds after the current time
+
+}
 
 //-------------------Drawing Different Shapes-------------------
 
