@@ -136,6 +136,7 @@ function checkCorrect(nmResp) {
 	} else {
 		jgl.trial.correct=0;
 		jgl.active.fixColor="#ff0000";
+		
 	}
 }
 
