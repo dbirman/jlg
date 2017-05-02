@@ -88,12 +88,13 @@ function jglInitTone(freq, length, name) {
 	jgl.sounds.sound[name] = jgl.sounds.context.createOscillator();
 
 	jgl.sounds.sound[name].type = 'square';
+	jgl.sonuds.sound[name].length = length;
 	jgl.sounds.sound[name].frequency.value = freq; // value in hertz
 }
 
 function jglPlayTone(name) {
 	jgl.sounds.sound[name].start();
-	jgl.sounds.sound[name].stop(jgl.sounds.context.currentTime + 0.200); // stop 2 seconds after the current time
+	jgl.sounds.sound[name].stop(jgl.sounds.context.currentTime + (jgl.sounds.sound[name].length/1000)); // stop 2 seconds after the current time
 
 }
 
