@@ -411,6 +411,9 @@ function clickEvent(event) {
 ///////////////////////////////////////////////////////////////////////
 
 function endExp_() {
+	// stop anything that's happening
+	cancelOngoingActivity();
+
 	console.log('Experiment complete');
 
 	if (jgl.callbacks.endExp!=undefined) {jgl.callbacks.endExp();}
@@ -507,12 +510,7 @@ function update_() {
 }
 
 function endBlock_() {
-	jgl.live = false;
-	// run standard code
-	cancelAnimationFrame(jgl.tick);
-
-	// remove event listeners
-	eventListenerRemoveAll();
+	endOngoingActivity();
 	
 	var data = {};
 		
@@ -554,6 +552,10 @@ function endBlock_() {
 			data[variables[vi]] = jgl.trial[variables[vi]];
 		}
 	}
+
+	// Allow accessibility from endBlock (useful for experiments
+	// that need to check something about the data, possibly to end the experiment early)
+	jgl.task[jgl.curBlock].data = data;
 
 	if (jgl.callbacks.endBlock) {jgl.callbacks.endBlock();}
 
@@ -779,4 +781,17 @@ function submitSurvey() {
 
 function surveyEnd() {
 	endBlock_();
+}
+
+/////////////////////////////
+////// CANCEL ACTIVITY //////
+/////////////////////////////
+
+function endOngoingActivity() {
+	jgl.live = false;
+	// run standard code
+	cancelAnimationFrame(jgl.tick);
+
+	// remove event listeners
+	eventListenerRemoveAll();
 }
