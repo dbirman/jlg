@@ -1,5 +1,6 @@
 
-function levelSetup(num) {
+function levelSetup1(taskblock) {
+	console.log(taskblock);
 	taskblock.callbacks.startBlock = startBlock_1
 	taskblock.callbacks.startTrial = startTrial_1;
 	taskblock.callbacks.startSegment = startSegment_1;
@@ -82,17 +83,7 @@ function startSegment_1() {
 	}
 }
 
-function upResp() {
-	if (jgl.trial.correct==1) {
-		jgl.ctx.fillStyle = "#00ff00";
-		jglTextDraw("Correct",0,0);
-	} else {
-		jgl.ctx.fillStyle = "#ff0000";
-		jglTextDraw("Wrong",0,0);
-	}
-}
-
-function updateScreen(t) {
+function updateScreen_1(t) {
 	if (jgl.active.fix) {
 		jglFixationCross(jgl.screenInfo.pixPerDeg,1,jgl.active.fixColor,[0,0]);
 	}

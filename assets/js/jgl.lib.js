@@ -75,27 +75,28 @@ function now() {
 function jglInitSounds() {
 	jgl.sounds = {};
 	jgl.sounds.sound = {}; // actual sound dictionary
-	window.AudioContext = window.AudioContext || window.webkitAudioContext;
-  jgl.sounds.context = new AudioContext();
+	jgl.sounds.context = new (window.AudioContext || window.webkit.AudioContext)();
 }
 
 function jglInitTone(freq, length, name) {
 	// Length in ms
 	// Freq in Hz
 	// Name is a string
-
-	// create Oscillator node
-	jgl.sounds.sound[name] = jgl.sounds.context.createOscillator();
-
-	jgl.sounds.sound[name].type = 'square';
-	jgl.sonuds.sound[name].length = length;
-	jgl.sounds.sound[name].frequency.value = freq; // value in hertz
+	if (jgl.sounds===undefined) {jglInitSounds();}
+	jgl.sounds.sound[name] = {};
+	jgl.sounds.sound[name].type = 'sine';
+	jgl.sounds.sound[name].length = length;
+	jgl.sounds.sound[name].freq = freq; // value in hertz
 }
 
 function jglPlayTone(name) {
-	jgl.sounds.sound[name].start();
-	jgl.sounds.sound[name].stop(jgl.sounds.context.currentTime + (jgl.sounds.sound[name].length/1000)); // stop 2 seconds after the current time
-
+	// create Oscillator node
+	var oscillator = jgl.sounds.context.createOscillator();
+	oscillator.type = jgl.sounds.sound[name].type;
+	oscillator.frequency.value = jgl.sounds.sound[name].freq; // value in hertz
+	oscillator.connect(jgl.sounds.context.destination);
+	oscillator.start();
+	oscillator.stop(jgl.sounds.context.currentTime + jgl.sounds.sound[name].length/1000);
 }
 
 //-------------------Drawing Different Shapes-------------------

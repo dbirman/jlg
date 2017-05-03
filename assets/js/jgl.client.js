@@ -213,6 +213,7 @@ function start() {
 }
 
 function error(type) {
+	jgl.curBlock=-Infinity;
 	hideAll();
 	$("#error").show();
 	switch (type) {
