@@ -4,36 +4,36 @@ function loadTask() {
 
 	var count=0;
 	// CONSENT
-	// task[count] = {};
-	// task[count].type = 'consent';
-	// // consent is a default type with no callbacks
-	// task[count].variables = {};
-	// task[count].variables.consent = NaN;
-	// count++;
-	// // consent has no data
+	task[count] = {};
+	task[count].type = 'consent';
+	// consent is a default type with no callbacks
+	task[count].variables = {};
+	task[count].variables.consent = NaN;
+	count++;
+	// consent has no data
 
-	// // // SURVEY DEMOGRAPHICS
-	// task[count] = {};
-	// task[count].type = 'survey';
-	// task[count].surveys = ['survey-demo'];
-	// task[count].variables = {};
-	// count++;
+	// // SURVEY DEMOGRAPHICS
+	task[count] = {};
+	task[count].type = 'survey';
+	task[count].surveys = ['survey-demo'];
+	task[count].variables = {};
+	count++;
 
-	// // SCREEN TEST
-	// task[count] = {};
-	// task[count].type = 'instructions';
-	// task[count].instructions = ['screen-test'];
-	// task[count].variables = {};
-	// count++;
+	// SCREEN TEST
+	task[count] = {};
+	task[count].type = 'instructions';
+	task[count].instructions = ['screen-test'];
+	task[count].variables = {};
+	count++;
 
-	// task[count++] = screenTestSetup();
+	task[count++] = screenTestSetup();
 
-	// // SCREEN TEST
-	// task[count] = {};
-	// task[count].type = 'instructions';
-	// task[count].instructions = ['sound-test'];
-	// task[count].variables = {};
-	// count++;
+	// SCREEN TEST
+	task[count] = {};
+	task[count].type = 'instructions';
+	task[count].instructions = ['sound-test'];
+	task[count].variables = {};
+	count++;
 
 	task[count++] = soundTestSetup();
 
@@ -44,15 +44,12 @@ function loadTask() {
 	task[count].instructions = ['instruct-1','instruct-2'];
 	count++;
 
-	// var count = 7;
 	// var levels = 1;
 	// for (var i=1;i<=levels;i++) {
-	// 	task[count++] = levelInstructionSetup(i);
-	// 	task[count++] = window['levelSetup'+i]();
+	// 	// task[count++] = levelInstructionSetup(i);
+	// 	task[count++] = levelSetup(i);
 	// 	task[count++] = surveySetup();
 	// }
-
-	jgl.active = {}; // use this for tracking what's happening
 
 	return task;
 }
@@ -85,13 +82,10 @@ function levelSetup(num) {
 	taskblock.callbacks.startBlock = startBlock;
 	taskblock.callbacks.endBlock = endBlock;
 
-	console.log(window['levelSetup'+num]);
 	return window['levelSetup'+num](taskblock);
 }
 
 function startBlock() {
-	jgl.active.dots = initDots(500,5,5,1,0,12,1);
-
 	document.addEventListener("keydown",checkStartTrial,false);
 	document.addEventListener("keyup",checkEndTrial,false);
 }

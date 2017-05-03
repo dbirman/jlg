@@ -54,7 +54,7 @@ function endBlock_sound() {
 			values.push(crt);
 		}
 	}
-	if ((crash>=2) || (mean(values)>500) || (mean(values)<100)) {
+	if ((crash>=2) || (mean(values)>750) || (mean(values)<100)) {
 		// They're probably fucking around
 		error('There is a problem with your screen, it is not showing the stimulus with the correct timing. We are really sorry. This is likely a browser incompatibility issue. Please close this window and return the HIT.');
 	}
@@ -67,6 +67,7 @@ function startTrial_sound() {
 }
 
 function updateScreen_sound() {
+	jglFixationCross();
 	if (jgl.active.stim && (jgl.trial.segname=='stim')) {
 		opts = ['low','high'];
 		jglPlayTone(opts[jgl.trial.sound]);

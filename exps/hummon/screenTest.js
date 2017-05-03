@@ -51,7 +51,7 @@ function endBlock_screen() {
 	}
 	console.log(mean(values));
 	console.log(crash);
-	if ((crash>=2) || (mean(values)>500) || (mean(values)<100)) {
+	if ((crash>=2) || (mean(values)>750) || (mean(values)<100)) {
 		// They're probably fucking around
 		error('There is a problem with your screen, it is not showing the stimulus with the correct timing. We are really sorry. This is likely a browser incompatibility issue. Please close this window and return the HIT.');
 	}
@@ -65,6 +65,7 @@ function startTrial_screen() {
 }
 
 function updateScreen_screen() {
+	jglFixationCross();
 	if (jgl.active.stim && (jgl.trial.segname=='stim')) {
 		jglFillRect(jgl.trial.ecc*Math.cos(jgl.trial.angle), jgl.trial.ecc*Math.sin(jgl.trial.angle), [1, 1], jgl.active.color);
 	}

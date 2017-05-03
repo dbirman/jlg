@@ -4,36 +4,36 @@ function loadTask() {
 
 	var count=0;
 	// CONSENT
-	// task[count] = {};
-	// task[count].type = 'consent';
-	// // consent is a default type with no callbacks
-	// task[count].variables = {};
-	// task[count].variables.consent = NaN;
-	// count++;
-	// // consent has no data
+	task[count] = {};
+	task[count].type = 'consent';
+	// consent is a default type with no callbacks
+	task[count].variables = {};
+	task[count].variables.consent = NaN;
+	count++;
+	// consent has no data
 
-	// // // SURVEY DEMOGRAPHICS
-	// task[count] = {};
-	// task[count].type = 'survey';
-	// task[count].surveys = ['survey-demo'];
-	// task[count].variables = {};
-	// count++;
+	// // SURVEY DEMOGRAPHICS
+	task[count] = {};
+	task[count].type = 'survey';
+	task[count].surveys = ['survey-demo'];
+	task[count].variables = {};
+	count++;
 
-	// // SCREEN TEST
-	// task[count] = {};
-	// task[count].type = 'instructions';
-	// task[count].instructions = ['screen-test'];
-	// task[count].variables = {};
-	// count++;
+	// SCREEN TEST
+	task[count] = {};
+	task[count].type = 'instructions';
+	task[count].instructions = ['screen-test'];
+	task[count].variables = {};
+	count++;
 
-	// task[count++] = screenTestSetup();
+	task[count++] = screenTestSetup();
 
-	// // SCREEN TEST
-	// task[count] = {};
-	// task[count].type = 'instructions';
-	// task[count].instructions = ['sound-test'];
-	// task[count].variables = {};
-	// count++;
+	// SCREEN TEST
+	task[count] = {};
+	task[count].type = 'instructions';
+	task[count].instructions = ['sound-test'];
+	task[count].variables = {};
+	count++;
 
 	task[count++] = soundTestSetup();
 
@@ -44,15 +44,12 @@ function loadTask() {
 	task[count].instructions = ['instruct-1','instruct-2'];
 	count++;
 
-	// var count = 7;
 	// var levels = 1;
 	// for (var i=1;i<=levels;i++) {
-	// 	task[count++] = levelInstructionSetup(i);
-	// 	task[count++] = window['levelSetup'+i]();
+	// 	// task[count++] = levelInstructionSetup(i);
+	// 	task[count++] = levelSetup(i);
 	// 	task[count++] = surveySetup();
 	// }
-
-	jgl.active = {}; // use this for tracking what's happening
 
 	return task;
 }
@@ -85,13 +82,10 @@ function levelSetup(num) {
 	taskblock.callbacks.startBlock = startBlock;
 	taskblock.callbacks.endBlock = endBlock;
 
-	console.log(window['levelSetup'+num]);
 	return window['levelSetup'+num](taskblock);
 }
 
 function startBlock() {
-	jgl.active.dots = initDots(500,5,5,1,0,12,1);
-
 	document.addEventListener("keydown",checkStartTrial,false);
 	document.addEventListener("keyup",checkEndTrial,false);
 }
@@ -169,8 +163,6 @@ function upDelay() {
 	}
 }
 function levelSetup1(taskblock) {
-	console.log(taskblock);
-	taskblock.callbacks.startBlock = startBlock_1
 	taskblock.callbacks.startTrial = startTrial_1;
 	taskblock.callbacks.startSegment = startSegment_1;
 	taskblock.callbacks.updateScreen = updateScreen_1;
@@ -199,11 +191,8 @@ function levelSetup1(taskblock) {
 	return taskblock;
 }
 
-function startBlock_1() {
-	document.addEventListener("keydown",checkStartTrial,false);
-	document.addEventListener("keyup",checkEndTrial,false);
-
-	startBlock();
+function checkEndConditions_1() {
+	return false;
 }
 
 function startTrial_1() {
@@ -214,14 +203,6 @@ function startTrial_1() {
 	}
 
 	jgl.active.dead = false;
-	if (jgl.trial.match) {
-		jgl.trial.dir2 = jgl.trial.dir1;
-	} else {
-		jgl.trial.dir2 = randomElement([0, Math.PI*1/4, Math.PI*1/2, Math.PI*3/4, Math.PI, Math.PI*5/4, Math.PI*6/4, Math.PI*7/4]);
-		while (jgl.trial.dir1==jgl.trial.dir2) {
-			jgl.trial.dir2 = randomElement([0, Math.PI*1/4, Math.PI*1/2, Math.PI*3/4, Math.PI, Math.PI*5/4, Math.PI*6/4, Math.PI*7/4]);
-		}
-	}
 }
 
 function startSegment_1() {
@@ -281,7 +262,7 @@ function screenTestSetup() {
 	taskblock.callbacks.getResponse = getResponse_screen;
 	// RT task doesn't have any parameters, but this gets auto-populated with data
 	taskblock.parameters = {};
-	taskblock.parameters.ecc = 5;
+	taskblock.parameters.ecc = 5*jgl.screenInfo.pixPerDeg;
 	// RT task won't log any variables either (these get set by the user somewhere in the callbacks)
 	// caution: these need a value (e.g. NaN) or they won't run correctly
 	taskblock.variables = {};
@@ -299,7 +280,7 @@ function screenTestSetup() {
 	// If you give different keys 
 	taskblock.keys = 32;
 	// Trials
-	taskblock.numTrials = 5; // can be infinite as well
+	taskblock.numTrials = 6; // can be infinite as well
 	// Keys
 
 	return taskblock;
@@ -318,7 +299,7 @@ function endBlock_screen() {
 	}
 	console.log(mean(values));
 	console.log(crash);
-	if ((crash>=2) || (mean(values)>500) || (mean(values)<100)) {
+	if ((crash>=2) || (mean(values)>750) || (mean(values)<100)) {
 		// They're probably fucking around
 		error('There is a problem with your screen, it is not showing the stimulus with the correct timing. We are really sorry. This is likely a browser incompatibility issue. Please close this window and return the HIT.');
 	}
@@ -332,6 +313,7 @@ function startTrial_screen() {
 }
 
 function updateScreen_screen() {
+	jglFixationCross();
 	if (jgl.active.stim && (jgl.trial.segname=='stim')) {
 		jglFillRect(jgl.trial.ecc*Math.cos(jgl.trial.angle), jgl.trial.ecc*Math.sin(jgl.trial.angle), [1, 1], jgl.active.color);
 	}
@@ -374,7 +356,7 @@ function soundTestSetup() {
 	// If you give different keys 
 	taskblock.keys = 32;
 	// Trials
-	taskblock.numTrials = 5; // can be infinite as well
+	taskblock.numTrials = 6; // can be infinite as well
 	// Keys
 
 	return taskblock;
@@ -396,7 +378,7 @@ function endBlock_sound() {
 			values.push(crt);
 		}
 	}
-	if ((crash>=2) || (mean(values)>500) || (mean(values)<100)) {
+	if ((crash>=2) || (mean(values)>750) || (mean(values)<100)) {
 		// They're probably fucking around
 		error('There is a problem with your screen, it is not showing the stimulus with the correct timing. We are really sorry. This is likely a browser incompatibility issue. Please close this window and return the HIT.');
 	}
@@ -409,6 +391,7 @@ function startTrial_sound() {
 }
 
 function updateScreen_sound() {
+	jglFixationCross();
 	if (jgl.active.stim && (jgl.trial.segname=='stim')) {
 		opts = ['low','high'];
 		jglPlayTone(opts[jgl.trial.sound]);

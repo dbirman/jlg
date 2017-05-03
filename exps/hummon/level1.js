@@ -1,7 +1,5 @@
 
 function levelSetup1(taskblock) {
-	console.log(taskblock);
-	taskblock.callbacks.startBlock = startBlock_1
 	taskblock.callbacks.startTrial = startTrial_1;
 	taskblock.callbacks.startSegment = startSegment_1;
 	taskblock.callbacks.updateScreen = updateScreen_1;
@@ -30,11 +28,8 @@ function levelSetup1(taskblock) {
 	return taskblock;
 }
 
-function startBlock_1() {
-	document.addEventListener("keydown",checkStartTrial,false);
-	document.addEventListener("keyup",checkEndTrial,false);
-
-	startBlock();
+function checkEndConditions_1() {
+	return false;
 }
 
 function startTrial_1() {
@@ -45,14 +40,6 @@ function startTrial_1() {
 	}
 
 	jgl.active.dead = false;
-	if (jgl.trial.match) {
-		jgl.trial.dir2 = jgl.trial.dir1;
-	} else {
-		jgl.trial.dir2 = randomElement([0, Math.PI*1/4, Math.PI*1/2, Math.PI*3/4, Math.PI, Math.PI*5/4, Math.PI*6/4, Math.PI*7/4]);
-		while (jgl.trial.dir1==jgl.trial.dir2) {
-			jgl.trial.dir2 = randomElement([0, Math.PI*1/4, Math.PI*1/2, Math.PI*3/4, Math.PI, Math.PI*5/4, Math.PI*6/4, Math.PI*7/4]);
-		}
-	}
 }
 
 function startSegment_1() {

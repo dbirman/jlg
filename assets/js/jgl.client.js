@@ -255,6 +255,7 @@ function processTask(task) {
 		if (task[ti].type=='trial') {
 			// setup trials
 			task[ti].trials = [];
+			if (task[ti].numTrials===Infinity) {task[ti].numTrials=1000;}
 			for (var i=0;i<task[ti].numTrials;i++) {
 				task[ti].trials[i] = {};
 				// RESPONSE WATCH
@@ -426,6 +427,7 @@ function startBlock_() {
 	jgl.curBlock++;
 	if (!debug) {socket.emit('block',jgl.curBlock);}
 	jgl.curTrial = -1;
+	jgl.active = {}; // Reset active across blocks
 
 	// Check if we need to end the experiment
 	if (jgl.curBlock>=(jgl.task.length)) {endExp_(); return}
