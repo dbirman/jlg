@@ -22,7 +22,7 @@ function levelSetup1(taskblock) {
 	// If you give different keys 
 	// taskblock.keys = 32;
 	// Trials
-	taskblock.numTrials = Infinity; // can be infinite as well
+	taskblock.numTrials = 250; // if we make it to 250 then we cancel the experiment
 	// Keys
 
 	return taskblock;

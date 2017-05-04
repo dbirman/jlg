@@ -4,52 +4,52 @@ function loadTask() {
 
 	var count=0;
 	// CONSENT
-	task[count] = {};
-	task[count].type = 'consent';
-	// consent is a default type with no callbacks
-	task[count].variables = {};
-	task[count].variables.consent = NaN;
-	count++;
-	// consent has no data
+	// task[count] = {};
+	// task[count].type = 'consent';
+	// // consent is a default type with no callbacks
+	// task[count].variables = {};
+	// task[count].variables.consent = NaN;
+	// count++;
+	// // consent has no data
 
-	// // SURVEY DEMOGRAPHICS
-	task[count] = {};
-	task[count].type = 'survey';
-	task[count].surveys = ['survey-demo'];
-	task[count].variables = {};
-	count++;
+	// // // SURVEY DEMOGRAPHICS
+	// task[count] = {};
+	// task[count].type = 'survey';
+	// task[count].surveys = ['survey-demo'];
+	// task[count].variables = {};
+	// count++;
 
-	// SCREEN TEST
-	task[count] = {};
-	task[count].type = 'instructions';
-	task[count].instructions = ['screen-test'];
-	task[count].variables = {};
-	count++;
+	// // SCREEN TEST
+	// task[count] = {};
+	// task[count].type = 'instructions';
+	// task[count].instructions = ['screen-test'];
+	// task[count].variables = {};
+	// count++;
 
-	task[count++] = screenTestSetup();
+	// task[count++] = screenTestSetup();
 
-	// SCREEN TEST
-	task[count] = {};
-	task[count].type = 'instructions';
-	task[count].instructions = ['sound-test'];
-	task[count].variables = {};
-	count++;
+	// // SCREEN TEST
+	// task[count] = {};
+	// task[count].type = 'instructions';
+	// task[count].instructions = ['sound-test'];
+	// task[count].variables = {};
+	// count++;
 
-	task[count++] = soundTestSetup();
+	// task[count++] = soundTestSetup();
 
-	// // INSTRUCTIONS
-	task[count] = {};
-	task[count].type = 'instructions';
-	task[count].variables = {};
-	task[count].instructions = ['instruct-1','instruct-2'];
-	count++;
+	// // // INSTRUCTIONS
+	// task[count] = {};
+	// task[count].type = 'instructions';
+	// task[count].variables = {};
+	// task[count].instructions = ['instruct-1','instruct-2'];
+	// count++;
 
-	// var levels = 1;
-	// for (var i=1;i<=levels;i++) {
-	// 	// task[count++] = levelInstructionSetup(i);
-	// 	task[count++] = levelSetup(i);
-	// 	task[count++] = surveySetup();
-	// }
+	var levels = 1;
+	for (var i=1;i<=levels;i++) {
+		// task[count++] = levelInstructionSetup(i);
+		task[count++] = levelSetup(i);
+		task[count++] = surveySetup();
+	}
 
 	return task;
 }
