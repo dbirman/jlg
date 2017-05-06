@@ -77,6 +77,7 @@ function surveySetup() {
 function levelSetup(num) {
 	// RT TRIALS
 	var taskblock = {};
+
 	taskblock.type = 'trial'; // this will give us use of the canvas
 	// Set minimum screen dimensions 
 	taskblock.minX = 8;
@@ -86,7 +87,8 @@ function levelSetup(num) {
 }
 
 function checkStartTrial(event) {
-	if (event.which==32 && !jgl.active.pressed) {
+	if (event.which==32 && !jgl.active.pressed && !jgl.active.trialUp) {
+		jgl.active.trialUp = true;
 		jgl.active.pressed = true;
 		if (jgl.trial.segname=='wait') {
 			event.preventDefault();
@@ -96,10 +98,9 @@ function checkStartTrial(event) {
 }
 
 function checkEndTrial(event) {
-	if (event.which==32) {
+	if (event.which==32 && !jgl.active.trialDown) {
+		jgl.active.trialDown = true;
 		jgl.active.pressed = false;
-		// crash out from wait
-		if (jgl.trial.segname=='wait') {jgl.active.dead=true; return}
 		// otherwise, call the local function
 		jgl.active.checkEnd();
 	}

@@ -165,17 +165,17 @@ function jglFillOval(x, y, size, color) {
 	canvas.context.restore();
 }
 
-function jglFillArc(x, y, size, color, sAng, wAng) {
+function jglFillArc(x, y, iradius, oradius, color, sAng, wAng) {
 	if (x.length != y.length) {
 		//Error
 		throw "Fill Oval: Lengths dont match";
 	}
-	canvas.context.fillStyle=color;
-	canvas.context.beginPath();
-	canvas.context.moveTo(0,0);
-	canvas.context.arc(x,y,size,sAng,wAng);
-	canvas.context.fill();
-	canvas.context.closePath();
+	jgl.ctx.fillStyle=color;
+	jgl.ctx.beginPath();
+	jgl.ctx.arc(x*jgl.screenInfo.pixPerDeg,y*jgl.screenInfo.pixPerDeg,oradius*jgl.screenInfo.pixPerDeg,sAng,wAng,false);
+	jgl.ctx.arc(x*jgl.screenInfo.pixPerDeg,y*jgl.screenInfo.pixPerDeg,iradius*jgl.screenInfo.pixPerDeg,wAng,sAng,true);
+	jgl.ctx.closePath();
+	jgl.ctx.fill();
 }
 
 /**
@@ -214,7 +214,7 @@ function jglFixationCross(width, lineWidth, color, origin) {
 	
 	if (arguments.length == 0) {
 		if (jgl.canvas.usingVisualAngles) {
-			width = jgl.screenInfo.pixPerDeg;
+			width = 1;
 			lineWidth = 1;
 			color = "#ffffff";
 			origin = [0 , 0];
@@ -226,6 +226,7 @@ function jglFixationCross(width, lineWidth, color, origin) {
 		}
 		
 	}
+	width = width * jgl.screenInfo.pixPerDeg;
 	jgl.ctx.lineWidth = lineWidth;
 	jgl.ctx.strokeStyle = color;
 	jgl.ctx.beginPath();

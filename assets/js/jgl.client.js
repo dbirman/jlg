@@ -285,7 +285,10 @@ function processTask(task) {
 				// SEGMENT TIMING (setup timing)
 				if (task[ti].seglen!=undefined) {
 					// seglen overrides min/max
-					task[ti].trials[i].seglen = task[ti].seglen;
+					task[ti].trials[i].seglen = [];
+					for (var li=0;li<task[ti].seglen.length;li++) {
+						task[ti].trials[i].seglen.push(task[ti].seglen[li]);
+					}
 				} else if (task[ti].segmin!=undefined) {
 					if (task[ti].segmax==undefined) {error('An error occurred: segment maximum was not defined');}
 					else {
@@ -503,7 +506,7 @@ function update_() {
 	// Next trial may have shut down the block, check this
 	if (cblock != jgl.curBlock) {return}
 	// Check next segment
-	if ((now()-jgl.timing.segment)>jgl.trial.seglen[jgl.trial.thisseg]) {startSegment_();}
+	if ((now()-jgl.timing.segment)>=jgl.trial.seglen[jgl.trial.thisseg]) {startSegment_();}
 
 	// Update screen
 	updateScreen_(t);
@@ -575,10 +578,8 @@ function endBlock_() {
 function jumpSegment(delay) {
 	if (delay===undefined) {delay = 0;}
 	if (jgl.trial.seglen[jgl.trial.thisseg]==Infinity) {
-		jgl.trial.seglen[jgl.trial.thisseg]=now()-jgl.timing.segment+delay;
-		jgl.trial.length = sum(jgl.trial.seglen);
+		updateSeglen(now()-jgl.timing.segment+delay,jgl.trial.thisseg);
 	}
-	startSegment_();
 }
 
 function startTrial_() {
@@ -589,6 +590,7 @@ function startTrial_() {
 	// Run trial:
 	jgl.timing.trial = now();
 	console.log('Starting trial: ' + (jgl.curTrial+1));
+	jgl.lasttrial = jgl.trial;
 	jgl.trial = jgl.task[jgl.curBlock].trials[jgl.curTrial];
 	jgl.trial.framerate = [];
 
@@ -597,11 +599,11 @@ function startTrial_() {
 	jgl.trial.RT = zeros(jgl.task[jgl.curBlock].response.length);
 	jgl.trial.responded = zeros(jgl.task[jgl.curBlock].response.length);
 
+	if (jgl.callbacks.startTrial) {jgl.callbacks.startTrial();}
+
 	// Start the segment immediately
 	jgl.trial.thisseg = -1;
 	startSegment_();
-
-	if (jgl.callbacks.startTrial) {jgl.callbacks.startTrial();}
 }
 
 function endTrial_() {
@@ -796,4 +798,9 @@ function endOngoingActivity() {
 
 	// remove event listeners
 	eventListenerRemoveAll();
+}
+
+function updateSeglen(nLength,segment) {
+	jgl.trial.seglen[segment] = nLength;
+	jgl.trial.length = sum(jgl.trial.seglen);
 }
