@@ -197,7 +197,7 @@ function jglFillRect(x, y, size, color) {
 	size[1] = size[1]*jgl.screenInfo.pixPerDeg;
 	for (var i=0;i<x.length;i++) {
 		jgl.ctx.fillStyle = color;
-		jgl.ctx.fillRect(x[i] - (size[0] / 2), y[i] - (size[1] / 2), size[0], size[1]);
+		jgl.ctx.fillRect(jgl.screenInfo.pixPerDeg*x[i] - (size[0] / 2),jgl.screenInfo.pixPerDeg*y[i] - (size[1] / 2), size[0], size[1]);
 	}
 }
 
@@ -812,6 +812,16 @@ function any(array) {
 		}
 	}
 	return false;
+}
+
+function all(array,value) {
+	if (value===undefined) {var value=1;}
+	for (var i=0;i<array.length;i++) {
+		if (array[i]!=value) {
+			return false;
+		}
+	}
+	return true;
 }
 
 /**

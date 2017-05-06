@@ -614,7 +614,6 @@ function endTrial_() {
 }
 
 function startSegment_() {
-
 	jgl.trial.thisseg++;
 
 	// check if we went too far
@@ -643,7 +642,7 @@ function updateScreen_(t) {
 function getResponse_() {
 	if (!jgl.live) {return}
 	// actual event -- do nothing unless subject requests
-	if (jgl.trial.responded[jgl.trial.thisseg]>0) {
+	if ((jgl.trial.responded[jgl.trial.thisseg]>0)) {
 		jgl.trial.responded[jgl.trial.thisseg]++;
 		console.log('Multiple responses recorded: ' + jgl.trial.responded);
 		return

@@ -51,6 +51,10 @@ function loadTask() {
 		task[count++] = surveySetup();
 	}
 
+	// Setup sounds
+	jglInitTone(100,200,'low');
+	jglInitTone(1000,200,'high');
+
 	return task;
 }
 
@@ -77,22 +81,8 @@ function levelSetup(num) {
 	// Set minimum screen dimensions 
 	taskblock.minX = 8;
 	taskblock.minY = 8;
-	// Setup callback functions
-	taskblock.callbacks = {};
-	taskblock.callbacks.startBlock = startBlock;
-	taskblock.callbacks.endBlock = endBlock;
 
 	return window['levelSetup'+num](taskblock);
-}
-
-function startBlock() {
-	document.addEventListener("keydown",checkStartTrial,false);
-	document.addEventListener("keyup",checkEndTrial,false);
-}
-
-function endBlock() {
-	document.removeEventListener("keydown",checkStartTrial,false);
-	document.removeEventListener("keyup",checkEndTrial,false);
 }
 
 function checkStartTrial(event) {
@@ -108,29 +98,10 @@ function checkStartTrial(event) {
 function checkEndTrial(event) {
 	if (event.which==32) {
 		jgl.active.pressed = false;
-		if ((jgl.trial.segname!='resp')&&(jgl.trial.segname!='iti')) {
-			jgl.active.dead = true;
-			return
-		}
-		if (jgl.trial.segname=='resp') {
-			if (jgl.trial.responded[jgl.trial.thisseg]==0) {
-				jgl.trial.responded[jgl.trial.thisseg]==1;
-				jgl.trial.nmResp = 0;
-				checkCorrect(jgl.trial.nmResp);
-				jgl.trial.RT[jgl.trial.thisseg] = now() - jgl.timing.segment;
-
-			}
-		}
-		if (jgl.trial.segname=='iti') {
-			if (jgl.trial.responded[jgl.trial.thisseg-1]==0) {
-				jgl.trial.responded[jgl.trial.thisseg]==1;
-				jgl.trial.nmResp=1;
-				checkCorrect(jgl.trial.nmResp);
-				jgl.trial.RT[jgl.trial.thisseg]=0;
-			}
-			event.preventDefault();
-			jumpSegment();
-		}
+		// crash out from wait
+		if (jgl.trial.segname=='wait') {jgl.active.dead=true; return}
+		// otherwise, call the local function
+		jgl.active.checkEnd();
 	}
 }
 
