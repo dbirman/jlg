@@ -63,7 +63,7 @@ function checkTrialConditions_2() {
 }
 
 function checkEndConditions_2() {
-	return (jgl.active.delayStaircase>=500) && all(jgl.active.pastCorrect);
+	return (jgl.active.delayStaircase>=1000) && all(jgl.active.pastCorrect);
 }
 
 function startTrial_2() {
@@ -85,7 +85,7 @@ function startTrial_2() {
 function endTrial_2() {
 	jgl.active.pastCorrect.shift();
 	jgl.active.pastCorrect.push(jgl.trial.correct);
-	if (checkTrialConditions_2()) {jgl.active.delayStaircase += 50; jgl.active.delayStaircase = Math.min(jgl.active.delayStaircase,500);}
+	if (checkTrialConditions_2()) {jgl.active.delayStaircase += 150; jgl.active.delayStaircase = Math.min(jgl.active.delayStaircase,1000);}
 	// if we've met the end conditions, end everthhing
 	if (checkEndConditions_2()) {jgl.task[jgl.curBlock].numTrials=jgl.curTrial;}
 }
