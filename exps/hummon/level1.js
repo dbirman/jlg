@@ -148,20 +148,23 @@ function updateScreen_1(t) {
 	switch (jgl.trial.segname) {
 		case 'sample':
 			if ((!jgl.active.soundPlayed) && ((now()-jgl.timing.segment)>jgl.trial.delay)) {
-				jglPlayTone(jgl.trial.tone);
-				jgl.active.soundPlayed = true;
+				playSound();
 			}
 			break;
 		case 'resp':
 			if ((!jgl.active.soundPlayed) && ((now()-jgl.timing.segment)>(jgl.trial.delay-200))) {
-				jglPlayTone(jgl.trial.tone);
-				jgl.active.soundPlayed = true;
+				playSound();
 			}
 			break;
 	}
 	// if (jgl.active.resp) {
 	// 	upResp();
 	// }
+}
+
+function playSound() {
+	jglPlayTone(jgl.trial.tone);
+	jgl.active.soundPlayed = true;
 }
 
 function upGratings() {
