@@ -19,14 +19,15 @@ function levelSetup1(taskblock) {
 	taskblock.variables.angle2 = 0; // display angle, ecc constant
 	// delay controls how long participants have to wait to be correct 
 	taskblock.variables.delay = NaN;
+	taskblock.variables.delay1 = NaN;
 	// Segment timing
 	taskblock.segnames = ['wait','sample1','delay1','sample2','resp','delay'];
 	// Seglen uses specific times
 	// We use zero for the delay time, so that we can add the delay segment
 	// only when we need to use it
-	taskblock.seglen = [Infinity,200,2000,Infinity];
+	taskblock.seglen = [Infinity,200,0,200,2000,Infinity];
 	// Responses
-	taskblock.response = [0,0,0,0];
+	taskblock.response = zeros(taskblock.seglen.length);
 	// Backgroud color (defaults to 0.5)
 	taskblock.background = 0.5;
 	// If you give different keys 
@@ -41,6 +42,7 @@ function startBlock_2() {
 	// Current delay: only thing we will adjust
 	// this controls how far after the sample time starts should we
 	// play the sound
+	console.log('Starting level 2');
 	jgl.active.pastCorrect = zeros(4);
 	jgl.active.respDelay = 0;
 	jgl.active.checkEnd = checkEnd_2;
@@ -61,7 +63,7 @@ function checkTrialConditions_2() {
 }
 
 function checkEndConditions_2() {
-	return (jgl.active.delay>=500) && all(jgl.active.pastCorrect);
+	return (jgl.active.delayStaircase>=500) && all(jgl.active.pastCorrect);
 }
 
 function startTrial_2() {
@@ -70,7 +72,9 @@ function startTrial_2() {
 		endBlock_();
 		return;
 	}
-	jgl.trial.delay = jgl.active.delayStaircase; // this will increment
+	jgl.trial.delay = 500;
+	jgl.trial.delay1 = jgl.active.delayStaircase; // this will increment
+	jgl.trial.seglen[2] = jgl.trial.delay1;
 
 	jgl.active.trialUp = false;
 	jgl.active.trialDown = false;
@@ -116,8 +120,16 @@ function startSegment_2() {
 	if (jgl.active.dead) {jgl.active.fix=0;}
 
 	switch (jgl.trial.segname) {
-		case 'sample':
+		case 'sample1':
 			jgl.active.drawGratings = 1;
+			if (jgl.active.dead) {jumpSegment(); return}
+			break;
+		case 'delay1':
+			if (jgl.active.dead) {jumpSegment(); return}
+			break;
+		case 'sample2':
+			jgl.active.drawGratings = 1;
+			if (jgl.active.dead) {jumpSegment(); return}
 			break;
 		case 'resp':
 			if (jgl.active.dead) {jumpSegment(); return}
@@ -143,41 +155,20 @@ function updateScreen_2(t) {
 	if (jgl.active.fix) {
 		jglFixationCross(1,1,jgl.active.fixColor,[0,0]);
 	}
+	if (jgl.active.dead) {return;}
 	if (jgl.active.drawGratings) {
-		upGratings(jgl.active.gratings);
+		upGratings();
 	}
 	switch (jgl.trial.segname) {
-		case 'sample':
+		case 'sample2':
 			if ((!jgl.active.soundPlayed) && ((now()-jgl.timing.segment)>jgl.trial.delay)) {
-				jglPlayTone(jgl.trial.tone);
-				jgl.active.soundPlayed = true;
+				playSound();
 			}
 			break;
 		case 'resp':
 			if ((!jgl.active.soundPlayed) && ((now()-jgl.timing.segment)>(jgl.trial.delay-200))) {
-				jglPlayTone(jgl.trial.tone);
-				jgl.active.soundPlayed = true;
+				playSound();
 			}
 			break;
 	}
-	// if (jgl.active.resp) {
-	// 	upResp();
-	// }
-}
-
-function upGratings() {
-	jglFillRect(5,0,[1,1],'#ffffff');
-}
-
-function upResp() {
-	jglTextSet('Arial',12,'#00ff00');
-	jglTextDraw('Correct',0,0);
-}
-
-function upTimer() {
-	// Draw the timer on the screen 
-	var perc = ((now()-jgl.timing.segment)/1000)/5;
-	jglFillArc(0,0,2,3,'#ff0000',perc*2*Math.PI,2*Math.PI);
-	jglTextSet('Arial',32,'#ff0000');
-	jglTextDraw(Math.ceil(5-5*perc)+'',0,0);
 }
