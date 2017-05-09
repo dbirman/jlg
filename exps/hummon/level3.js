@@ -1,21 +1,23 @@
 
 function levelSetup1(taskblock) {
 	taskblock.callbacks = {};
-	taskblock.callbacks.startBlock = startBlock_2;
-	taskblock.callbacks.endBlock = endBlock_2;
-	taskblock.callbacks.startTrial = startTrial_2;
-	taskblock.callbacks.endTrial = endTrial_2;
-	taskblock.callbacks.startSegment = startSegment_2;
-	taskblock.callbacks.updateScreen = updateScreen_2;
+	taskblock.callbacks.startBlock = startBlock_3;
+	taskblock.callbacks.endBlock = endBlock_3;
+	taskblock.callbacks.startTrial = startTrial_3;
+	taskblock.callbacks.endTrial = endTrial_3;
+	taskblock.callbacks.startSegment = startSegment_3;
+	taskblock.callbacks.updateScreen = updateScreen_3;
 	// RT task doesn't have any parameters, but this gets auto-populated with data
 	taskblock.parameters = {};
-	taskblock.parameters.tone = ['low','high'];
+	taskblock.parameters.match = [0,1];
 	taskblock.parameters.ecc = 5;
-	taskblock.parameters.angle = 0;
-	taskblock.parameters.rotation = multiply(Math.PI,[0,1/8,2/8,3/8,4/8,5/8,6/8,7/8]); // actual orientation
+	taskblock.parameters.rotation1 = multiply(Math.PI,[0,1/8,2/8,3/8,4/8,5/8,6/8,7/8]); // actual orientation
 	// RT task won't log any variables either (these get set by the user somewhere in the callbacks)
 	// caution: these need a value (e.g. NaN) or they won't run correctly
 	taskblock.variables = {};
+	taskblock.variables.rotation2 = NaN; // based on rotation 1
+	taskblock.variables.angle1 = 0; // display angle, ecc constant
+	taskblock.variables.angle2 = 0; // display angle, ecc constant
 	// delay controls how long participants have to wait to be correct 
 	taskblock.variables.delay = NaN;
 	taskblock.variables.delay1 = NaN;
@@ -37,37 +39,37 @@ function levelSetup1(taskblock) {
 	return taskblock;
 }
 
-function startBlock_2() {
+function startBlock_3() {
 	// Current delay: only thing we will adjust
 	// this controls how far after the sample time starts should we
 	// play the sound
 	console.log('Starting level 2');
 	jgl.active.pastCorrect = zeros(4);
 	jgl.active.respDelay = 0;
-	jgl.active.checkEnd = checkEnd_2;
+	jgl.active.checkEnd = checkEnd_3;
 	jgl.active.delayStaircase = 0;
 	document.addEventListener("keydown",checkStartTrial,false);
 	document.addEventListener("keyup",checkEndTrial,false);
 }
 
-function endBlock_2() {
+function endBlock_3() {
 	document.removeEventListener("keydown",checkStartTrial,false);
 	document.removeEventListener("keyup",checkEndTrial,false);
 }
 
 // After every trial, we check whether we got the last four trials correct
 // (probability 1/16) and increment/decrement the relevant delays
-function checkTrialConditions_2() {
+function checkTrialConditions_3() {
 	return all(jgl.active.pastCorrect.slice(4,6));
 }
 
-function checkEndConditions_2() {
+function checkEndConditions_3() {
 	return (jgl.active.delayStaircase>=1000) && all(jgl.active.pastCorrect);
 }
 
-function startTrial_2() {
+function startTrial_3() {
 	// Check if we should
-	if (checkEndConditions_2()) {
+	if (checkEndConditions_3()) {
 		endBlock_();
 		return;
 	}
@@ -81,35 +83,35 @@ function startTrial_2() {
 	jgl.active.soundPlayed = false;
 }
 
-function endTrial_2() {
+function endTrial_3() {
 	jgl.active.pastCorrect.shift();
 	jgl.active.pastCorrect.push(jgl.trial.correct);
-	if (checkTrialConditions_2()) {jgl.active.delayStaircase += 150; jgl.active.delayStaircase = Math.min(jgl.active.delayStaircase,1000);}
+	if (checkTrialConditions_3()) {jgl.active.delayStaircase += 150; jgl.active.delayStaircase = Math.min(jgl.active.delayStaircase,1000);}
 	// if we've met the end conditions, end everthhing
-	if (checkEndConditions_2()) {jgl.task[jgl.curBlock].numTrials=jgl.curTrial;}
+	if (checkEndConditions_3()) {jgl.task[jgl.curBlock].numTrials=jgl.curTrial;}
 }
 
-function checkEnd_2() {
+function checkEnd_3() {
 	if (jgl.trial!==undefined) {
 		jgl.active.dead=true;
 		// If the user raised the spacebar at the right time, set the
 		// trial to be correct
 		if ((jgl.trial.segname=='sample') && (jgl.trial.delay<200)) {
 			// Check what to do here 
-			if ((now()-jgl.timing.segment)>jgl.trial.delay) {trialCorrect_2();}
+			if ((now()-jgl.timing.segment)>jgl.trial.delay) {trialCorrect_3();}
 		} else if (jgl.trial.segname=='resp') {
-			if ((now()-jgl.timing.segment)>(jgl.trial.delay-200)) {trialCorrect_2();}
+			if ((now()-jgl.timing.segment)>(jgl.trial.delay-200)) {trialCorrect_3();}
 		}
 	}
 }
 
-function trialCorrect_2() {
+function trialCorrect_3() {
 	jgl.trial.correct = true;
 	jgl.active.drawGratings = 0;
 	jgl.active.fixColor = "#00ff00";
 }
 
-function startSegment_2() {
+function startSegment_3() {
 	jgl.active.fix = 1;
 	jgl.active.fixColor = "#ffffff";
 	jgl.active.resp = 0;
@@ -147,7 +149,7 @@ function startSegment_2() {
 	}
 }
 
-function updateScreen_2(t) {
+function updateScreen_3(t) {
 	if (jgl.active.delay) {
 		upTimer();
 	}
