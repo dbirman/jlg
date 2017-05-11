@@ -178,6 +178,48 @@ function jglFillArc(x, y, iradius, oradius, color, sAng, wAng) {
 	jgl.ctx.fill();
 }
 
+// Initialize grating 
+function jglInitGrating(name,radius,contrast, freq, sigma) {
+	// Draw onto the canvas then erase
+	var ppd = jgl.screenInfo.pixPerDeg;
+	var radius = Math.round(radius * ppd);
+	var sigma = sigma * ppd;
+	// Create a new back context 
+	// console.log('Warning: Gratings have a high overhead (create a new canvas), avoid using too many');
+	var ghostcanvas = document.createElement('canvas');
+	ghostcanvas.style.display="none";
+	document.body.appendChild(ghostcanvas);
+	ghostcanvas.height = ""+radius*4;
+	ghostcanvas.width = ""+radius*4;
+	var ctx = ghostcanvas.getContext('2d');
+	// Do the drawing
+	ctx.clearRect(0,0,radius*4,radius*4*ppd);
+	for (var x=0;x<radius*4;x++) {
+		for (var y=0;y<radius*4;y++) {
+			var dist = Math.hypot(x-(radius*2),y-(radius*2));
+			ctx.fillStyle = mexicanHat2D(x,dist,freq,sigma,0);
+			ctx.fillRect(x,y,1,1);
+		}
+	}
+	if (jgl.images===undefined) {jgl.images={};}
+	jgl.images[name] = ghostcanvas;
+}
+
+function mexicanHat2D(x,dist,f,sigma,theta) {
+	var alpha = pow(Math.exp(1),multiply(-1,divide(pow(dist,2),multiply(2,pow(sigma,2))[0])));
+	var wave = Math.round(add(127.5,multiply(127.5,cos(subtract(multiply(2*Math.PI*f,x),theta)))));
+	return "rgba("+wave+","+wave+","+wave+","+alpha+")";
+}
+
+function jglDrawGrating(name,x,y,theta) {
+	var width = jgl.images[name].width, height = jgl.images[name].height;
+	jgl.ctx.save();
+	jgl.ctx.translate(x*jgl.screenInfo.pixPerDeg,y*jgl.screenInfo.pixPerDeg);
+	jgl.ctx.rotate(theta);
+	jgl.ctx.drawImage(jgl.images[name],-width/2,-height/2);
+	jgl.ctx.restore();
+}
+
 /**
  * Makes Filled Rectangles
  * @param {Array} x an array of x coordinates of the centers
@@ -237,6 +279,13 @@ function jglFixationCross(width, lineWidth, color, origin) {
 	jgl.ctx.moveTo(origin[0], origin[1] - width / 2);
 	jgl.ctx.lineTo(origin[0], origin[1] + width / 2);
 	jgl.ctx.stroke();
+}
+
+function jglFixationCircle(radius,color,origin) {
+	jgl.ctx.fillStyle = color;
+	jgl.ctx.beginPath();
+  jgl.ctx.arc(origin[0], origin[1], radius*jgl.screenInfo.pixPerDeg, 0, 2 * Math.PI);
+  jgl.ctx.fill();
 }
 
 /**
@@ -329,10 +378,7 @@ function jglTextDraw(text, x, y) {
  * it does not effect the normal canvas. 
  */
 function jglVisualAngleCoordinates() {
-	jgl.ctx.save();
 	jgl.ctx.translate(jgl.canvas.width / 2, jgl.canvas.height / 2);
-	// jgl.ctx.transform(jgl.canvas.pixPerDeg,0,0,jgl.canvas.pixPerDeg, 0,0);
-		
 	jgl.canvas.usingVisualAngles = true;
 }
 
@@ -381,7 +427,7 @@ function repmat(array,reps) {
 
 function jglClearScreen() {
 	// Clear screen
-	jgl.ctx.fillStyle = con2hex(jgl.canvas.background);
+	jgl.ctx.fillStyle = gsc2hex(jgl.canvas.background);
 	jgl.ctx.fillRect(-jgl.canvas.width/2,-jgl.canvas.height/2,jgl.canvas.width,jgl.canvas.height);
 }
 
@@ -607,7 +653,7 @@ function sortIndices(array,indices) {
  * You must set myscreen.pow via the calibration.html survey first. This function
  * returns the hex of your color.
  */
-function con2hex(contrast) {
+function gsc2hex(contrast) {
 	// if (myscreen.pow > -1) {
 	// 	con = Math.round(Math.pow(contrast,1/myscreen.pow)*255);
 	// } else {
@@ -1131,6 +1177,35 @@ function multiply(first, second) {
 	}
 }
 
+
+/**
+ * Function to element wise multiple any combination of two arrays and / or scalars.
+ * @param {Array|Number} first the first item.
+ * @param {Array|Number} second the second item.
+ * @returns {Array} the multiplied array.
+ */
+function pow(first, second) {
+	if ($.isArray(first) && $.isArray(second)) {
+		if (first.length != second.length) {
+			throw "array multiply, dimensions don't agree";
+		}
+		return jQuery.map(first, function(n, i) {
+			return Math.pow(n,second[i]);
+		});
+	} else if ($.isArray(first) && ! $.isArray(second)) {
+		return jQuery.map(first, function(n, i) {
+			return Math.pow(n,second);
+		});
+	} else if (! $.isArray(first) && $.isArray(second)) {
+		return jQuery.map(second, function(n, i) {
+			return Math.pow(first,n);
+		});
+	} else {
+		return [Math.pow(first,second)];
+	}
+}
+
+
 /**
  * Function to element wise to divide any combination of two arrays / scalars
  * @param {Array|Number} first the first item.
@@ -1498,3 +1573,16 @@ function change(array, values, indexer) {
 	return array;
 }
 
+function componentToHex(c) {
+    var hex = c.toString(16);
+    return hex.length == 1 ? "0" + hex : hex;
+}
+
+function rgb2hex(r, g, b) {
+    return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
+}
+
+function gsc2hex(perc) {
+	var comp = componentToHex(Math.round(perc*255));
+	return "#" + comp + comp + comp;
+}

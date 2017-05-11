@@ -44,16 +44,16 @@ function loadTask() {
 	// task[count].instructions = ['instruct-1','instruct-2'];
 	// count++;
 
-	var levels = 1;
-	for (var i=1;i<=levels;i++) {
+	var levels = 3;
+	for (var i=3;i<=levels;i++) {
 		// task[count++] = levelInstructionSetup(i);
 		task[count++] = levelSetup(i);
 		task[count++] = surveySetup();
 	}
 
 	// Setup sounds
-	jglInitTone(100,200,'low');
-	jglInitTone(1000,200,'high');
+	jglInitTone(500,200,'low');
+	jglInitTone(1500,200,'high');
 
 	return task;
 }
@@ -83,26 +83,30 @@ function levelSetup(num) {
 	taskblock.minX = 8;
 	taskblock.minY = 8;
 
-	return window['levelSetup'+num](taskblock);
+	return window['levelSetup_'+num](taskblock);
 }
 
 function checkStartTrial(event) {
-	if (event.which==32 && !jgl.active.pressed && !jgl.active.trialUp) {
-		jgl.active.trialUp = true;
+	if (event.which==32) {
 		jgl.active.pressed = true;
-		if (jgl.trial.segname=='wait') {
+
+		if (!jgl.active.trialUp && (jgl.trial.segname=='wait')) {
+			jgl.active.trialUp = true;
 			event.preventDefault();
-			jumpSegment();
+			setTimeout(jumpSegment,500); 
 		}
 	}
 }
 
 function checkEndTrial(event) {
-	if (event.which==32 && !jgl.active.trialDown) {
-		jgl.active.trialDown = true;
+	if (event.which==32) {
 		jgl.active.pressed = false;
-		// otherwise, call the local function
-		jgl.active.checkEnd();
+
+		if (!jgl.active.trialDown && !(jgl.trial.segname=='wait')) {
+			jgl.active.trialDown = true;
+			// call the local function
+			jgl.active.checkEnd();
+		}
 	}
 }
 
@@ -133,4 +137,27 @@ function upDelay() {
 	} else {
 		checkEndTrial();
 	}
+}
+
+function setWaitFixColor(t) {
+	if (jgl.active.fixTime===undefined) {
+		jgl.active.fixTime=0;
+		jgl.active.cFixColor=false;
+		jgl.active.fixColors=["#808080","#1414C8"];
+	}
+	jgl.active.fixTime+=t;
+	if (jgl.active.fixTime>500) {
+		jgl.active.fixTime = 0;
+		jgl.active.cFixColor = !jgl.active.cFixColor;
+		jgl.active.fixColor = jgl.active.fixColors[jgl.active.cFixColor+0];
+	}
+}
+
+function playSound() {
+	jglPlayTone(jgl.trial.tone);
+	jgl.active.soundPlayed = true;
+}
+
+function upGratings(ecc,angle,rotation) {
+	jglDrawGrating("grating",ecc*Math.cos(angle),ecc*Math.sin(angle),rotation);
 }

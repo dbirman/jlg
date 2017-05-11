@@ -1,5 +1,5 @@
 
-function levelSetup1(taskblock) {
+function levelSetup_2(taskblock) {
 	taskblock.callbacks = {};
 	taskblock.callbacks.startBlock = startBlock_2;
 	taskblock.callbacks.endBlock = endBlock_2;
@@ -152,6 +152,7 @@ function updateScreen_2(t) {
 		upTimer();
 	}
 	if (jgl.active.fix) {
+		if (jgl.trial.segname=='wait') {setWaitFixColor(t);}
 		jglFixationCross(1,1,jgl.active.fixColor,[0,0]);
 	}
 	if (jgl.active.dead) {return;}

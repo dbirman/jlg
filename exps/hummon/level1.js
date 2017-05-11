@@ -1,5 +1,5 @@
 
-function levelSetup1(taskblock) {
+function levelSetup_1(taskblock) {
 	taskblock.callbacks = {};
 	taskblock.callbacks.startBlock = startBlock_1;
 	taskblock.callbacks.endBlock = endBlock_1;
@@ -140,6 +140,7 @@ function updateScreen_1(t) {
 		upTimer();
 	}
 	if (jgl.active.fix) {
+		if (jgl.trial.segname=='wait') {setWaitFixColor(t);}
 		jglFixationCross(1,1,jgl.active.fixColor,[0,0]);
 	}
 	if (jgl.active.drawGratings) {
@@ -160,15 +161,6 @@ function updateScreen_1(t) {
 	// if (jgl.active.resp) {
 	// 	upResp();
 	// }
-}
-
-function playSound() {
-	jglPlayTone(jgl.trial.tone);
-	jgl.active.soundPlayed = true;
-}
-
-function upGratings() {
-	jglFillRect(5,0,[1,1],'#ffffff');
 }
 
 function upResp() {
