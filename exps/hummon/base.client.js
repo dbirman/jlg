@@ -46,7 +46,7 @@ function loadTask() {
 
 	var levels = 3;
 	for (var i=1;i<=levels;i++) {
-		// task[count++] = levelInstructionSetup(i);
+		task[count++] = levelInstructionSetup(i);
 		task[count++] = levelSetup(i);
 		task[count++] = surveySetup();
 	}
