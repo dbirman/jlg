@@ -1,10 +1,10 @@
 // This is the ad logic. You shouldn't need to edit this unless you're running your server somewhere other than the gru.stanford.edu server (which you shouldn't do).
 
-			var debug;
+var debug;
 
-			function getExperiment() {
-				debug = getQueryVariable('debug')=='true';
-			}
+function getExperiment() {
+	debug = getQueryVariable('debug')=='true';
+}
 
 $(document).ready(function() {launch();});
 
@@ -57,4 +57,8 @@ function getQueryVariable(variable) {
 		}
 	}
 	console.log('Query variable %s not found', variable);
+}
+
+function submitBackupCode() {
+	// Check the hash of this worker's code against the experiment's name (workerid+name) and then allow submission
 }
