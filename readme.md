@@ -13,10 +13,12 @@ https://github.com/dbirman/jgl
 
 (3) Download the following NPM packages by running the following lines of code inside your jgl directory:
 
+```
   npm install express --save
   npm install socket.io --save
   npm install mturk-api
   npm install numjs
+```
 
 You may have some other NPM dependencies that you have to install (e.g. mkdirp, helmet)
 
