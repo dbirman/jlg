@@ -1,3 +1,137 @@
-## JGL
 
-http://gru.stanford.edu/doku.php?id=gru:runningTurk
+# JGL
+
+## Installing JGL
+
+Instructions:
+
+(1) Clone or fork the master repository:
+
+https://github.com/dbirman/jgl
+
+(2) Download Node (if you do not already have it. Install NPM (node package manager). See https://www.npmjs.com/get-npm for instructions. 
+
+(3) Download the following NPM packages by running the following lines of code inside your jgl directory:
+
+  npm install express --save
+  npm install socket.io --save
+  npm install mturk-api
+  npm install numjs
+
+You may have some other NPM dependencies that you have to install (e.g. mkdirp, helmet)
+
+## Running JGL
+
+From the top of the JGL directory, type:
+  node jgl.server.js
+
+This should open a server on port 8080, which you can connect to by going to the following link. Request your experiment via an html query string.
+
+```
+  localhost:8080/exp.html?exp=EXP_NAME
+```
+  
+where 'EXP_NAME' is the name of a particular experiment you are requesting, which has to be organized according to the setup described below (design FAQ). This also assumes you launched the experiment on your local machine (localhost) by navigating the jgl folder and calling 'node jgl.server.js'. If you run JGL on the server, you access it at gru.stanford.edu:8080.
+
+To avoid generating endless debugging data files on the server, set the query string debug=1, so the full call will be localhost:8080/exp.html?exp=dms&debug=1
+
+## Overview
+
+JGL is a javascript graphics library that Dan is working on, based on the original JGL (which used PsiTurk, which was annoying), which is based on MGL. The core philosophy is that everything should be minimalist.
+
+The JGL architecture involves an advertisement page, which is what the subjects see on MTurk, a server that runs locally on a machine you own (e.g. at Stanford), and a client page which actually runs the experiment. The client page is fully functional in the absence of the server, which allows us to run a debug mode for talks or for showing people what experiments look like. When connected to the server the client sends updates about what block it is on and passes it data about the subjects actions. The advantage of this architecture is that workers can connect or disconnect at any time, they can drop out or exit fullscreen, or literally do anything stupid, and the experiment will simply continue where it left off when they re-connect. Additionally data is saved progressively, which guarantees that there will be no data loss even from participants who disconnect partway through an experiment.
+
+## Callbacks
+
+In JGL the core functionality is hidden behind callback functions (same as MGL). Creating a new experiment simply consists of writing out the task structure and writing new callback functions to generate trials, update the screen, and collect responses. All of the callbacks and any helper functions you write should end up in yourexperiment.client.js. This code, along with your advertisement page, live in a single folder. As you collect data from subjects the folder will be populated with that data.
+
+JGL encrypts the client on the client-side, guaranteeing anonymity.
+
+The callbacks you can implement are:
+
+== Callbacks ==
+startBlock \\
+startTrial \\
+startSegment \\
+updateScreen \\
+endSegment: not implemented yet \\
+endTrial \\
+endBlock \\
+endExp \\
+\\
+In JGL parameters that you want randomized (block-wise) can be set into task[i].parameters, while variables that you plan to set can be placed in task[i].variables.
+
+The JGL server is insulated from client-side errors (e.g. from bad messages). This does mean that if a message ever drops for some reason the client will get "stuck". Fortunately, clients can simply restart their connection to the server at any time to escape this.
+
+**A warning about JGL:** this is Dan's pet project, it isn't exactly stable! Much of the code in JGL.lib.js is legacy code, you should expect it not to work! The code in jgl.client and jgl.server, on the other hand, is all re-built and should be fully functional. Ask Dan for help!
+
+## Design FAQ
+
+Ad pages can be hosted in a github repository with pages enabled--we use this repository for that purpose (a front-facing link would be: dbirman.github.io/jgl/ads/exp/ad-exp.html)
+
+AWS keys -- To deploy to MTurk your keys need to be in a auth.json file, an example is provided. 
+
+All of your code goes in three files in the folder exps/yourexp/:
+
+yourexp.client.js
+yourexp_instructions.html
+yourexp_surveys.html
+
+The client code consists of a function loadTask() which builds the task list and any callbacks you need for your experiment. Keep in mind that different blocks can use different callbacks, allowing you to run different kinds of experiments.
+
+Here's an example of how to set up a consent block:
+
+```
+  var task = [];
+	// CONSENT
+	task[0] = {};
+	task[0].type = 'consent';
+	// consent is a default type with no callbacks
+	task[0].variables = {};
+	task[0].variables.consent = NaN;
+	// consent has no data
+```
+
+For instructions and surveys you need to include the id tags of the divs that will be displayed. For example in yourexp_instructions.html you might put this div:
+
+```
+  <div id="instruct-1">
+	<p>Your task is to learn a simple rule.</p>
+</div>
+```
+
+In your loadTask() function you would then need the following code:
+
+```
+  // INSTRUCTIONS
+	task[1] = {};
+	task[1].type = 'instructions';
+	// instructions is a default type with no callbacks
+	// it simply displays whatever divs we specify by adding them to an instruction page and showing/hiding them in order
+	task[1].variables = {};
+	task[1].instructions = ['instruct-1'];
+```
+
+See the RT or DMS experiments for more examples of how to construct blocks. Note that trial blocks start with a short delay "Get Ready!" which displays for 3 seconds before starting the actual trials.
+
+## Fullscreen
+
+It would be nice if JGL automatically went fullscreen for us. Dan is working on implementing this. We have a test page that checks if user's browsers are fullscreen compatible:
+
+http://gru.stanford.edu/doku.php/shared/fullscreentest.html
+
+## Eye tracking
+
+Dan is working on implementing optional eye tracking using the WebGazer library: https://webgazer.cs.brown.edu/
+
+## Server webpage
+
+Dan is working on building a server page which allows you to deploy on MTurk without needing to interface with the terminal at all by using the mturk-api library. This is still a work in progress. 
+
+## Running an Experiment 
+
+We recommend the following sequence for running an experiment on MTurk:
+
+  * **Alpha**: Test your code on the sandbox with yourself, and 2-3 other people. Analyze your data IN FULL. Does your entire analysis work?
+  * **Beta**: Put your code on MTurk and let 3-5 Turkers do the task. It should now be trivial to analyze your data. Ignore the actual results, but make sure that all //technical// aspects functioned fine and that you have all the data you want.
+  * **Full Dataset**: If both your alpha and beta were successful, collect a full dataset. I would recommend you never collect >50 Turkers of data at a time. In part because if your code fails you will have to coordinate 50 emails to get people paid.
