@@ -27,7 +27,7 @@ var rendererOptions = {
 
 var ORIGIN_WIDTH = window.innerWidth,
 	ORIGIN_HEIGHT = window.innerHeight;
-	
+
 const app = new PIXI.Application(ORIGIN_WIDTH,ORIGIN_HEIGHT, rendererOptions);
 
 ///////////////////////////////////////////////////////////////////////
@@ -512,7 +512,6 @@ function update_() {
 	// SPECIAL CASE: CUR TRIAL -1 AND BLOCK START < 3000 MS
 	if (jgl.curTrial==-1 && (now()-jgl.timing.block)<3000) {
 		updateScreen_(t);
-		jgl.tick = requestAnimationFrame(update_);
 		return;
 	}
 	// Check first trial (waits a bit)
