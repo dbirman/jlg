@@ -15,6 +15,22 @@
 var socket;
 
 ///////////////////////////////////////////////////////////////////////
+/////////////////////// PIXI FUNCTIONS ////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+
+var rendererOptions = {
+  antialiasing: false,
+  transparent: true,
+  resolution: window.devicePixelRatio,
+  autoResize: true,
+}
+
+var ORIGIN_WIDTH = window.innerWidth,
+	ORIGIN_HEIGHT = window.innerHeight;
+	
+const app = new PIXI.Application(ORIGIN_WIDTH,ORIGIN_HEIGHT, rendererOptions);
+
+///////////////////////////////////////////////////////////////////////
 //////////////////////// JGL FUNCTIONS ////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
 
@@ -481,7 +497,7 @@ function startBlock_() {
 
 	if (jgl.task[jgl.curBlock].type=='trial' || jgl.task[jgl.curBlock].canvas==1) {
 		jgl.timing.block = now();
-		elapsed();
+		elapsed('jgl_client');
 		jgl.tick=-1;
 		update_();
 	}
@@ -491,7 +507,7 @@ function update_() {
 	if (!jgl.live) {return}
 
 	var cblock = jgl.curBlock;
-	var t = elapsed(); // get elapsed time
+	var t = elapsed('jgl_client'); // get elapsed time
 
 	// SPECIAL CASE: CUR TRIAL -1 AND BLOCK START < 3000 MS
 	if (jgl.curTrial==-1 && (now()-jgl.timing.block)<3000) {
