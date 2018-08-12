@@ -12,23 +12,57 @@
 // i.e. if you call a function from within a function, there is no guarantee that the inner function returns before
 // the outer one continues. Keep this in mind when you write your code :)
 
-var socket;
+let socket;
 
 ///////////////////////////////////////////////////////////////////////
 /////////////////////// PIXI FUNCTIONS ////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
 
-var rendererOptions = {
+const rendererOptions = {
   antialiasing: false,
-  transparent: true,
+  transparent: false,
   resolution: window.devicePixelRatio,
   autoResize: true,
+  backgroundColor: 0x808080,
 }
 
-var ORIGIN_WIDTH = window.innerWidth,
+const ORIGIN_WIDTH = window.innerWidth,
 	ORIGIN_HEIGHT = window.innerHeight;
 
-const app = new PIXI.Application(ORIGIN_WIDTH,ORIGIN_HEIGHT, rendererOptions);
+const app = new PIXI.Application(ORIGIN_WIDTH,ORIGIN_HEIGHT,rendererOptions);
+
+const zBackground = 0,
+	zStimulus = 25,
+	zFixation = 50;
+
+let jglContainer = new DContainer();
+
+function setupCanvas() {
+	document.getElementById("canvas").appendChild(app.view);
+
+	// Setup jgl.canvas information
+	jgl.canvas = {};
+	jgl.canvas.degX = ORIGIN_WIDTH/jgl.screenInfo.pixPerDeg;
+	jgl.canvas.degY = ORIGIN_HEIGHT/jgl.screenInfo.pixPerDeg;
+	if (jgl.canvas.degX<jgl.task[jgl.curBlock].minX || jgl.canvas.degY<jgl.task[jgl.curBlock].minY) {error('Your screen is not large enough to support our experiment. Please maximize the window or switch to a larger screen and refresh the page.');}
+	jgl.canvas.pixPerDeg = jgl.screenInfo.pixPerDeg;
+
+	// Add the jglContainer
+	app.stage.addChild(jglContainer);
+
+	// Switch to degree coordinates
+	jglVisualAngleCoordinates();
+
+	// Background color
+	if (jgl.task[jgl.curBlock].background!==undefined) {
+		app.renderer.background = jgl.task[jgl.curBlock].background;
+	} else {
+		jgl.canvas.background = 0.5;
+	}
+	// Add event listeners
+	if (jgl.task[jgl.curBlock].keys!=undefined) {eventListenerAdd('keypress',keyEvent);}
+	if (jgl.task[jgl.curBlock].mouse!=undefined) {eventListenerAdd('click',clickEvent);}
+}
 
 ///////////////////////////////////////////////////////////////////////
 //////////////////////// JGL FUNCTIONS ////////////////////////////////
@@ -361,27 +395,6 @@ function loadTask_() {
 	jgl.task = loadTask();
 	// Take the task and process it
 	processTask(jgl.task);
-}
-
-function setupCanvas() {
-	jgl.canvas = document.getElementById("canvas");
-	jgl.canvas.width = window.innerWidth-50;
-	jgl.canvas.degX = jgl.canvas.width/jgl.screenInfo.pixPerDeg;
-	jgl.canvas.height = window.innerHeight-50;
-	jgl.canvas.degY = jgl.canvas.height/jgl.screenInfo.pixPerDeg;
-	if (jgl.canvas.degX<jgl.task[jgl.curBlock].minX || jgl.canvas.degY<jgl.task[jgl.curBlock].minY) {error('Your screen is not large enough to support our experiment. Please maximize the window or switch to a larger screen and refresh the page.');}
-	jgl.ctx = jgl.canvas.getContext("2d");
-	jgl.canvas.pixPerDeg = jgl.screenInfo.pixPerDeg;
-	jglVisualAngleCoordinates();
-	// Background color
-	if (jgl.task[jgl.curBlock].background!==undefined) {
-		jgl.canvas.background = jgl.task[jgl.curBlock].background;
-	} else {
-		jgl.canvas.background = 0.5;
-	}
-	// Add event listeners
-	if (jgl.task[jgl.curBlock].keys!=undefined) {eventListenerAdd('keypress',keyEvent);}
-	if (jgl.task[jgl.curBlock].mouse!=undefined) {eventListenerAdd('click',clickEvent);}
 }
 
 function eventListenerAdd(trigger,func) {
