@@ -7,11 +7,13 @@ Instructions:
 
 (1) Clone or fork the master repository:
 
-https://github.com/dbirman/jgl
+```
+  git clone https://github.com/dbirman/jgl
+```
 
 (2) Download Node (if you do not already have it. Install NPM (node package manager). See https://www.npmjs.com/get-npm for instructions. 
 
-(3) Download the following NPM packages by running the following lines of code inside your jgl directory:
+(3) If any packages are missing, download the following NPM packages by running the following lines of code inside your jgl directory.
 
 ```
   npm install express --save
@@ -25,7 +27,10 @@ You may have some other NPM dependencies that you have to install (e.g. mkdirp, 
 ## Running JGL
 
 From the top of the JGL directory, type:
+
+```
   node jgl.server.js
+```
 
 This should open a server on port 8080, which you can connect to by going to the following link. Request your experiment via an html query string.
 
@@ -33,19 +38,23 @@ This should open a server on port 8080, which you can connect to by going to the
   localhost:8080/exp.html?exp=EXP_NAME
 ```
   
-where 'EXP_NAME' is the name of a particular experiment you are requesting, which has to be organized according to the setup described below (design FAQ). This also assumes you launched the experiment on your local machine (localhost) by navigating the jgl folder and calling 'node jgl.server.js'. If you run JGL on the server, you access it at gru.stanford.edu:8080.
+where 'EXP_NAME' is the name of a particular experiment you are requesting, which has to be organized according to the setup described below (design FAQ). If you run JGL on the server, you access it at gru.stanford.edu:8080.
 
-To avoid generating endless debugging data files on the server, set the query string debug=1, so the full call will be localhost:8080/exp.html?exp=dms&debug=1
+To avoid generating endless debugging data files on the server, set the query string debug=1, so the full call will be 
+
+```
+  localhost:8080/exp.html?exp=dms&debug=1
+```
 
 ## Overview
 
-JGL is a javascript graphics library that Dan is working on, based on the original JGL (which used PsiTurk, which was annoying), which is based on MGL. The core philosophy is that everything should be minimalist.
+JGL is a graphics library for MTurk that Dan is working on, based on the original JGL (which used PsiTurk, which was annoying), which is based on MGL.
 
-The JGL architecture involves an advertisement page, which is what the subjects see on MTurk, a server that runs locally on a machine you own (e.g. at Stanford), and a client page which actually runs the experiment. The client page is fully functional in the absence of the server, which allows us to run a debug mode for talks or for showing people what experiments look like. When connected to the server the client sends updates about what block it is on and passes it data about the subjects actions. The advantage of this architecture is that workers can connect or disconnect at any time, they can drop out or exit fullscreen, or literally do anything stupid, and the experiment will simply continue where it left off when they re-connect. Additionally data is saved progressively, which guarantees that there will be no data loss even from participants who disconnect partway through an experiment.
+The JGL architecture involves an advertisement page, which is what the subjects see on MTurk, a server that runs locally on a machine you own (e.g. at Stanford), and a client page which actually runs the experiment. The client page is fully functional in the absence of the server, which allows us to run a debug mode for talks or for showing people what experiments look like. The way to think about the JGl server/client setup is that the client is simply a data collection function. The server tells the client what block to display, the client does this and then returns data, then waits until the next block is sent. The advantage of this architecture is that workers can connect or disconnect at any time, they can drop out or exit fullscreen, or literally do anything stupid, and the experiment will simply continue where it left off when they re-connect. Additionally data is saved progressively (per block), which guarantees that there will be no data loss even from participants who disconnect partway through an experiment.
 
 ## Callbacks
 
-In JGL the core functionality is hidden behind callback functions (same as MGL). Creating a new experiment simply consists of writing out the task structure and writing new callback functions to generate trials, update the screen, and collect responses. All of the callbacks and any helper functions you write should end up in yourexperiment.client.js. This code, along with your advertisement page, live in a single folder. As you collect data from subjects the folder will be populated with that data.
+In JGL the core functionality is hidden behind callback functions (same as MGL). Creating a new experiment simply consists of writing out the task structure and writing new callback functions to generate trials, update the screen, and collect responses. All of the callbacks and any helper functions you write should end up in yourexperiment.client.js. This code, along with your advertisement page, live in a single folder. As you collect data from subjects the folder will be populated with that data. The one key difference from MGL is that JGL uses a scene graph for display, this means that most sprites and textures should not be re-drawn each update. The drawing functions are documented to help understand when you might want to do different things.
 
 JGL encrypts the client on the client-side, guaranteeing anonymity.
 
@@ -65,7 +74,7 @@ In JGL parameters that you want randomized (block-wise) can be set into task[i].
 
 The JGL server is insulated from client-side errors (e.g. from bad messages). This does mean that if a message ever drops for some reason the client will get "stuck". Fortunately, clients can simply restart their connection to the server at any time to escape this.
 
-**A warning about JGL:** this is Dan's pet project, it isn't exactly stable! Much of the code in JGL.lib.js is legacy code, you should expect it not to work! The code in jgl.client and jgl.server, on the other hand, is all re-built and should be fully functional. Ask Dan for help!
+**A warning about JGL:** this is Dan's pet project, it isn't exactly stable! Much of the code lives in jgl.lib.old.js and is broken code from the previous jgl, I'm working on porting functions over to jgl.lib.js. The code in jgl.client and jgl.server, on the other hand, is all re-built and should be fully functional. Ask Dan for help!
 
 ## Design FAQ
 
@@ -99,19 +108,19 @@ For instructions and surveys you need to include the id tags of the divs that wi
 ```
   <div id="instruct-1">
 	<p>Your task is to learn a simple rule.</p>
-</div>
+  </div>
 ```
 
 In your loadTask() function you would then need the following code:
 
 ```
-  // INSTRUCTIONS
-	task[1] = {};
-	task[1].type = 'instructions';
-	// instructions is a default type with no callbacks
-	// it simply displays whatever divs we specify by adding them to an instruction page and showing/hiding them in order
-	task[1].variables = {};
-	task[1].instructions = ['instruct-1'];
+// INSTRUCTIONS
+task[1] = {};
+task[1].type = 'instructions';
+// instructions is a default type with no callbacks
+// it simply displays whatever divs we specify by adding them to an instruction page and showing/hiding them in order
+task[1].variables = {};
+task[1].instructions = ['instruct-1'];
 ```
 
 See the RT or DMS experiments for more examples of how to construct blocks. Note that trial blocks start with a short delay "Get Ready!" which displays for 3 seconds before starting the actual trials.
