@@ -333,7 +333,11 @@ function addDiv(div) {
 
 function setDiv(div) {
 	hideAll();
-	if (div=='trial') $("#main").hide();
+	if (div=='trial') {
+		$("#main").hide();
+	} else {
+		$("#main").show();
+	}
 
 	$("#"+div).show();
 }
