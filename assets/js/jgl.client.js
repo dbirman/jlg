@@ -586,9 +586,6 @@ function update_() {
 
 	// Update screen
 	updateScreen_(t);
-
-	// Render
-	app.renderer.render();
 }
 
 function endBlock_() {
@@ -730,7 +727,7 @@ function getResponse_() {
 	}
 	// called by the event listeners on the canvas during trials
 	jgl.trial.RT[jgl.trial.thisseg] = now() - jgl.timing.segment;
-	jgl.trial.responded[jgl.trial.thisseg] = true;		
+	jgl.trial.responded[jgl.trial.thisseg] = true;	
 	// call the experiment callback
 	if (jgl.callbacks.getResponse) {jgl.callbacks.getResponse();}
 }

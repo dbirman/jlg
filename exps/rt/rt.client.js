@@ -14,6 +14,7 @@ function loadTask() {
 	task[1].type = 'trial'; // this will give us use of the canvas
 	task[1].callbacks = {};
 	task[1].callbacks.startSegment = startSegment;
+	task[1].callbacks.updateScreen = updateScreen;
 	task[1].callbacks.getResponse = getResponse;
 	// RT task doesn't have any parameters, but this gets auto-populated with data
 	task[1].parameters = {};
@@ -31,26 +32,33 @@ function loadTask() {
 	// Trials
 	task[1].numTrials = 5; // can't be infinite, best to have smaller blocks with breaks in between (e.g. an instruction page that is blank)
 	// Keys
-	task[1].keys = 32;
+	task[1].keys = 32; // (check w/ http://keycode.info/)
 
 	return task;
 }
 
-let rt_text;
+let fix, rect, showResp, rt_text;
 
 function startSegment() {
 	if (jgl.trial.segname=='delay') {
 		if (rt_text!=undefined) {rt_text.destroy();}
-		jglFixationCross();
+		fix = jglFixationCross();
 	}
-	if (jgl.trial.segname=='stim' && !jgl.trial.responded[jgl.trial.thisseg]) {
-		jglFillRect(0,0,[1,1],'#ffffff');
+	if (jgl.trial.segname=='stim') {
+		fix.destroy();
+		rect = jglFillRect(0,0,[1,1],'#ffffff');
+		showResp = false;
 	}
-	if (jgl.trial.segname=='stim' && jgl.trial.responded[jgl.trial.thisseg]) {
+}
+
+function updateScreen() { 
+	if (jgl.trial.segname=='stim' && jgl.trial.responded[jgl.trial.thisseg] && !showResp) {
+		rect.destroy();
+		showResp = true;
 		if (jgl.trial.RT[jgl.trial.thisseg]<300) {
-			jglTextSet('Arial',20,'#00ff00');
+			jglTextSet('Arial',1,'#00ff00');
 		} else {
-			jglTextSet('Arial',20,'#ff0000');
+			jglTextSet('Arial',1,'#ff0000');
 		}
 		rt_text = jglTextDraw(Math.round(jgl.trial.RT[jgl.trial.thisseg]),0,0);
 	}

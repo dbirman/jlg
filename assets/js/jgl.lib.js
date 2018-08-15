@@ -112,6 +112,40 @@ function jglFixationCircle(radius = 1,color = 0xFFFFFF,origin = [0,0]) {
 	return g;
 }
 
+/**
+ * Makes Filled Rectangles
+ * @param {Array} x an array of x coordinates of the centers
+ * @param {Array} y an array of y coordinates of the centers
+ * @param {Array} size [width,height] array
+ * @param {String} color color in binary format 0x000000
+ */
+function jglFillRect(x, y, size, color = 0xFFFFFF) {
+	if (typeof x == 'number') {
+		x = [x]; y = [y];
+	}
+	if (x.length != y.length || size.length != 2) {
+		//Error
+		throw "Fill Rect: Lengths dont match"
+	}
+	// convert
+	if (jgl.pixi.usingVisualAngles) {
+		x = multiply(x,jgl.screenInfo.pixPerDeg);
+		y = multiply(y,jgl.screenInfo.pixPerDeg);
+		size = multiply(size,jgl.screenInfo.pixPerDeg);
+	}
+	// draw
+	let g = new PIXI.Graphics();
+	jgl.pixi.graphicsContainer.addChild(g);
+
+	for (var i=0;i<x.length;i++) {
+
+		g.beginFill(color);
+		g.drawRect(x[i]-(size[0]/2),y[i]-(size[1]/2),size[0],size[1]);
+	}
+
+	return g;
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////// TIMING ////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -199,6 +233,8 @@ function zeros(length) {
 	return tempArray;
 }
 
+//--------------------- Math -----------------------
+
 /**
  * Function to element wise multiple any combination of two arrays and / or scalars.
  * @param {Array|Number} first the first item.
@@ -226,6 +262,24 @@ function multiply(first, second) {
 	}
 }
 
+/**
+ * Determines the mean of the given array.
+ * @param {Array} array the given array
+ * @returns {Number} the mean value
+ */
+function mean(array) {
+	if (array.length == 0) {
+		return 0;
+	}
+	var sum = 0, count = 0;
+	for (var i =0 ;i<array.length;i++) {
+		sum += array[i];
+		count++;
+	}
+	return sum / count;
+	
+}
+function average(array) {return mean(array);}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// HTML HELPER FUNCS /////////////////////////////////////////////////////////////

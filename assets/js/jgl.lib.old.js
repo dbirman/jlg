@@ -164,28 +164,6 @@ function jglDrawGrating(name,x,y,theta) {
 	jgl.ctx.restore();
 }
 
-/**
- * Makes Filled Rectangles
- * @param {Array} x an array of x coordinates of the centers
- * @param {Array} y an array of y coordinates of the centers
- * @param {Array} size [width,height] array
- * @param {String} color color in hex format #000000
- */
-function jglFillRect(x, y, size, color) {
-	if (typeof x == 'number') {
-		x = [x]; y = [y];
-	}
-	if (x.length != y.length || size.length != 2) {
-		//Error
-		throw "Fill Rect: Lengths dont match"
-	}
-	size[0] = size[0]*jgl.screenInfo.pixPerDeg;
-	size[1] = size[1]*jgl.screenInfo.pixPerDeg;
-	for (var i=0;i<x.length;i++) {
-		jgl.ctx.fillStyle = color;
-		jgl.ctx.fillRect(jgl.screenInfo.pixPerDeg*x[i] - (size[0] / 2),jgl.screenInfo.pixPerDeg*y[i] - (size[1] / 2), size[0], size[1]);
-	}
-}
 
 
 /**
@@ -1214,23 +1192,6 @@ function lessThan(first, second) {
 	}
 }
 
-/**
- * Determines the mean of the given array.
- * @param {Array} array the given array
- * @returns {Number} the mean value
- */
-function mean(array) {
-	if (array.length == 0) {
-		return 0;
-	}
-	var sum = 0, count = 0;
-	for (var i =0 ;i<array.length;i++) {
-		sum += array[i];
-		count++;
-	}
-	return sum / count;
-	
-}
 
 /**
  * Function for generating a random integer.
