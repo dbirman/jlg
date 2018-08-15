@@ -13,7 +13,7 @@ function loadTask() {
 	task[1] = {};
 	task[1].type = 'trial'; // this will give us use of the canvas
 	task[1].callbacks = {};
-	task[1].callbacks.updateScreen = updateScreen;
+	task[1].callbacks.startSegment = startSegment;
 	task[1].callbacks.getResponse = getResponse;
 	// RT task doesn't have any parameters, but this gets auto-populated with data
 	task[1].parameters = {};
@@ -36,8 +36,11 @@ function loadTask() {
 	return task;
 }
 
-function updateScreen() {
+let rt_text;
+
+function startSegment() {
 	if (jgl.trial.segname=='delay') {
+		if (rt_text!=undefined) {rt_text.destroy();}
 		jglFixationCross();
 	}
 	if (jgl.trial.segname=='stim' && !jgl.trial.responded[jgl.trial.thisseg]) {
@@ -49,7 +52,7 @@ function updateScreen() {
 		} else {
 			jglTextSet('Arial',20,'#ff0000');
 		}
-		jglTextDraw(Math.round(jgl.trial.RT[jgl.trial.thisseg]),0,0);
+		rt_text = jglTextDraw(Math.round(jgl.trial.RT[jgl.trial.thisseg]),0,0);
 	}
 }
 

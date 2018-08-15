@@ -16,8 +16,47 @@
  * it does not effect the normal canvas. 
  */
 function jglVisualAngleCoordinates() {
-	jglContainer.setTransform(jgl.canvas.width/2, jgl.canvas.height/2, 1/jgl.canvas.pixPerDeg, 1/jgl.canvas.pixPerDeg);
-	jgl.canvas.usingVisualAngles = true;
+	let w = app.view.parentNode.clientWidth,
+		h = app.view.parentNode.clientHeight;
+	console.log('Setting 0,0 to: ' + w/2 + ', ' +h/2);
+	jgl.pixi.container.setTransform(w/2, h/2);
+	jgl.pixi.usingVisualAngles = true;
+}
+
+
+//-----------------------Text Functions------------------------
+
+/**
+ * Function to set the text params. Needs to be called right before jglTextDraw
+ * @param {String} fontFamily the name of the font to use
+ * @param {Number} fontSize the size of the font in *degrees*
+ * @param {String} fontColor the color of the font to use (use hex format #FFFFFF)
+ * @param {Number} style can be 'bold', 'italic', 'oblique'
+ */
+function jglTextSet(fontFamily = 'Arial', fontSize = 1, fontColor = '#ffffff', style = 'normal') {
+	jgl.pixi.textStyle = new PIXI.TextStyle({
+		fontFamily: fontFamily,
+		fill:fontColor,
+		fontSize:fontSize*jgl.screenInfo.pixPerDeg,
+		fontStyle:style,
+		align:'center'
+	});
+}
+
+/**
+ * Draws the given text starting at (x, y). Make sure to run jglTextSet first.
+ * @param {String} text the text to be drawn
+ * @param {Number} x the x coordinate of the beginning of the text (degs)
+ * @param {Number} y the y coordinate of the beginning of the text (degs)
+ * @returns {Object} a handle pointing to the text object
+ */
+function jglTextDraw(text, x = 0, y = 0) {
+	if (jgl.pixi.textStyle==undefined) {console.log('Text drawing failure: set the style first'); return}
+  let t = new PIXI.Text(text,jgl.pixi.textStyle);
+  t.x = x * jgl.screenInfo.pixPerDeg; t.y = y * jgl.screenInfo.pixPerDeg;
+  t.anchor.set(0.5,0.5);
+  jgl.pixi.textContainer.addChild(t);
+  return t;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -30,14 +69,17 @@ let prev_tick = {};
  * Get the elapsed time since the last call to this function (in ms).
  * @param {String} type is a string to let you track calls to elapsed()
  */
-function elapsed(type) {
+function elapsed(type = 'null') {
 	// Returns time since the last call to elapsed
-	if (type==undefined) {
-		type = 'null';
-	}
 	let n = now();
-	prev_tick[type] = n;
-	return now()-prev_tick[type];
+	if (prev_tick[type]!=undefined) {
+		let elapsed = n - prev_tick[type];
+		prev_tick[type] = n;
+		return elapsed;
+	} else {
+		prev_tick[type] = n;
+		return 0;
+	}
 }
 
 /**

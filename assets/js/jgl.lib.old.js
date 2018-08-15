@@ -14,20 +14,6 @@ function toggleFullScreen() {
   }
 }
 
-// TIMING
-
-var prev_tick;
-
-function elapsed() {
-	// Returns time since the last call to elapsed
-	var elapsed = now()-prev_tick;
-	prev_tick = now();
-	return elapsed;
-}
-
-function now() {
-	return performance.now();
-}
 //------------------- SOUNDS -------------------
 
 function jglInitSounds() {
@@ -213,7 +199,7 @@ function jglFillRect(x, y, size, color) {
 function jglFixationCross(width, lineWidth, color, origin) {
 	
 	if (arguments.length == 0) {
-		if (jgl.canvas.usingVisualAngles) {
+		if (jgl.pixi.usingVisualAngles) {
 			width = 1;
 			lineWidth = 1;
 			color = "#ffffff";
@@ -222,7 +208,7 @@ function jglFixationCross(width, lineWidth, color, origin) {
 			width = 20;
 			lineWidth = 1;
 			color = "#ffffff";
-			origin = [jgl.canvas.width / 2 , jgl.canvas.height / 2];
+			origin = [jgl.pixi.width / 2 , jgl.pixi.height / 2];
 		}
 		
 	}
@@ -289,56 +275,7 @@ function jglGetSecs(t0) {
 }
 
 
-//-----------------------Text Functions------------------------
 
-/**
- * Function to set the text params. Needs to be called right before jglTextDraw
- * @param {String} fontName the name of the font to use
- * @param {Number} fontSize the size of the font to use
- * @param {String} fontColor the color of the font to use
- * @param {Number} fontBold 1 for bold, 0 for not
- * @param {Number} fontItalic 1 for italic, 0 for not
- */
-function jglTextSet(fontName, fontSize, fontColor, fontBold, fontItalic) {
-	// fontString needs to be in a specific format, this function builds it.
-	var fontString = "";
-	if (fontBold == 1) {
-		fontString = fontString.concat("bold ");
-	}
-	
-	if (fontItalic == 1) {
-		fontString = fontString.concat("italic ");
-	}
-	
-	fontString = fontString.concat(fontSize, "px ", fontName);
-	jgl.ctx.font = fontString;
-	jgl.ctx.fillStyle = fontColor;
-	jgl.ctx.textAlign="center";
-	jgl.ctx.textBaseline="middle";
-}
-
-/**
- * Draws the given text starting at (x, y)
- * @param {String} text the text to be drawn
- * @param {Number} x the x coordinate of the beginning of the text
- * @param {Number} y the y coordinate of the beginning of the text
- */
-function jglTextDraw(text, x, y) {
-	jgl.ctx.fillText(text, x*jgl.screenInfo.pixPerDeg, y*jgl.screenInfo.pixPerDeg);
-}
-
-
-//----------------------Coordinate Functions---------------------------
-
-/**
- * Function for changing to visual Angle Coordinates.
- * If this function is called while drawing a stencil, 
- * it does not effect the normal canvas. 
- */
-function jglVisualAngleCoordinates() {
-	jgl.ctx.translate(jgl.canvas.width / 2, jgl.canvas.height / 2);
-	jgl.canvas.usingVisualAngles = true;
-}
 
 
 //--------------------------Texture Functions-----------------------------------
@@ -383,11 +320,6 @@ function repmat(array,reps) {
 	return(out);
 }
 
-function jglClearScreen() {
-	// Clear screen
-	jgl.ctx.fillStyle = gsc2hex(jgl.canvas.background);
-	jgl.ctx.fillRect(-jgl.canvas.width/2,-jgl.canvas.height/2,jgl.canvas.width,jgl.canvas.height);
-}
 
 /**
  * Function for generating jgl textures.
@@ -626,28 +558,6 @@ function gsc2hex(contrast) {
 	return(hex);
 }
 
-function randomInteger(n) {
-	return Math.floor(Math.random()*n);
-}
-
-function randomElement(array) {
-	return array[randomInteger(array.length)];
-}
-
-
-// Random shit
-
-function getQueryVariable(variable) {
-    var query = window.location.search.substring(1);
-    var vars = query.split('&');
-    for (var i = 0; i < vars.length; i++) {
-        var pair = vars[i].split('=');
-        if (decodeURIComponent(pair[0]) == variable) {
-            return decodeURIComponent(pair[1]);
-        }
-    }
-    console.log('Query variable %s not found', variable);
-}
 
 
 
