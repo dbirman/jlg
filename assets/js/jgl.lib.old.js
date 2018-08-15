@@ -187,50 +187,6 @@ function jglFillRect(x, y, size, color) {
 	}
 }
 
-/**
- * Draws a fixation cross onto the screen. 
- * If no params are given, cross defaults to center,
- * with lineWidth = 1, width = 10, and black.
- * @param {Number} width the width of the cross
- * @param {Number} lineWidth the width of the lines of the cross
- * @param {String} color the color in hex format
- * @param {Array} origin the center point in [x,y]
- */
-function jglFixationCross(width, lineWidth, color, origin) {
-	
-	if (arguments.length == 0) {
-		if (jgl.pixi.usingVisualAngles) {
-			width = 1;
-			lineWidth = 1;
-			color = "#ffffff";
-			origin = [0 , 0];
-		} else {
-			width = 20;
-			lineWidth = 1;
-			color = "#ffffff";
-			origin = [jgl.pixi.width / 2 , jgl.pixi.height / 2];
-		}
-		
-	}
-	width = width * jgl.screenInfo.pixPerDeg;
-	jgl.ctx.lineWidth = lineWidth;
-	jgl.ctx.strokeStyle = color;
-	jgl.ctx.beginPath();
-	jgl.ctx.moveTo(origin[0] - width / 2, origin[1]);
-	jgl.ctx.lineTo(origin[0] + width / 2, origin[1]);
-	jgl.ctx.stroke();
-	jgl.ctx.beginPath();
-	jgl.ctx.moveTo(origin[0], origin[1] - width / 2);
-	jgl.ctx.lineTo(origin[0], origin[1] + width / 2);
-	jgl.ctx.stroke();
-}
-
-function jglFixationCircle(radius,color,origin) {
-	jgl.ctx.fillStyle = color;
-	jgl.ctx.beginPath();
-  jgl.ctx.arc(origin[0], origin[1], radius*jgl.screenInfo.pixPerDeg, 0, 2 * Math.PI);
-  jgl.ctx.fill();
-}
 
 /**
  * Function for drawing a polygon.
@@ -1015,33 +971,6 @@ function subtract(first, second, index) {
 			}		});
 	} else {
 		return [first - second];
-	}
-}
-
-/**
- * Function to element wise multiple any combination of two arrays and / or scalars.
- * @param {Array|Number} first the first item.
- * @param {Array|Number} second the second item.
- * @returns {Array} the multiplied array.
- */
-function multiply(first, second) {
-	if ($.isArray(first) && $.isArray(second)) {
-		if (first.length != second.length) {
-			throw "array multiply, dimensions don't agree";
-		}
-		return jQuery.map(first, function(n, i) {
-			return n * second[i];
-		});
-	} else if ($.isArray(first) && ! $.isArray(second)) {
-		return jQuery.map(first, function(n, i) {
-			return n * second;
-		});
-	} else if (! $.isArray(first) && $.isArray(second)) {
-		return jQuery.map(second, function(n, i) {
-			return n * first;
-		});
-	} else {
-		return [first * second];
 	}
 }
 

@@ -59,6 +59,59 @@ function jglTextDraw(text, x = 0, y = 0) {
   return t;
 }
 
+//-------------------Drawing Different Shapes-------------------
+
+/**
+ * Draws a fixation cross onto the screen. 
+ * If no params are given, cross defaults to center,
+ * with lineWidth = 1, width = 0.1, and white.
+ * @param {Number} width the width of the cross
+ * @param {Number} lineWidth the width of the lines of the cross
+ * @param {String} color the color in hex format
+ * @param {Array} origin the center point in [x,y]
+ */
+function jglFixationCross(width = 1, lineWidth = 0.1, color = 0xFFFFFF, origin = [0,0]) {
+	let g = new PIXI.Graphics();
+	jgl.pixi.fixContainer.addChild(g);
+
+
+	if (jgl.pixi.usingVisualAngles) {
+		g.lineStyle(lineWidth*jgl.screenInfo.pixPerDeg,color);
+		origin = multiply(origin,jgl.screenInfo.pixPerDeg);
+		width = width * jgl.screenInfo.pixPerDeg;
+	} else {
+		g.lineStyle(lineWidth,color);
+	}
+
+	g.moveTo(origin[0]-width/2,origin[1]);
+	g.lineTo(origin[0]+width/2,origin[1]);
+	g.moveTo(origin[0],origin[1]-width/2);
+	g.lineTo(origin[0],origin[1]+width/2);
+
+	return g;
+}
+
+/**
+ * Draws a fixation circle onto the screen. 
+ * @param {Number} radius
+ * @param {Number} color in binary 0xFFFFFF
+ * @param {Array} origin in [0,0] format
+ */
+function jglFixationCircle(radius = 1,color = 0xFFFFFF,origin = [0,0]) {
+	let g = new PIXI.Graphics();
+	jgl.pixi.fixContainer.addChild(g);
+
+	if (jgl.pixi.usingVisualAngles) {
+		origin = multiply(origin,jgl.screenInfo.pixPerDeg);
+		radius = radius * jgl.screenInfo.pixPerDeg;
+	}
+
+	g.beginFill(color);
+	g.drawCircle(origin[0],origin[1],radius);
+
+	return g;
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////// TIMING ////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -145,6 +198,34 @@ function zeros(length) {
 	}
 	return tempArray;
 }
+
+/**
+ * Function to element wise multiple any combination of two arrays and / or scalars.
+ * @param {Array|Number} first the first item.
+ * @param {Array|Number} second the second item.
+ * @returns {Array} the multiplied array.
+ */
+function multiply(first, second) {
+	if ($.isArray(first) && $.isArray(second)) {
+		if (first.length != second.length) {
+			throw "array multiply, dimensions don't agree";
+		}
+		return jQuery.map(first, function(n, i) {
+			return n * second[i];
+		});
+	} else if ($.isArray(first) && ! $.isArray(second)) {
+		return jQuery.map(first, function(n, i) {
+			return n * second;
+		});
+	} else if (! $.isArray(first) && $.isArray(second)) {
+		return jQuery.map(second, function(n, i) {
+			return n * first;
+		});
+	} else {
+		return [first * second];
+	}
+}
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////// HTML HELPER FUNCS /////////////////////////////////////////////////////////////
