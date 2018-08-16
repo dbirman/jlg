@@ -7,11 +7,14 @@
     "express": "^4.14.1",
     "helmet": "^3.5.0",
     "jsonfile": "^2.4.0",
-    "mturk-api": "^3.0.2"
+    "mkdirp": "^0.5.1",
+    "mturk-api": "^3.0.2",
+    "socket.io": "^2.1.1"
   },
   "devDependencies": {},
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "docs:build": "documentation build assets/js/** -f html -o docs"
   },
   "repository": {
     "type": "git",
