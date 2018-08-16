@@ -12,7 +12,93 @@
 // i.e. if you call a function from within a function, there is no guarantee that the inner function returns before
 // the outer one continues. Keep this in mind when you write your code :)
 
-var socket;
+let socket;
+
+///////////////////////////////////////////////////////////////////////
+/////////////////////// PIXI FUNCTIONS ////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+
+const rendererOptions = {
+  antialiasing: false,
+  transparent: false,
+  resolution: window.devicePixelRatio,
+  autoResize: true,
+  backgroundColor: 0x808080,
+}
+
+const ORIGIN_WIDTH = window.innerWidth,
+	ORIGIN_HEIGHT = window.innerHeight;
+
+const app = new PIXI.Application(ORIGIN_WIDTH,ORIGIN_HEIGHT,rendererOptions);
+app.setup = false;
+
+const zBackground = 0,
+	zStimulus = 25,
+	zFixation = 50;
+
+function setupPixiContainers() {
+	// Create containers
+	let containers = ['fixContainer','textContainer','graphicsContainer'];
+	let conZ = [zFixation, zStimulus, zStimulus];
+	for (var ci = 0; ci < containers.length; ci++) {
+		if (jgl.pixi[containers[ci]]!=undefined) {jgl.pixi[containers[ci]].destroy();}
+		jgl.pixi[containers[ci]] = new DContainer();
+		jgl.pixi[containers[ci]].zOrder = conZ[ci];
+		jgl.pixi.container.addChild(jgl.pixi[containers[ci]]);
+	}
+}
+
+function setupCanvas() {
+
+	if (!app.setup) {
+		document.getElementById("trial").appendChild(app.view);
+	}
+	if (jgl.pixi==undefined) {
+		jgl.pixi = {};
+	}
+
+	if (jgl.pixi.container!=undefined) {jgl.pixi.container.destroy();}
+	jgl.pixi.container = new DContainer();
+
+	// Switch to degree coordinates
+	jglVisualAngleCoordinates();
+	// Add the jglContainer
+	app.stage.addChild(jgl.pixi.container);
+
+	// Setup containers
+	setupPixiContainers();
+
+
+	let parent = app.view.parentNode;
+	// Resize the renderer
+	app.renderer.resize(parent.clientWidth, parent.clientHeight);
+  
+	// Setup PIXI information
+	jgl.pixi.degX = app.view.width/jgl.screenInfo.pixPerDeg;
+	jgl.pixi.degY = app.view.height/jgl.screenInfo.pixPerDeg;
+	jgl.pixi.width = parent.clientWidth;
+	jgl.pixi.height = parent.clientHeight;
+	if (jgl.pixi.degX<jgl.task[jgl.curBlock].minX || jgl.pixi.degY<jgl.task[jgl.curBlock].minY) {error('Your screen is not large enough to support our experiment. Please maximize the window or switch to a larger screen and refresh the page.');}
+	jgl.screenInfo.pixPerDeg;
+	jgl.screenInfo.degPerPix = 1/jgl.screenInfo.pixPerDeg;
+
+
+	// Background color
+	if (jgl.task[jgl.curBlock].background!==undefined) {
+		app.renderer.background = jgl.task[jgl.curBlock].background;
+	} else {
+		app.renderer.background = 0.5;
+	}
+
+	// Add event listeners
+	if (jgl.task[jgl.curBlock].keys!=undefined) {eventListenerAdd('keypress',keyEvent);}
+	if (jgl.task[jgl.curBlock].mouse!=undefined) {eventListenerAdd('click',clickEvent);}
+
+	// Block the ticker
+	jgl.ticker = PIXI.ticker.shared;
+	jgl.ticker.autoStart = false;
+	jgl.ticker.stop();
+}
 
 ///////////////////////////////////////////////////////////////////////
 //////////////////////// JGL FUNCTIONS ////////////////////////////////
@@ -243,7 +329,18 @@ function addDiv(div) {
 	divList.push(div);
 	$.get('assets/templates/'+div+'.html', function(data) {$('#content').append(data);});
 	$("#"+div).hide();
-} 
+}
+
+function setDiv(div) {
+	hideAll();
+	if (div=='trial') {
+		$("#main").hide();
+	} else {
+		$("#main").show();
+	}
+
+	$("#"+div).show();
+}
 
 function processTask(task) {
 	for (var ti=0;ti<task.length;ti++) {
@@ -347,27 +444,6 @@ function loadTask_() {
 	processTask(jgl.task);
 }
 
-function setupCanvas() {
-	jgl.canvas = document.getElementById("canvas");
-	jgl.canvas.width = window.innerWidth-50;
-	jgl.canvas.degX = jgl.canvas.width/jgl.screenInfo.pixPerDeg;
-	jgl.canvas.height = window.innerHeight-50;
-	jgl.canvas.degY = jgl.canvas.height/jgl.screenInfo.pixPerDeg;
-	if (jgl.canvas.degX<jgl.task[jgl.curBlock].minX || jgl.canvas.degY<jgl.task[jgl.curBlock].minY) {error('Your screen is not large enough to support our experiment. Please maximize the window or switch to a larger screen and refresh the page.');}
-	jgl.ctx = jgl.canvas.getContext("2d");
-	jgl.canvas.pixPerDeg = jgl.screenInfo.pixPerDeg;
-	jglVisualAngleCoordinates();
-	// Background color
-	if (jgl.task[jgl.curBlock].background!==undefined) {
-		jgl.canvas.background = jgl.task[jgl.curBlock].background;
-	} else {
-		jgl.canvas.background = 0.5;
-	}
-	// Add event listeners
-	if (jgl.task[jgl.curBlock].keys!=undefined) {eventListenerAdd('keypress',keyEvent);}
-	if (jgl.task[jgl.curBlock].mouse!=undefined) {eventListenerAdd('click',clickEvent);}
-}
-
 function eventListenerAdd(trigger,func) {
 	jgl.eventListeners.push({trigger:trigger,func:func});
 	document.addEventListener(trigger,func,false);
@@ -398,9 +474,9 @@ function clickEvent(event) {
 	if (jgl.curTrial>-1 && jgl.trial.response[jgl.trial.thisseg]===1) {
 		jgl.event.mouse = {};
 
-	  var rect = jgl.canvas.getBoundingClientRect(), // abs. size of element
-	    scaleX = jgl.canvas.width / rect.width,    // relationship bitmap vs. element for X
-	    scaleY = jgl.canvas.height / rect.height;  // relationship bitmap vs. element for Y
+	  var rect = jgl.pixi.getBoundingClientRect(), // abs. size of element
+	    scaleX = jgl.pixi.width / rect.width,    // relationship bitmap vs. element for X
+	    scaleY = jgl.pixi.height / rect.height;  // relationship bitmap vs. element for Y
 
 	  jgl.event.mouse.x =  (event.clientX - rect.left) * scaleX;  // scale mouse coordinates after they have
 	  jgl.event.mouse.y =  (event.clientY - rect.top) * scaleY;    // been adjusted to be relative to element
@@ -444,13 +520,12 @@ function startBlock_() {
 		jgl.callbacks = {};
 	}
 
-	hideAll();
-	$("#"+jgl.task[jgl.curBlock].type).show();
+	setDiv(jgl.task[jgl.curBlock].type);
 
 	// run the experiment callback if necessary
 	if (jgl.callbacks.startBlock) {jgl.callbacks.startBlock(jgl.task);}
 
-	if (jgl.task[jgl.curBlock].type=='trial') {
+	if (jgl.task[jgl.curBlock].type=='trial' || jgl.task[jgl.curBlock].canvas==1) {
 		// trials use the update_() code and a canvas to render
 		// set up canvas
 		setupCanvas();
@@ -481,9 +556,12 @@ function startBlock_() {
 
 	if (jgl.task[jgl.curBlock].type=='trial' || jgl.task[jgl.curBlock].canvas==1) {
 		jgl.timing.block = now();
-		elapsed();
+		elapsed('jgl_client');
 		jgl.tick=-1;
-		update_();
+		// add the update_ function to the ticker
+		jgl.ticker.add(update_);
+		// Call this when you are ready for a running shared ticker.
+		jgl.ticker.start();
 	}
 }
 
@@ -491,16 +569,18 @@ function update_() {
 	if (!jgl.live) {return}
 
 	var cblock = jgl.curBlock;
-	var t = elapsed(); // get elapsed time
+	var t = elapsed('jgl_client'); // get elapsed time
 
-	// SPECIAL CASE: CUR TRIAL -1 AND BLOCK START < 3000 MS
-	if (jgl.curTrial==-1 && (now()-jgl.timing.block)<3000) {
-		updateScreen_(t);
-		jgl.tick = requestAnimationFrame(update_);
-		return;
+	// SPECIAL CASE: CUR TRIAL -1 AND BLOCK START < 3000 MS -- just show "get ready"
+	if (jgl.curTrial==-1) {
+		if ((now()-jgl.timing.block)<3000) {
+			if (jgl.trial.gr_text ==undefined) {jgl.trial.gr_text = getReady();}
+			return;
+		} else {
+			jgl.trial.gr_text.destroy();
+			startTrial_();
+		}
 	}
-	// Check first trial (waits a bit)
-	if (jgl.curTrial==-1) {startTrial_();}
 	// Check next trial
 	if ((now()-jgl.timing.trial)>jgl.trial.length) {endTrial_(); startTrial_();}
 	// Next trial may have shut down the block, check this
@@ -510,9 +590,6 @@ function update_() {
 
 	// Update screen
 	updateScreen_(t);
-
-	// Start repeats
-	jgl.tick = requestAnimationFrame(update_);
 }
 
 function endBlock_() {
@@ -587,6 +664,8 @@ function startTrial_() {
 	// Check end block	
 	if (jgl.curTrial>=jgl.task[jgl.curBlock].numTrials) {endBlock_();return}
 
+	setupPixiContainers();
+
 	// Run trial:
 	jgl.timing.trial = now();
 	console.log('Starting trial: ' + (jgl.curTrial+1));
@@ -600,6 +679,7 @@ function startTrial_() {
 	jgl.trial.responded = zeros(jgl.task[jgl.curBlock].response.length);
 
 	if (jgl.callbacks.startTrial) {jgl.callbacks.startTrial();}
+	jgl.pixi.container.sortChildren();
 
 	// Start the segment immediately
 	jgl.trial.thisseg = -1;
@@ -631,12 +711,12 @@ function startSegment_() {
 }
 
 function updateScreen_(t) {
-	// jgl.trial.framerate.push(t);
-	// Clear screen
-	jglClearScreen();
+	if (jgl.trial.framerate!=undefined) {
+		jgl.trial.framerate.push(t);
+	}
+
 	// jgl.ctx.font="1px Georgia";
 	// jgl.ctx.fillText('Trial: ' + jgl.curTrial + ' Segment: ' + jgl.trial.thisseg,-5,-5);
-	if (jgl.curTrial===-1) {getReady();return;}
 
 	if (jgl.callbacks.updateScreen) {jgl.callbacks.updateScreen(t);}
 }
@@ -651,10 +731,11 @@ function getResponse_() {
 	}
 	// called by the event listeners on the canvas during trials
 	jgl.trial.RT[jgl.trial.thisseg] = now() - jgl.timing.segment;
-	jgl.trial.responded[jgl.trial.thisseg] = true;		
+	jgl.trial.responded[jgl.trial.thisseg] = true;	
 	// call the experiment callback
 	if (jgl.callbacks.getResponse) {jgl.callbacks.getResponse();}
 }
+
 ///////////////////////////////////////////////////////////////////////
 //////////////////////// GET READY ////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
@@ -663,8 +744,11 @@ function getResponse_() {
 // "get ready!" on the screen
 
 function getReady() {
-	jglTextSet('Courier New',30,'#ffffff');
-	jglTextDraw('Get Ready',0,0);
+	console.log('here');
+	jglTextSet('Courier New',1,'#ffffff');
+	let text = jglTextDraw('Get Ready',0,0);
+	console.log('here');
+	return text;
 }
 
 ///////////////////////////////////////////////////////////////////////
@@ -794,7 +878,10 @@ function surveyEnd() {
 function endOngoingActivity() {
 	jgl.live = false;
 	// run standard code
-	cancelAnimationFrame(jgl.tick);
+	if (jgl.ticker!=undefined) {
+		jgl.ticker.stop();
+		jgl.ticker.remove(update_);
+	}
 
 	// remove event listeners
 	eventListenerRemoveAll();
