@@ -125,6 +125,17 @@ task[1].instructions = ['instruct-1'];
 
 See the RT or DMS experiments for more examples of how to construct blocks. Note that trial blocks start with a short delay "Get Ready!" which displays for 3 seconds before starting the actual trials.
 
+## Backup codes
+
+Each experiment ad includes a file with backup codes. These are hashed from a set of private keys using the md5 library. If something goes wrong during an experiment you can create additional backup codes, push them to your repository, and then allow participants to use them to submit the HIT without needing to connect with the server. 
+
+(1) Open your ad page. In the console type md5.apply('private_key_string') to generate hash codes. 
+(2) Save the hash codes in backups.js in your ad folder. Push these to git or to your ad server.
+(3) Respond to your Turker's emails by sending them one of the *private keys*. They can now submit by going to the ad page, typing the letters "b a c k u p" and then entering the private key. The HIT will submit without every connecting to the server.
+(4) Clear the backups.js file and push the empty file to the server, otherwise a Turker could theoretically re-use the codes.
+
+Notes: It would be good to prevent multiple submissions in some way, something to-do. 
+
 ## Fullscreen
 
 It would be nice if JGL automatically went fullscreen for us. Dan is working on implementing this. We have a test page that checks if user's browsers are fullscreen compatible:
