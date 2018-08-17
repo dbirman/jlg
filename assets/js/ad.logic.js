@@ -1,15 +1,11 @@
 // This is the ad logic. You shouldn't need to edit this unless you're running your server somewhere other than the gru.stanford.edu server (which you shouldn't do).
 
-var debug;
-
-function getExperiment() {
-	debug = getQueryVariable('debug')=='true';
-}
+let debug;
 
 $(document).ready(function() {launch();});
 
 function launch() {
-	debug = getQueryVariable('debug')=='true';
+	debug = getQueryVariable('debug')=='1';
 	if (debug) {
 		$("#preview").show();
 		$("#active").show();
@@ -20,11 +16,14 @@ function launch() {
 		$("#preview").hide();
 		$("#active").show();
 	}
+
+	// add debug tracker
+	document.addEventListener('keypress',checkBackup,false);
 };
 
-var experimentWindow,path,expName;
+let experimentWindow,path,expName;
 
-var server = 'localhost:8080';
+let server = 'localhost:8080';
 
 function openwindow() {
 	path = location.pathname;
@@ -45,6 +44,7 @@ function submit() {
 	}
 	experimentWindow.close();
 	turk.submit(dataPackage);
+	showSubmit();
 }
 
 function getQueryVariable(variable) {
@@ -59,6 +59,44 @@ function getQueryVariable(variable) {
 	console.log('Query variable %s not found', variable);
 }
 
+function showSubmit() {
+	$("#preview").hide();
+	$("#active").hide();
+	$("#emergency").hide();
+	$("#submit").show();
+}
+
+codes = [98,97,99,107,117,112]
+ci = 0;
+
+function checkBackup(event) {
+	if (event.keyCode==codes[ci]) {ci++;} else {ci=0;}
+	if (ci>=codes.length) {
+		$("#preview").hide();
+		$("#active").hide();
+		$("#emergency").show();
+		ci = -1000;
+	}
+}
+
 function submitBackupCode() {
-	// Check the hash of this worker's code against the experiment's name (workerid+name) and then allow submission
+	console.log('User requested to submit a backup code');
+
+	// The backup hash codes would be hard to reverse engineer
+	let hash = md5.apply($("#bcode").val());
+
+	// Compare the hash against available backup code values 
+	for (var bi=0; bi<backupcodes.length;bi++) {
+		if (hash==backupcodes[bi]) {
+			var dataPackage = {
+				turk:turk,
+				path:path,
+				expName:expName,
+				backup:hash,
+				success:true
+			}
+			turk.submit(dataPackage);
+			showSubmit();
+		}
+	}
 }
