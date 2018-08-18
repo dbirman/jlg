@@ -10,7 +10,7 @@ var app = require('express')();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
 var jsonfile = require('jsonfile');
-var mturk = require('mturk-api');
+var api = require('mturk-api');
 var mkdirp = require('mkdirp');
 
 //////////////////////////////////////////////////////////////////////////////
@@ -56,32 +56,9 @@ io.on('connection', function(socket){
   socket.on('vinfo', function() {try {viewerInfo(socket.id);} catch(err) {console.log(err);}});
 });
 
-var port = 8080;
-http.listen(port, function(){
-  console.log('Server live on *: ' + port);
-  // tick();
-});
-
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////// NODE FUNCTIONS ////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
-
-function viewerLogin(id,hash) {
-  var vInfo = jsonfile.readFileSync('hash.json');
-  if (hash==vInfo.hash) {
-    // Succesful login (correct password)
-    // store that this ID is allowed to access viewer functions
-    info[id] = true;
-    io.to(id).emit('vlogin');
-  }
-}
-
-function viewerInfo(id) {
-  if (info[id]===true) {
-    io.to(id).emit('vJGL',JGL);
-    io.to(id).emit('vinfo',info);
-  }
-}
 
 function login(id,msg) {
   console.log('Connection: ID ' + id);
@@ -202,9 +179,52 @@ function saveData_(exp,subj,data) {
 }
 
 
+// ///////////////////////////////////////////////////////////////////////
+// ///////////////////// VIEWER FUNCTIONS ////////////////////////////////
+// ///////////////////////////////////////////////////////////////////////
+
+let viewerChanged = false;
+
+function viewerLogin(id,hash) {
+  var vInfo = jsonfile.readFileSync('hash.json');
+  if (hash==vInfo.hash) {
+    // Succesful login (correct password)
+    // store that this ID is allowed to access viewer functions
+    info[id] = true;
+    io.to(id).emit('vlogin');
+  }
+}
+
+function viewerInfo(id) {
+  if (info[id]===true) {
+    io.to(id).emit('vJGL',JGL);
+    io.to(id).emit('vinfo',info);
+    console.log(info);
+  }
+}
+
 ///////////////////////////////////////////////////////////////////////
 //////////////////////// MTURK FUNCTIONS //////////////////////////////
 ///////////////////////////////////////////////////////////////////////
+
+let config;
+
+function loadMTurkAPI() {
+  config = jsonfile.readFileSync('auth.json');
+  enableSandbox();
+
+  createHIT('rt');
+}
+
+function enableProduction() {
+  config.sandbox = false;
+  console.log('WARNING: Production mode enabled');
+}
+
+function enableSandbox() {
+  config.sandbox = true;
+  console.log('Sandbox mode enabled');
+}
 
 // HIT information
 // Each HIT has:
@@ -212,7 +232,7 @@ function saveData_(exp,subj,data) {
 //   HIT.hitID
 //   HIT.assignments
 //   HIT.settings. {title, description, keywords, url, frame_height, duration, delay, reward, quals}
-var HIT = {};
+var HITs = {};
 
 // Save the HIT object
 function saveHIT() {
@@ -224,8 +244,36 @@ function loadHIT() {
 
 }
 
-function createHIT() {
+/**
+* Create a new HIT 
+*/
+function createHIT(exp) {
+  //Import an XML file. You can use one of our examples in the templates folder *
+  let params = jsonfile.readFileSync('./exps/'+exp+'/settings.json');
 
+
+  params = parseExternal_(params);
+
+  console.log(params);
+
+  delete params.qualifications;
+  
+  api.req('CreateHIT', params).then(function(res){
+    console.log('Created HIT? Check sandbox');
+  }).catch(console.error);
+    
+}
+
+function parseExternal_(params) {
+  params.ExternalQuestion = "<ExternalQuestion xmlns=http://mechanicalturk.amazonaws.com/AWSMechanicalTurkDataSchemas/2006-07-14/ExternalQuestion.xsd>" +
+    "<ExternalURL>"+params.url+"</ExternalURL>"+
+    "<FrameHeight>"+params.frame_height+"</FrameHeight>"+
+    "</ExternalQuestion>";
+
+  delete params.url;
+  delete params.frame_height;
+
+  return params;
 }
 
 // Creates actual 9-person batches and tracks them correctly
@@ -267,3 +315,9 @@ function history() {
 function eraseHistory() {
 
 }
+
+var port = 8080;
+http.listen(port, function(){
+  console.log('Server live on *: ' + port);
+  loadMTurkAPI();
+});

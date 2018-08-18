@@ -1,14 +1,21 @@
 {
-    "title":               "Reaction time experiment",
-    "description":         "A simple game about responding quickly",
-    "keywords":            "Reaction time, cognitive science",
-    "url":                 "https://dbirman.github.io/jgl/rt/ad/ad-rt.html",
-    "frame_height":         450,
-    "assignment_duration":  "1 hour",
-    "auto_approval_delay":  "5 minutes",
-    "reward":               0.60,
-    "qualifications": {
-        "location": "US",
-        "approval_percentage": 85
-    }
+ "_cosubSpecVersion": 2,
+ "Url": "https://jgl.danbirman.com/ads/rt/ad-rt.html",
+ "Title": "Reaction time experiment",
+ "Description": "Testing",
+ "Keywords": "rt",
+ "Batch": false,
+ "FrameHeight": 450,
+ "AssignmentDuration": "1 hour",
+ "AutoApprovalDelay": "5 minutes",
+ "Reward": "0.5",
+ "QualificationRequirements": [
+  {
+   "Name": "Worker_PercentAssignmentsApproved",
+   "Comparator": "GreaterThan",
+   "IntegerValues": [
+    85
+   ]
+  }
+ ]
 }

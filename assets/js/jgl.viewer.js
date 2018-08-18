@@ -2,6 +2,8 @@
 // server. It doesn't get pushed to github. 
 var socket = io();
 
+let jgl, info;
+
 $(document).ready(function() {launch();});
 
 function launch() {
@@ -13,7 +15,7 @@ function launch() {
 	socket.on('vJGL', function(jgl) {parseJGL(jgl);});
 	socket.on('vinfo',function(info) {parseInfo(info);});
 
-	tick();
+	// get the list of experiments
 }
 
 function tick() {
@@ -26,10 +28,13 @@ function login() {
 	document.removeEventListener('keypress',keyPressed,false);
 	console.log('Successful login to server');
 	$("#experiments").html("");
-	populate();
+	tick();
 }
 
-function parseJGL(jgl) {
+function parseJGL(njgl) {
+	console.log('Received JGL info: parsing');
+	jgl = njgl;
+
 	$("#experiments").html("");
 	var exps = Object.keys(jgl);
 	for (var e=0;e<exps.length;e++) {
@@ -44,21 +49,46 @@ function parseJGL(jgl) {
 	}
 }
 
-function parseInfo(info) {
+function parseInfo(ninfo) {
+	console.log('Receive info: parsing');
+	info = ninfo;
 	$("#connections").html("");
 	var ids = Object.keys(info);
 	for (var i=0;i<ids.length;i++) {
-		if (info[ids[i]]===true) {
-			$("#connections").append("\<h4\>"+ids[i]+ " connected as\</h4\>\<p\>server viewer\</p\>");
-		} else {
-			$("#connections").append("\<h4\>"+ids[i]+ " connected as\</h4\>\<p\>participant in "+info[ids[i]].experiment+"\</p\>");
+		// create a well div
+		let well = document.createElement("div");
+		well.className = "well well-sm";
+		well.style.backgroundColor = "black";
 
+		let h4 = document.createElement("h4");
+		if (info[ids[i]]===true) {
+			h4.textContent = ids[i]+ " connected as: server viewer";
+		} else {
+			h4.textContent = ids[i]+ " connected as: participant in "+info[ids[i]].experiment;
 		}
+		well.appendChild(h4);
+
+		if (!(info[ids[i]]===true)) {
+			let button = document.createElement("button");
+			button.tagName = "button";
+			button.className = "btn btn-default btn-lg";
+			button.onClick = function() {disconnectParticipant("+ids[i]");};
+			button.textContent = "disconnect";
+			well.appendChild(button);
+		}
+		$("#connections").append(well);
 	}
+
+	populate();
 }
 
 function populate() {
-	// $("#controls").append("<button type=\"button\" id=\"getinfo\" class=\"btn btn-primary btn-lg\" onclick=\"getInfo();\">Get info</button>");
+	let button = document.createElement("button");
+	button.tagName = "button";
+	button.className = "btn btn-default btn-sm";
+	button.onClick = function() {createHIT();};
+	button.textContent = "Create new HIT";
+	$("#experiments").append(button);
 }
 
 function getInfo() {
