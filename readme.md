@@ -19,7 +19,6 @@ Instructions:
   npm install express --save
   npm install socket.io --save
   npm install mturk-api
-  npm install numjs
 ```
 
 You may have some other NPM dependencies that you have to install (e.g. mkdirp, helmet)
@@ -124,6 +123,44 @@ task[1].instructions = ['instruct-1'];
 ```
 
 See the RT or DMS experiments for more examples of how to construct blocks. Note that trial blocks start with a short delay "Get Ready!" which displays for 3 seconds before starting the actual trials.
+
+## Mathjs
+
+We load the mathjs library (http://mathjs.org/docs/). This includes functions for arrays and matrices and their manipulation. Some quick examples are shown below:
+
+```
+// create an array and a matrix/ 
+const array = [[2, 0], [-1, 3]]               // Array
+const matrix = math.matrix([[7, 1], [-2, 3]]) // Matrix
+
+// perform a calculation on an array and matrix
+math.square(array)                            // Array,  [[4, 0], [1, 9]]
+math.square(matrix)                           // Matrix, [[49, 1], [4, 9]]
+
+// perform calculations with mixed array and matrix input
+math.add(array, matrix)                       // Matrix, [[9, 1], [-3, 6]]
+math.multiply(array, matrix)                  // Matrix, [[14, 2], [-13, 8]]
+
+// create a matrix. Type of output of function ones is determined by the
+// configuration option `matrix`
+math.ones(2, 3)                               // Matrix, [[1, 1, 1], [1, 1, 1]]
+```
+
+A list of useful functions:
+
+```
+math.ones(3)                        // Matrix, size [3],    [1, 1, 1]
+math.range(0, 4)        // [0, 1, 2, 3]
+
+const a = math.matrix([1, 4, 9, 16, 25])  // Matrix, [1, 4, 9, 16, 25]
+math.sqrt(a)                              // Matrix, [1, 2, 3, 4, 5]
+
+const c = [[2, 0], [-1, 3]]               // Array
+const d = math.matrix([[7, 1], [-2, 3]])  // Matrix
+math.multiply(c, d)                       // Matrix, [[14, 2], [-13, 8]]
+
+math.size([0, 1, 2, 3])                       // Array, [4]
+```
 
 ## Backup codes
 
