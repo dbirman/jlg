@@ -8,6 +8,22 @@
 //////////////////////////////// JGL CORE //////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+//----------------------Full screen Functions---------------------------
+
+function toggleFullScreen() {
+	alert('Not implemented yet');
+	// if (!document.documentElement.requestFullscreen && document.documentElement.webkitRequestFullscreen) {
+	// 	document.documentElement.requestFullscreen = document.documentElement.webkitRequestFullscreen;
+	// }
+ //  if (!document.fullscreenElement) {
+ //      document.documentElement.requestFullscreen();
+ //  } else {
+ //    if (document.exitFullscreen) {
+ //      document.exitFullscreen(); 
+ //    }
+ //  }
+}
+
 //----------------------Coordinate Functions---------------------------
 
 /**
@@ -57,6 +73,38 @@ function jglTextDraw(text, x = 0, y = 0) {
   t.anchor.set(0.5,0.5);
   jgl.pixi.textContainer.addChild(t);
   return t;
+}
+
+//------------------- SOUNDS -------------------
+
+function jglInitSounds() {
+	alert('Sounds not setup yet');
+	// jgl.sounds = {};
+	// jgl.sounds.sound = {}; // actual sound dictionary
+	// jgl.sounds.context = new (window.AudioContext || window.webkit.AudioContext)();
+}
+
+function jglInitTone(freq, length, name) {
+	alert('Sounds not setup yet');
+	// Length in ms
+	// Freq in Hz
+	// Name is a string
+	// if (jgl.sounds===undefined) {jglInitSounds();}
+	// jgl.sounds.sound[name] = {};
+	// jgl.sounds.sound[name].type = 'sine';
+	// jgl.sounds.sound[name].length = length;
+	// jgl.sounds.sound[name].freq = freq; // value in hertz
+}
+
+function jglPlayTone(name) {
+	alert('Sounds not setup yet');
+	// create Oscillator node
+	// var oscillator = jgl.sounds.context.createOscillator();
+	// oscillator.type = jgl.sounds.sound[name].type;
+	// oscillator.frequency.value = jgl.sounds.sound[name].freq; // value in hertz
+	// oscillator.connect(jgl.sounds.context.destination);
+	// oscillator.start();
+	// oscillator.stop(jgl.sounds.context.currentTime + jgl.sounds.sound[name].length/1000);
 }
 
 //-------------------Drawing Different Shapes-------------------
@@ -144,6 +192,79 @@ function jglFillRect(x, y, size, color = 0xFFFFFF) {
 	}
 
 	return g;
+}
+
+//-------------------Drawing Images-------------------
+
+// Some notes on Pixi drawing. To render things *really* fast in Pixi you need to build RenderTexture
+// objects and use those. We use these to build textures for bltTexture, but you can do this too with
+// other things like dots that are repeated on the screen. Anytime you draw the same thing more than
+// once you should be thinking about code like this. 
+
+// Render a circle to a texture:
+
+// var texture = new PIXI.RenderTexture(renderer, 16, 16);
+// var graphics = new PIXI.Graphics();
+// graphics.beginFill(0x44FFFF);
+// graphics.drawCircle(8, 8, 8);
+// graphics.endFill();
+// texture.render(graphics);
+// Then create a sprite from the texture
+
+// var s = new PIXI.Sprite(texture);
+
+// You can create any number of Sprites in this way and they will be render FAR faster than if you
+// generated each sprite individually. This can be useful e.g. for drawing gratings or other 
+// static images more quickly. 
+
+
+/**
+ * Function for generating jgl textures.
+ * @param {file} File to load texture from.
+ * @returns the texture
+ */
+function jglCreateTexture(file) {
+	console.log('Creating texture from: ' + file);
+	let tex = PIXI.Texture.fromImage(file);
+	jgl.pixi.textures.push(tex);
+
+	return tex;
+}
+
+/**
+ * Function for generating jgl textures.
+ * @param {array} Array to draw texture using.
+ * @returns the texture
+ */
+function jglCreateTextureFromArray(array) {
+	console.log('Not implemented yet');
+	// This code is a bit complex because Pixi doesn't have support for doing this directly. Instead
+	// you need to draw to a hidden canvas and then build a texture from that. 
+}
+
+/**
+ * Function for drawing the given texture to screen. All params except texture
+ * are optional, defaults to center with 0 rotation.
+ * @param {Object} texture the texture to draw, should only pass something
+ * given by jglCreateTexture.
+ * @param {Number} xpos the x-coordinate to place the center of the texture.
+ * @param {Number} ypos the y-coordinate to place the center of the texture.
+ * @param {Number} rotation the rotation of the texture in radians (use math.PI).
+ */
+function jglBltTexture(texture, xpos=0, ypos=0, rotation=0) {
+	let sprite = new PIXI.Sprite.from(texture);
+
+	if (jgl.usingVisualAngles) {
+		xpos = xpos * jgl.screenInfo.pixPerDeg;
+		ypos = ypos * jgl.screenInfo.pixPerDeg;
+	}
+	sprite.x = xpos;
+	sprite.y = ypos;
+	sprite.anchor.set(0.5,0.5);
+	sprite.rotation = rotation;
+
+	jgl.pixi.graphicsContainer.addChild(sprite);
+	return sprite;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

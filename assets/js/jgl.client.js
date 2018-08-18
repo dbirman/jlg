@@ -57,6 +57,10 @@ function setupCanvas() {
 		jgl.pixi = {};
 	}
 
+	// This is the only place we use the loader
+	jgl.pixi.textures = [];
+
+
 	if (jgl.pixi.container!=undefined) {jgl.pixi.container.destroy();}
 	jgl.pixi.container = new DContainer();
 
@@ -534,6 +538,9 @@ function startBlock_() {
 		switch (jgl.task[jgl.curBlock].type) {
 			// Anything that isn't a trial/canvas just waits for a submit function
 			// (these could be instructions, forms, surveys, whatever)
+			case 'skip':
+				startBlock_();
+				break;
 			case 'consent':
 				jgl.endBlockFunction = consentEnd;
 				break;
