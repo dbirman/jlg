@@ -207,117 +207,117 @@ function viewerInfo(id) {
 //////////////////////// MTURK FUNCTIONS //////////////////////////////
 ///////////////////////////////////////////////////////////////////////
 
-let config;
+// let config;
 
-function loadMTurkAPI() {
-  config = jsonfile.readFileSync('auth.json');
-  enableSandbox();
+// function loadMTurkAPI() {
+//   config = jsonfile.readFileSync('auth.json');
+//   enableSandbox();
 
-  createHIT('rt');
-}
+//   createHIT('rt');
+// }
 
-function enableProduction() {
-  config.sandbox = false;
-  console.log('WARNING: Production mode enabled');
-}
+// function enableProduction() {
+//   config.sandbox = false;
+//   console.log('WARNING: Production mode enabled');
+// }
 
-function enableSandbox() {
-  config.sandbox = true;
-  console.log('Sandbox mode enabled');
-}
+// function enableSandbox() {
+//   config.sandbox = true;
+//   console.log('Sandbox mode enabled');
+// }
 
-// HIT information
-// Each HIT has:
-//   HIT.experiment - experiment name
-//   HIT.hitID
-//   HIT.assignments
-//   HIT.settings. {title, description, keywords, url, frame_height, duration, delay, reward, quals}
-var HITs = {};
+// // HIT information
+// // Each HIT has:
+// //   HIT.experiment - experiment name
+// //   HIT.hitID
+// //   HIT.assignments
+// //   HIT.settings. {title, description, keywords, url, frame_height, duration, delay, reward, quals}
+// var HITs = {};
 
-// Save the HIT object
-function saveHIT() {
+// // Save the HIT object
+// function saveHIT() {
 
-}
+// }
 
-// Load the HIT object
-function loadHIT() {
+// // Load the HIT object
+// function loadHIT() {
 
-}
+// }
 
-/**
-* Create a new HIT 
-*/
-function createHIT(exp) {
-  //Import an XML file. You can use one of our examples in the templates folder *
-  let params = jsonfile.readFileSync('./exps/'+exp+'/settings.json');
+// /**
+// * Create a new HIT 
+// */
+// function createHIT(exp) {
+//   //Import an XML file. You can use one of our examples in the templates folder *
+//   let params = jsonfile.readFileSync('./exps/'+exp+'/settings.json');
 
 
-  params = parseExternal_(params);
+//   params = parseExternal_(params);
 
-  console.log(params);
+//   console.log(params);
 
-  delete params.qualifications;
+//   delete params.qualifications;
   
-  api.req('CreateHIT', params).then(function(res){
-    console.log('Created HIT? Check sandbox');
-  }).catch(console.error);
+//   api.req('CreateHIT', params).then(function(res){
+//     console.log('Created HIT? Check sandbox');
+//   }).catch(console.error);
     
-}
+// }
 
-function parseExternal_(params) {
-  params.ExternalQuestion = "<ExternalQuestion xmlns=http://mechanicalturk.amazonaws.com/AWSMechanicalTurkDataSchemas/2006-07-14/ExternalQuestion.xsd>" +
-    "<ExternalURL>"+params.url+"</ExternalURL>"+
-    "<FrameHeight>"+params.frame_height+"</FrameHeight>"+
-    "</ExternalQuestion>";
+// function parseExternal_(params) {
+//   params.ExternalQuestion = "<ExternalQuestion xmlns=http://mechanicalturk.amazonaws.com/AWSMechanicalTurkDataSchemas/2006-07-14/ExternalQuestion.xsd>" +
+//     "<ExternalURL>"+params.url+"</ExternalURL>"+
+//     "<FrameHeight>"+params.frame_height+"</FrameHeight>"+
+//     "</ExternalQuestion>";
 
-  delete params.url;
-  delete params.frame_height;
+//   delete params.url;
+//   delete params.frame_height;
 
-  return params;
-}
+//   return params;
+// }
 
-// Creates actual 9-person batches and tracks them correctly
-function createHITbatch() {
+// // Creates actual 9-person batches and tracks them correctly
+// function createHITbatch() {
 
-}
+// }
 
-function updateHIT() {
+// function updateHIT() {
 
-}
+// }
 
-function addHITassignments() {
+// function addHITassignments() {
 
-}
+// }
 
-function addHITtime() {
+// function addHITtime() {
 
-}
+// }
 
-function expireHIT() {
+// function expireHIT() {
 
-}
+// }
 
-// Overall status
-function status() {
+// // Overall status
+// function status() {
 
-}
+// }
 
-// Individual HIt status
-function statusHIT() {
+// // Individual HIt status
+// function statusHIT() {
 
-}
+// }
 
-function history() {
+// function history() {
 
-}
+// }
 
-// Reset the HIT tracking file (HIT.json)
-function eraseHistory() {
+// // Reset the HIT tracking file (HIT.json)
+// function eraseHistory() {
 
-}
+// }
 
 var port = 8080;
 http.listen(port, function(){
   console.log('Server live on *: ' + port);
-  loadMTurkAPI();
+  // loadMTurkAPI();
 });

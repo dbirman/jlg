@@ -8,20 +8,54 @@
 //////////////////////////////// JGL CORE //////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+/**
+* Rather than use .destroy() on PIXI.js objects we recommend calling this function. 
+* This will avoid having objects that have already been destroyed get re-destroyed. 
+*/
+function jglDestroy(object) {
+	if (object!=undefined && !object._destroyed && object.destroy!=undefined) {object.destroy();}
+	object = undefined;
+}
+
 //----------------------Full screen Functions---------------------------
 
+function checkFullScreen() {
+	console.log('Not implemented');
+	
+	var element = document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement;
+	return element!=null;
+}
 function toggleFullScreen() {
-	alert('Not implemented yet');
-	// if (!document.documentElement.requestFullscreen && document.documentElement.webkitRequestFullscreen) {
-	// 	document.documentElement.requestFullscreen = document.documentElement.webkitRequestFullscreen;
-	// }
- //  if (!document.fullscreenElement) {
- //      document.documentElement.requestFullscreen();
- //  } else {
- //    if (document.exitFullscreen) {
- //      document.exitFullscreen(); 
- //    }
- //  }
+	console.log('Not implemented');
+	
+  if (!document.fullscreenElement &&    // alternative standard method
+      !document.mozFullScreenElement && !document.webkitFullscreenElement && !document.msFullscreenElement ) {  // current working methods
+    if (document.documentElement.requestFullscreen) {
+      document.documentElement.requestFullscreen();
+    } else if (document.documentElement.msRequestFullscreen) {
+      document.documentElement.msRequestFullscreen();
+    } else if (document.documentElement.mozRequestFullScreen) {
+      document.documentElement.mozRequestFullScreen();
+    } else if (document.documentElement.webkitRequestFullscreen) {
+      document.documentElement.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
+    }
+  } else {
+    if (document.exitFullscreen) {
+      document.exitFullscreen();
+    } else if (document.msExitFullscreen) {
+      document.msExitFullscreen();
+    } else if (document.mozCancelFullScreen) {
+      document.mozCancelFullScreen();
+    } else if (document.webkitExitFullscreen) {
+      document.webkitExitFullscreen();
+    }
+  }
+}
+
+function escPressed() {
+	console.log('Not implemented');
+
+	alert('The data from the current block has been dropped until you return to fullscreen.');
 }
 
 //----------------------Coordinate Functions---------------------------
@@ -121,7 +155,6 @@ function jglPlayTone(name) {
 function jglFixationCross(width = 1, lineWidth = 0.1, color = 0xFFFFFF, origin = [0,0]) {
 	let g = new PIXI.Graphics();
 	jgl.pixi.fixContainer.addChild(g);
-
 
 	if (jgl.pixi.usingVisualAngles) {
 		g.lineStyle(lineWidth*jgl.screenInfo.pixPerDeg,color);

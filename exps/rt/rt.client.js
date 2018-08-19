@@ -13,6 +13,7 @@ function loadTask() {
 	task[1] = {};
 	task[1].type = 'trial'; // this will give us use of the canvas
 	task[1].callbacks = {};
+	task[1].callbacks.startBlock = startBlock;
 	task[1].callbacks.startSegment = startSegment;
 	task[1].callbacks.updateScreen = updateScreen;
 	task[1].callbacks.getResponse = getResponse;
@@ -39,21 +40,31 @@ function loadTask() {
 
 let fix, rect, showResp, rt_text;
 
+function startBlock() {
+	// pre-draw all the graphcis and make them invisible
+	fix = jglFixationCross();
+	fix.visible = false;
+
+	rect = jglFillRect(0,0,[1,1],'#ffffff');
+	rect.visible = false;
+}
+
 function startSegment() {
 	if (jgl.trial.segname=='delay') {
-		if (rt_text!=undefined) {rt_text.destroy();}
-		fix = jglFixationCross();
+		jglDestroy(rt_text);
+		rect.visible = false;
+		fix.visible = true;
 	}
 	if (jgl.trial.segname=='stim') {
-		fix.destroy();
-		rect = jglFillRect(0,0,[1,1],'#ffffff');
+		rect.visible = true;
+		fix.visible = false;
 		showResp = false;
 	}
 }
 
 function updateScreen() { 
 	if (jgl.trial.segname=='stim' && jgl.trial.responded[jgl.trial.thisseg] && !showResp) {
-		rect.destroy();
+		rect.visible = false;
 		showResp = true;
 		if (jgl.trial.RT[jgl.trial.thisseg]<300) {
 			jglTextSet('Arial',1,'#00ff00');
@@ -65,5 +76,5 @@ function updateScreen() {
 }
 
 function getResponse() {
-	jgl.trial.key = jgl.event.key.keyCode;
+	jgl.trial.key = jgl.event.which;
 }

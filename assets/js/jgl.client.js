@@ -49,7 +49,6 @@ function setupPixiContainers() {
 }
 
 function setupCanvas() {
-
 	if (!app.setup) {
 		document.getElementById("trial").appendChild(app.view);
 	}
@@ -60,23 +59,20 @@ function setupCanvas() {
 	// This is the only place we use the loader
 	jgl.pixi.textures = [];
 
-
 	if (jgl.pixi.container!=undefined) {jgl.pixi.container.destroy();}
 	jgl.pixi.container = new DContainer();
-
-	// Switch to degree coordinates
-	jglVisualAngleCoordinates();
-	// Add the jglContainer
 	app.stage.addChild(jgl.pixi.container);
 
 	// Setup containers
 	setupPixiContainers();
 
-
 	let parent = app.view.parentNode;
 	// Resize the renderer
 	app.renderer.resize(parent.clientWidth, parent.clientHeight);
   
+	// Switch to degree coordinates
+	jglVisualAngleCoordinates();
+
 	// Setup PIXI information
 	jgl.pixi.degX = app.view.width/jgl.screenInfo.pixPerDeg;
 	jgl.pixi.degY = app.view.height/jgl.screenInfo.pixPerDeg;
@@ -102,6 +98,8 @@ function setupCanvas() {
 	jgl.ticker = PIXI.ticker.shared;
 	jgl.ticker.autoStart = false;
 	jgl.ticker.stop();
+
+	console.log('Canvas setup complete');
 }
 
 ///////////////////////////////////////////////////////////////////////
@@ -464,9 +462,9 @@ function eventListenerRemoveAll() {
 ///////////////////////////////////////////////////////////////////////
 
 function keyEvent(event) {
-	if (jgl.curTrial>-1 && jgl.trial.response[jgl.trial.thisseg]===1) {
-		if (event.which==32) {event.preventDefault();} // block spacebar from dropping
+	if (event.which==32) {event.preventDefault();} // block spacebar from dropping
 
+	if (jgl.curTrial>-1 && jgl.trial.response[jgl.trial.thisseg]===1) {
 		jgl.event.key = {};
 		jgl.event.key.keyCode = event.which;
 
@@ -526,9 +524,6 @@ function startBlock_() {
 
 	setDiv(jgl.task[jgl.curBlock].type);
 
-	// run the experiment callback if necessary
-	if (jgl.callbacks.startBlock) {jgl.callbacks.startBlock(jgl.task);}
-
 	if (jgl.task[jgl.curBlock].type=='trial' || jgl.task[jgl.curBlock].canvas==1) {
 		// trials use the update_() code and a canvas to render
 		// set up canvas
@@ -559,7 +554,11 @@ function startBlock_() {
 				if (jgl.task[jgl.curBlock].endBlockFunction==undefined) {error('An error occurred: no endblock function was defined, this block will never end');}
 				jgl.endBlockFunction = jgl.task[jgl.curBlock].endBlockFunction;
 		}
+		console.log('Block start complete');
 	}
+
+	// run the experiment callback if necessary
+	if (jgl.callbacks.startBlock) {jgl.callbacks.startBlock(jgl.task);}
 
 	if (jgl.task[jgl.curBlock].type=='trial' || jgl.task[jgl.curBlock].canvas==1) {
 		jgl.timing.block = now();
@@ -671,8 +670,6 @@ function startTrial_() {
 	// Check end block	
 	if (jgl.curTrial>=jgl.task[jgl.curBlock].numTrials) {endBlock_();return}
 
-	setupPixiContainers();
-
 	// Run trial:
 	jgl.timing.trial = now();
 	console.log('Starting trial: ' + (jgl.curTrial+1));
@@ -751,10 +748,8 @@ function getResponse_() {
 // "get ready!" on the screen
 
 function getReady() {
-	console.log('here');
 	jglTextSet('Courier New',1,'#ffffff');
 	let text = jglTextDraw('Get Ready',0,0);
-	console.log('here');
 	return text;
 }
 
