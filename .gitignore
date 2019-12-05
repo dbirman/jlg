@@ -8,3 +8,6 @@ hash.json
 node_modules/*
 
 node_modules\*
+
+local_ssl/*
+.DS_Store
