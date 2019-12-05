@@ -4,6 +4,7 @@
   "description": "Javascript graphics library",
   "main": "jgl.server.js",
   "dependencies": {
+    "ejs": "^3.0.1",
     "express": "^4.16.3",
     "helmet": "^3.21.2",
     "jsonfile": "^2.4.0",
