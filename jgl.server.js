@@ -318,7 +318,7 @@ function viewerInfo(id) {
 // }
 
 
-var port = 8080;
+var port = process.env.PORT || 8080;
 // var server = http.createServer(certOptions, app).listen(port);
 
 http.listen(port, function(){
