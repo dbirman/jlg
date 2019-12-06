@@ -318,10 +318,10 @@ function viewerInfo(id) {
 // }
 
 
-var port = process.env.PORT || 8080;
+const PORT = process.env.PORT || 8080;
 // var server = http.createServer(certOptions, app).listen(port);
 
-http.listen(port, function(){
-  console.log('Server live on *: ' + port);
+http.listen(PORT, function(){
+  console.log('Server live on *: ' + PORT);
   // loadMTurkAPI();
 });
