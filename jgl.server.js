@@ -8,9 +8,10 @@
 // Requirements
 var app = require('express')();
 var http = require('http').Server(app);
+// var https = require('https')
 var io = require('socket.io')(http);
 var jsonfile = require('jsonfile');
-var api = require('mturk-api');
+// var api = require('mturk-api');
 var mkdirp = require('mkdirp');
 
 //////////////////////////////////////////////////////////////////////////////
@@ -316,7 +317,10 @@ function viewerInfo(id) {
 
 // }
 
+
 var port = 8080;
+// var server = http.createServer(certOptions, app).listen(port);
+
 http.listen(port, function(){
   console.log('Server live on *: ' + port);
   // loadMTurkAPI();
