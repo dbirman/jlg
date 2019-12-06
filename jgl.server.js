@@ -6,19 +6,19 @@
 // socket.io
 
 // Requirements
-var app = require('express')();
-var http = require('http').Server(app);
+const app = require('express')();
+const http = require('http').Server(app);
 // var https = require('https')
-var io = require('socket.io')(http);
-var jsonfile = require('jsonfile');
+const io = require('socket.io')(http);
+const jsonfile = require('jsonfile');
 // var api = require('mturk-api');
-var mkdirp = require('mkdirp');
+const mkdirp = require('mkdirp');
 
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////// SECURITY FUNCTIONS ////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 
-var helmet = require('helmet')
+const helmet = require('helmet')
 app.use(helmet())
 
 //////////////////////////////////////////////////////////////////////////////

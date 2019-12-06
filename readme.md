@@ -1,27 +1,29 @@
 
 # JGL
 
+## UNDER CONSTRUCTION
+
+Note: we're currently (as of 12/6/2019) updating this for Heroku
+
 ## Installing JGL
 
 Instructions:
 
-(1) Clone or fork the master repository:
+(1) Clone the master repository:
 
 ```
   git clone https://github.com/dbirman/jgl
 ```
 
-(2) Download Node (if you do not already have it. Install NPM (node package manager). See https://www.npmjs.com/get-npm for instructions. 
+(2) Install Node.js (comes with npm)
 
-(3) If any packages are missing, download the following NPM packages by running the following lines of code inside your jgl directory.
+(3) In the jgl directory, run:
 
 ```
-  npm install express --save
-  npm install socket.io --save
-  npm install mturk-api
+  npm install
 ```
 
-You may have some other NPM dependencies that you have to install (e.g. mkdirp, helmet)
+This will install into the folder `jgl/node_modules` some other NPM dependencies that you have to install (e.g. socket.io, express, jsonfile, mkdirp, helmet)
 
 ## Running JGL
 
@@ -75,7 +77,7 @@ The JGL server is insulated from client-side errors (e.g. from bad messages). Th
 
 **A warning about JGL:** this is Dan's pet project, it isn't exactly stable! Much of the code lives in jgl.lib.old.js and is broken code from the previous jgl, I'm working on porting functions over to jgl.lib.js. The code in jgl.client and jgl.server, on the other hand, is all re-built and should be fully functional. Ask Dan for help!
 
-## Design FAQ
+## Design
 
 Ad pages can be hosted in a github repository with pages enabled--we use this repository for that purpose (a front-facing link would be: dbirman.github.io/jgl/ads/exp/ad-exp.html)
 
